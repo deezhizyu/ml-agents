@@ -15,7 +15,7 @@ namespace Unity.MLAgents.Inference
     /// allowing the user to specify everything but the data in a graphical way.
     /// </summary>
     [Serializable]
-    internal class TensorProxy
+    internal class TensorProxy : IDisposable
     {
         public enum TensorType
         {
@@ -67,17 +67,33 @@ namespace Unity.MLAgents.Inference
             }
         }
 
+        bool m_Disposed;
+
         ~TensorProxy()
         {
-            Dispose();
+            Dispose(false);
         }
 
-        void Dispose()
+        public void Dispose()
         {
-            if (data.dataOnBackend.backendType != BackendType.CPU)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        void Dispose(bool disposing)
+        {
+            if (m_Disposed)
             {
-                data?.Dispose();
+                return;
             }
+
+            if (data != null)
+            {
+                data.Dispose();
+                data = null;
+            }
+
+            m_Disposed = true;
         }
     }
 

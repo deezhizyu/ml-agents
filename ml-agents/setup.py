@@ -74,6 +74,7 @@ setup(
         "huggingface_hub>=0.14",
         'pypiwin32==223;platform_system=="Windows"',
         "onnx==1.15.0",
+        "packaging",
     ],
     python_requires=">=3.10.1,<=3.11.9",
     entry_points={
