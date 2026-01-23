@@ -311,7 +311,9 @@ class SubprocessEnvManager(EnvManager):
         # Pausing all training is needed since we need to reset all pending training steps as they could be corrupted.
         other_failures: Dict[int, Exception] = self._drain_step_queue()
         # Use Python 3.9+ dict union operator
-        failures: Dict[int, Exception] = {first_failure.worker_id: first_failure.payload} | other_failures
+        failures: Dict[int, Exception] = {
+            first_failure.worker_id: first_failure.payload
+        } | other_failures
         for worker_id, ex in failures.items():
             self._assert_worker_can_restart(worker_id, ex)
             logger.warning(f"Restarting worker[{worker_id}] after '{ex}'")
