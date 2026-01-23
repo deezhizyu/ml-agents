@@ -15,9 +15,16 @@ namespace Unity.MLAgents.Inference
 
     internal class ModelRunner
     {
-        List<AgentInfoSensorsPair> m_Infos = new List<AgentInfoSensorsPair>();
-        Dictionary<int, ActionBuffers> m_LastActionsReceived = new Dictionary<int, ActionBuffers>();
-        List<int> m_OrderedAgentsRequestingDecisions = new List<int>();
+        // Pre-allocated capacity for better performance with many agents
+        const int k_DefaultBatchCapacity = 512;
+
+        List<AgentInfoSensorsPair> m_Infos;
+        Dictionary<int, ActionBuffers> m_LastActionsReceived;
+        List<int> m_OrderedAgentsRequestingDecisions;
+
+        // Array-based storage for batch processing (avoids dictionary lookups in hot path)
+        ActionBuffers[] m_BatchedActions;
+        int m_CurrentBatchSize;
 
         TensorGenerator m_TensorGenerator;
         TensorApplier m_TensorApplier;
@@ -58,6 +65,13 @@ namespace Unity.MLAgents.Inference
             int seed = 0,
             bool deterministicInference = false)
         {
+            // Initialize collections with capacity hints for better performance
+            m_Infos = new List<AgentInfoSensorsPair>(k_DefaultBatchCapacity);
+            m_LastActionsReceived = new Dictionary<int, ActionBuffers>(k_DefaultBatchCapacity);
+            m_OrderedAgentsRequestingDecisions = new List<int>(k_DefaultBatchCapacity);
+            m_BatchedActions = new ActionBuffers[k_DefaultBatchCapacity];
+            m_CurrentBatchSize = 0;
+
             Model sentisModel;
             SentisModelInfo sentisModelInfo;
             m_Model = model;
@@ -203,6 +217,11 @@ namespace Unity.MLAgents.Inference
             {
                 return;
             }
+
+            // Ensure batch arrays are large enough
+            EnsureBatchCapacity(currentBatchSize);
+            m_CurrentBatchSize = currentBatchSize;
+
             if (!m_ObservationsInitialized)
             {
                 // Just grab the first agent in the collection (any will suffice, really).
@@ -215,17 +234,17 @@ namespace Unity.MLAgents.Inference
             Profiler.BeginSample("ModelRunner.DecideAction");
             Profiler.BeginSample(m_ModelName);
 
-            Profiler.BeginSample($"GenerateTensors");
+            Profiler.BeginSample("GenerateTensors");
             // Prepare the input tensors to be feed into the engine
             m_TensorGenerator.GenerateTensors(m_InferenceInputs, currentBatchSize, m_Infos);
             Profiler.EndSample();
 
-            Profiler.BeginSample($"PrepareSentisInputs");
+            Profiler.BeginSample("PrepareSentisInputs");
             PrepareSentisInputs(m_InferenceInputs);
             Profiler.EndSample();
 
             // Execute the Model
-            Profiler.BeginSample($"ExecuteGraph");
+            Profiler.BeginSample("ExecuteGraph");
             foreach (var kv in m_InputsByName)
             {
                 m_Engine.SetInput(kv.Key, kv.Value);
@@ -233,21 +252,49 @@ namespace Unity.MLAgents.Inference
             m_Engine.Schedule();
             Profiler.EndSample();
 
-            Profiler.BeginSample($"FetchSentisOutputs");
+            Profiler.BeginSample("FetchSentisOutputs");
             FetchSentisOutputs(m_OutputNames);
             Profiler.EndSample();
 
-            Profiler.BeginSample($"ApplyTensors");
-            // Update the outputs
+            Profiler.BeginSample("ApplyTensors");
+            // Update the outputs using optimized batch arrays
             m_TensorApplier.ApplyTensors(m_InferenceOutputs, m_OrderedAgentsRequestingDecisions, m_LastActionsReceived);
+            Profiler.EndSample();
+
+            // Sync batch results back to dictionary for GetAction lookups
+            Profiler.BeginSample("SyncBatchResults");
+            SyncBatchResultsToDictionary();
             Profiler.EndSample();
 
             Profiler.EndSample(); // end name
             Profiler.EndSample(); // end ModelRunner.DecideAction
 
             m_Infos.Clear();
-
             m_OrderedAgentsRequestingDecisions.Clear();
+        }
+
+        void EnsureBatchCapacity(int requiredCapacity)
+        {
+            if (m_BatchedActions.Length < requiredCapacity)
+            {
+                // Grow by 2x to amortize allocations
+                var newCapacity = System.Math.Max(requiredCapacity, m_BatchedActions.Length * 2);
+                System.Array.Resize(ref m_BatchedActions, newCapacity);
+            }
+        }
+
+        void SyncBatchResultsToDictionary()
+        {
+            // After ApplyTensors updates the dictionary, we can optionally cache in arrays
+            // for faster subsequent GetAction calls within the same step
+            for (var i = 0; i < m_CurrentBatchSize && i < m_OrderedAgentsRequestingDecisions.Count; i++)
+            {
+                var agentId = m_OrderedAgentsRequestingDecisions[i];
+                if (m_LastActionsReceived.TryGetValue(agentId, out var action))
+                {
+                    m_BatchedActions[i] = action;
+                }
+            }
         }
 
         public bool HasModel(ModelAsset other, InferenceDevice otherInferenceDevice)

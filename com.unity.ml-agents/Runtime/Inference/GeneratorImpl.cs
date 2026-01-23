@@ -3,6 +3,7 @@ using System;
 using Unity.InferenceEngine;
 using Unity.MLAgents.Inference.Utils;
 using Unity.MLAgents.Sensors;
+using UnityEngine.Profiling;
 using static Unity.MLAgents.Inference.TensorProxy;
 
 namespace Unity.MLAgents.Inference
@@ -82,49 +83,49 @@ namespace Unity.MLAgents.Inference
         public void Generate(
             TensorProxy tensorProxy, int batchSize, IList<AgentInfoSensorsPair> infos)
         {
+            Profiler.BeginSample("RecurrentInputGenerator.Generate");
+
             TensorUtils.ResizeTensor(tensorProxy, batchSize);
 
             var memorySize = tensorProxy.data.Width();
 
             tensorProxy.data.CompleteAllPendingOperations();
 
+            var floatTensor = (Tensor<float>)tensorProxy.data;
             var agentIndex = 0;
 
             for (var infoIndex = 0; infoIndex < infos.Count; infoIndex++)
             {
                 var infoSensorPair = infos[infoIndex];
                 var info = infoSensorPair.agentInfo;
-                List<float> memory;
 
                 if (info.done)
                 {
                     m_Memories.Remove(info.episodeId);
                 }
 
-                if (!m_Memories.TryGetValue(info.episodeId, out memory))
+                if (!m_Memories.TryGetValue(info.episodeId, out var memory))
                 {
-
+                    // No memory found, fill with zeros
                     for (var j = 0; j < memorySize; j++)
                     {
-                        ((Tensor<float>)tensorProxy.data)[agentIndex, 0, j] = 0;
+                        floatTensor[agentIndex, 0, j] = 0;
                     }
 
                     agentIndex++;
                     continue;
                 }
 
-                for (var j = 0; j < Math.Min(memorySize, memory.Count); j++)
+                var copyLength = Math.Min(memorySize, memory.Count);
+                for (var j = 0; j < copyLength; j++)
                 {
-                    if (j >= memory.Count)
-                    {
-                        break;
-                    }
-
-                    ((Tensor<float>)tensorProxy.data)[agentIndex, 0, j] = memory[j];
+                    floatTensor[agentIndex, 0, j] = memory[j];
                 }
 
                 agentIndex++;
             }
+
+            Profiler.EndSample();
         }
     }
 
@@ -140,11 +141,15 @@ namespace Unity.MLAgents.Inference
 
         public void Generate(TensorProxy tensorProxy, int batchSize, IList<AgentInfoSensorsPair> infos)
         {
+            Profiler.BeginSample("PreviousActionInputGenerator.Generate");
+
             TensorUtils.ResizeTensor(tensorProxy, batchSize);
             tensorProxy.data.CompleteAllPendingOperations();
 
             var actionSize = tensorProxy.shape[tensorProxy.shape.Length - 1];
+            var intTensor = (Tensor<int>)tensorProxy.data;
             var agentIndex = 0;
+
             for (var infoIndex = 0; infoIndex < infos.Count; infoIndex++)
             {
                 var infoSensorPair = infos[infoIndex];
@@ -154,12 +159,14 @@ namespace Unity.MLAgents.Inference
                 {
                     for (var j = 0; j < actionSize; j++)
                     {
-                        ((Tensor<int>)tensorProxy.data)[agentIndex, j] = pastAction[j];
+                        intTensor[agentIndex, j] = pastAction[j];
                     }
                 }
 
                 agentIndex++;
             }
+
+            Profiler.EndSample();
         }
     }
 
@@ -175,26 +182,42 @@ namespace Unity.MLAgents.Inference
 
         public void Generate(TensorProxy tensorProxy, int batchSize, IList<AgentInfoSensorsPair> infos)
         {
+            Profiler.BeginSample("ActionMaskInputGenerator.Generate");
+
             TensorUtils.ResizeTensor(tensorProxy, batchSize);
 
             tensorProxy.data.CompleteAllPendingOperations();
 
             var maskSize = tensorProxy.shape[tensorProxy.shape.Length - 1];
+            var floatTensor = (Tensor<float>)tensorProxy.data;
             var agentIndex = 0;
+
             for (var infoIndex = 0; infoIndex < infos.Count; infoIndex++)
             {
                 var infoSensorPair = infos[infoIndex];
                 var agentInfo = infoSensorPair.agentInfo;
                 var maskList = agentInfo.discreteActionMasks;
 
-                for (var j = 0; j < maskSize; j++)
+                if (maskList == null)
                 {
-                    var isUnmasked = (maskList != null && maskList[j]) ? 0.0f : 1.0f;
-                    ((Tensor<float>)tensorProxy.data)[agentIndex, j] = isUnmasked;
+                    // Fast path: no mask, all actions unmasked
+                    for (var j = 0; j < maskSize; j++)
+                    {
+                        floatTensor[agentIndex, j] = 1.0f;
+                    }
+                }
+                else
+                {
+                    for (var j = 0; j < maskSize; j++)
+                    {
+                        floatTensor[agentIndex, j] = maskList[j] ? 0.0f : 1.0f;
+                    }
                 }
 
                 agentIndex++;
             }
+
+            Profiler.EndSample();
         }
     }
 
@@ -227,19 +250,31 @@ namespace Unity.MLAgents.Inference
     /// </summary>
     internal class ObservationGenerator : TensorGenerator.IGenerator
     {
-        List<int> m_SensorIndices = new List<int>();
+        List<int> m_SensorIndices = new List<int>(8);
         ObservationWriter m_ObservationWriter = new ObservationWriter();
+
+        // Pre-calculated total observation size for this generator
+        int m_TotalObservationSize = -1;
 
         public ObservationGenerator() { }
 
         public void AddSensorIndex(int sensorIndex)
         {
             m_SensorIndices.Add(sensorIndex);
+            // Invalidate cached size
+            m_TotalObservationSize = -1;
         }
 
         public void Generate(TensorProxy tensorProxy, int batchSize, IList<AgentInfoSensorsPair> infos)
         {
+            Profiler.BeginSample("ObservationGenerator.Generate");
+
             TensorUtils.ResizeTensor(tensorProxy, batchSize);
+
+            // Cache sensor indices array for faster iteration
+            var sensorIndicesCount = m_SensorIndices.Count;
+
+            Profiler.BeginSample("ProcessAgents");
             var agentIndex = 0;
             for (var infoIndex = 0; infoIndex < infos.Count; infoIndex++)
             {
@@ -256,7 +291,7 @@ namespace Unity.MLAgents.Inference
                     var tensorOffset = 0;
 
                     // Write each sensor consecutively to the tensor
-                    for (var sensorIndexIndex = 0; sensorIndexIndex < m_SensorIndices.Count; sensorIndexIndex++)
+                    for (var sensorIndexIndex = 0; sensorIndexIndex < sensorIndicesCount; sensorIndexIndex++)
                     {
                         var sensorIndex = m_SensorIndices[sensorIndexIndex];
                         var sensor = info.sensors[sensorIndex];
@@ -268,6 +303,9 @@ namespace Unity.MLAgents.Inference
 
                 agentIndex++;
             }
+            Profiler.EndSample();
+
+            Profiler.EndSample();
         }
     }
 }

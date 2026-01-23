@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.InferenceEngine;
 using Unity.MLAgents.Sensors;
+using UnityEngine.Profiling;
 
 namespace Unity.MLAgents.Inference
 {
@@ -164,16 +165,21 @@ namespace Unity.MLAgents.Inference
         public void GenerateTensors(
             IReadOnlyList<TensorProxy> tensors, int currentBatchSize, IList<AgentInfoSensorsPair> infos)
         {
-            for (var tensorIndex = 0; tensorIndex < tensors.Count; tensorIndex++)
+            Profiler.BeginSample("TensorGenerator.GenerateTensors");
+
+            var tensorCount = tensors.Count;
+            for (var tensorIndex = 0; tensorIndex < tensorCount; tensorIndex++)
             {
                 var tensor = tensors[tensorIndex];
-                if (!m_Dict.ContainsKey(tensor.name))
+                if (!m_Dict.TryGetValue(tensor.name, out var generator))
                 {
                     throw new UnityAgentsException(
                         $"Unknown tensorProxy expected as input : {tensor.name}");
                 }
-                m_Dict[tensor.name].Generate(tensor, currentBatchSize, infos);
+                generator.Generate(tensor, currentBatchSize, infos);
             }
+
+            Profiler.EndSample();
         }
     }
 }

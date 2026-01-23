@@ -101,15 +101,23 @@ namespace Unity.MLAgents.Inference
     {
         public static void ResizeTensor(TensorProxy tensor, int batch)
         {
+            // Quick check: if batch size already matches, skip entirely
             if (tensor.shape[0] == batch &&
                 tensor.data != null && tensor.data.Batch() == batch)
             {
                 return;
             }
 
-            tensor.data?.Dispose();
+            // Dispose existing tensor if any
+            if (tensor.data != null)
+            {
+                tensor.data.Dispose();
+            }
+
             tensor.shape[0] = batch;
-            var newTensorShape = new TensorShape(tensor.shape.Select(i => (int)i).ToArray());
+
+            // Create TensorShape directly from the shape array (TensorShape constructor copies the array)
+            var newTensorShape = new TensorShape(tensor.shape);
             tensor.data = CreateEmptyTensor(newTensorShape, tensor.DType);
         }
 
@@ -173,13 +181,28 @@ namespace Unity.MLAgents.Inference
 
             tensorProxy.data.CompleteAllPendingOperations();
 
-            for (var h = 0; h < height; h++)
+            var floatTensor = (Tensor<float>)tensorProxy.data;
+
+            // Optimized: cache tensor reference and use linear indexing where possible
+            if (height == 1 && width == 1)
             {
-                for (var w = 0; w < width; w++)
+                // 2D case: direct linear access
+                for (var c = 0; c < channels; c++)
                 {
-                    for (var c = 0; c < channels; c++)
+                    floatTensor[batch, c] = fillValue;
+                }
+            }
+            else
+            {
+                // 4D case
+                for (var c = 0; c < channels; c++)
+                {
+                    for (var h = 0; h < height; h++)
                     {
-                        ((Tensor<float>)tensorProxy.data)[batch, c, h, w] = fillValue;
+                        for (var w = 0; w < width; w++)
+                        {
+                            floatTensor[batch, c, h, w] = fillValue;
+                        }
                     }
                 }
             }

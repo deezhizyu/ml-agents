@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Unity.InferenceEngine;
 using Unity.MLAgents.Actuators;
-
+using UnityEngine.Profiling;
 
 namespace Unity.MLAgents.Inference
 {
@@ -97,16 +97,21 @@ namespace Unity.MLAgents.Inference
         public void ApplyTensors(
             IReadOnlyList<TensorProxy> tensors, IList<int> actionIds, Dictionary<int, ActionBuffers> lastActions)
         {
-            for (var tensorIndex = 0; tensorIndex < tensors.Count; tensorIndex++)
+            Profiler.BeginSample("TensorApplier.ApplyTensors");
+
+            var tensorCount = tensors.Count;
+            for (var tensorIndex = 0; tensorIndex < tensorCount; tensorIndex++)
             {
                 var tensor = tensors[tensorIndex];
-                if (!m_Dict.ContainsKey(tensor.name))
+                if (!m_Dict.TryGetValue(tensor.name, out var applier))
                 {
                     throw new UnityAgentsException(
                         $"Unknown tensorProxy expected as output : {tensor.name}");
                 }
-                m_Dict[tensor.name].Apply(tensor, actionIds, lastActions);
+                applier.Apply(tensor, actionIds, lastActions);
             }
+
+            Profiler.EndSample();
         }
     }
 }

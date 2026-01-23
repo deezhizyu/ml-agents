@@ -4,6 +4,7 @@ using Unity.MLAgents.Inference.Utils;
 using Unity.MLAgents.Actuators;
 using Unity.InferenceEngine;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Unity.MLAgents.Inference
 {
@@ -22,18 +23,21 @@ namespace Unity.MLAgents.Inference
 
         public void Apply(TensorProxy tensorProxy, IList<int> actionIds, Dictionary<int, ActionBuffers> lastActions)
         {
+            Profiler.BeginSample("ContinuousActionOutputApplier.Apply");
+
             var actionSize = tensorProxy.shape[^1];
 
             tensorProxy.data.CompleteAllPendingOperations();
 
+            // Cache tensor reference to avoid repeated casts in loop
+            var floatTensor = (Tensor<float>)tensorProxy.data;
             var agentIndex = 0;
 
             for (var i = 0; i < actionIds.Count; i++)
             {
                 var agentId = actionIds[i];
-                if (lastActions.ContainsKey(agentId))
+                if (lastActions.TryGetValue(agentId, out var actionBuffer))
                 {
-                    var actionBuffer = lastActions[agentId];
                     if (actionBuffer.IsEmpty())
                     {
                         actionBuffer = new ActionBuffers(m_ActionSpec);
@@ -44,12 +48,14 @@ namespace Unity.MLAgents.Inference
 
                     for (var j = 0; j < actionSize; j++)
                     {
-                        continuousBuffer[j] = ((Tensor<float>)tensorProxy.data)[agentIndex, j];
+                        continuousBuffer[j] = floatTensor[agentIndex, j];
                     }
                 }
 
                 agentIndex++;
             }
+
+            Profiler.EndSample();
         }
     }
 
@@ -67,18 +73,20 @@ namespace Unity.MLAgents.Inference
 
         public void Apply(TensorProxy tensorProxy, IList<int> actionIds, Dictionary<int, ActionBuffers> lastActions)
         {
-            var agentIndex = 0;
+            Profiler.BeginSample("DiscreteActionOutputApplier.Apply");
 
             tensorProxy.data.CompleteAllPendingOperations();
 
             var actionSize = tensorProxy.shape[tensorProxy.shape.Length - 1];
+            // Cache tensor reference to avoid repeated casts in loop
+            var intTensor = (Tensor<int>)tensorProxy.data;
+            var agentIndex = 0;
 
             for (var i = 0; i < actionIds.Count; i++)
             {
                 var agentId = actionIds[i];
-                if (lastActions.ContainsKey(agentId))
+                if (lastActions.TryGetValue(agentId, out var actionBuffer))
                 {
-                    var actionBuffer = lastActions[agentId];
                     if (actionBuffer.IsEmpty())
                     {
                         actionBuffer = new ActionBuffers(m_ActionSpec);
@@ -89,12 +97,14 @@ namespace Unity.MLAgents.Inference
 
                     for (var j = 0; j < actionSize; j++)
                     {
-                        discreteBuffer[j] = ((Tensor<int>)tensorProxy.data)[agentIndex, j];
+                        discreteBuffer[j] = intTensor[agentIndex, j];
                     }
                 }
 
                 agentIndex++;
             }
+
+            Profiler.EndSample();
         }
     }
 
@@ -125,13 +135,16 @@ namespace Unity.MLAgents.Inference
 
         public void Apply(TensorProxy tensorProxy, IList<int> actionIds, Dictionary<int, ActionBuffers> lastActions)
         {
+            Profiler.BeginSample("LegacyDiscreteActionOutputApplier.Apply");
+
             var agentIndex = 0;
+            var actionSizeLength = m_ActionSize.Length;
+
             for (var i = 0; i < actionIds.Count; i++)
             {
                 var agentId = actionIds[i];
-                if (lastActions.ContainsKey(agentId))
+                if (lastActions.TryGetValue(agentId, out var actionBuffer))
                 {
-                    var actionBuffer = lastActions[agentId];
                     if (actionBuffer.IsEmpty())
                     {
                         actionBuffer = new ActionBuffers(m_ActionSpec);
@@ -139,7 +152,7 @@ namespace Unity.MLAgents.Inference
                     }
 
                     var discreteBuffer = actionBuffer.DiscreteActions;
-                    for (var j = 0; j < m_ActionSize.Length; j++)
+                    for (var j = 0; j < actionSizeLength; j++)
                     {
                         ComputeCdf(tensorProxy, agentIndex, m_StartActionIndices[j], m_ActionSize[j]);
                         discreteBuffer[j] = m_Multinomial.Sample(m_CdfBuffer, m_ActionSize[j]);
@@ -148,6 +161,8 @@ namespace Unity.MLAgents.Inference
 
                 agentIndex++;
             }
+
+            Profiler.EndSample();
         }
 
         /// <summary>
@@ -198,31 +213,39 @@ namespace Unity.MLAgents.Inference
 
         public void Apply(TensorProxy tensorProxy, IList<int> actionIds, Dictionary<int, ActionBuffers> lastActions)
         {
-            var agentIndex = 0;
+            Profiler.BeginSample("MemoryOutputApplier.Apply");
 
             tensorProxy.data.CompleteAllPendingOperations();
 
             var memorySize = tensorProxy.data.Width();
+            // Cache tensor reference to avoid repeated casts in loop
+            var floatTensor = (Tensor<float>)tensorProxy.data;
+            var agentIndex = 0;
 
             for (var i = 0; i < actionIds.Count; i++)
             {
                 var agentId = actionIds[i];
-                List<float> memory;
-                if (!m_Memories.TryGetValue(agentId, out memory)
+                if (!m_Memories.TryGetValue(agentId, out var memory)
                     || memory.Count < memorySize)
                 {
-                    memory = new List<float>();
-                    memory.AddRange(Enumerable.Repeat(0f, memorySize));
+                    // Pre-allocate with exact capacity needed
+                    memory = new List<float>(memorySize);
+                    for (var k = 0; k < memorySize; k++)
+                    {
+                        memory.Add(0f);
+                    }
                 }
 
                 for (var j = 0; j < memorySize; j++)
                 {
-                    memory[j] = ((Tensor<float>)tensorProxy.data)[agentIndex, 0, j];
+                    memory[j] = floatTensor[agentIndex, 0, j];
                 }
 
                 m_Memories[agentId] = memory;
                 agentIndex++;
             }
+
+            Profiler.EndSample();
         }
     }
 }
