@@ -110,17 +110,14 @@ def _get_tmp_dir_helper(tmp_dir: Optional[str] = None) -> Tuple[str, str]:
     TMP_FOLDER_NAME = "tmp"
     BINARY_FOLDER_NAME = "binaries"
     mla_directory = os.path.join(tmp_dir, MLAGENTS)
-    if not os.path.exists(mla_directory):
-        os.makedirs(mla_directory)
-        os.chmod(mla_directory, 16877)
+    os.makedirs(mla_directory, exist_ok=True)
+    os.chmod(mla_directory, 16877)
     zip_directory = os.path.join(tmp_dir, MLAGENTS, TMP_FOLDER_NAME)
-    if not os.path.exists(zip_directory):
-        os.makedirs(zip_directory)
-        os.chmod(zip_directory, 16877)
+    os.makedirs(zip_directory, exist_ok=True)
+    os.chmod(zip_directory, 16877)
     bin_directory = os.path.join(tmp_dir, MLAGENTS, BINARY_FOLDER_NAME)
-    if not os.path.exists(bin_directory):
-        os.makedirs(bin_directory)
-        os.chmod(bin_directory, 16877)
+    os.makedirs(bin_directory, exist_ok=True)
+    os.chmod(bin_directory, 16877)
     return zip_directory, bin_directory
 
 
@@ -130,13 +127,6 @@ def get_tmp_dirs(tmp_dir: Optional[str] = None) -> Tuple[str, str]:
     binaries. If these folders do not exist, they will be created.
     :retrun: Tuple containing path to : (zip folder, extracted files folder)
     """
-    # TODO: Once we don't use python 3.7 we should just use exists_ok=True when creating the dirs to avoid this.
-    # Should only be able to error out 3 times (once for each subdir).
-    for _attempt in range(3):
-        try:
-            return _get_tmp_dir_helper(tmp_dir)
-        except FileExistsError:
-            continue
     return _get_tmp_dir_helper(tmp_dir)
 
 

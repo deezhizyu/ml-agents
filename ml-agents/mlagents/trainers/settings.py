@@ -927,9 +927,6 @@ class RunOptions(ExportableSettings):
                 )
 
         # Override with CLI args
-        # Keep deprecated --load working, TODO: remove
-        argparse_args["resume"] = argparse_args["resume"] or argparse_args["load_model"]
-
         for key, val in argparse_args.items():
             if key in DetectDefault.non_default_args:
                 if key in attr.fields_dict(CheckpointSettings):

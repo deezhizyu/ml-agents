@@ -310,11 +310,8 @@ class SubprocessEnvManager(EnvManager):
         # Drain the step queue to make sure all workers are paused and we have found all concurrent errors.
         # Pausing all training is needed since we need to reset all pending training steps as they could be corrupted.
         other_failures: Dict[int, Exception] = self._drain_step_queue()
-        # TODO: Once we use python 3.9 switch to using the | operator to combine dicts.
-        failures: Dict[int, Exception] = {
-            **{first_failure.worker_id: first_failure.payload},
-            **other_failures,
-        }
+        # Use Python 3.9+ dict union operator
+        failures: Dict[int, Exception] = {first_failure.worker_id: first_failure.payload} | other_failures
         for worker_id, ex in failures.items():
             self._assert_worker_can_restart(worker_id, ex)
             logger.warning(f"Restarting worker[{worker_id}] after '{ex}'")
