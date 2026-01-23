@@ -19,10 +19,13 @@ import mlagents.plugins.trainer_type
 _BASE_PORT = 6005
 
 
-# Hook for xdist
-# https://github.com/ohmu/pytest-xdist/blob/master/xdist/newhooks.py
-def pytest_testnodeready():
-    PortAllocator().setup_once_per_node()
+# Hook for xdist - use pytest_configure to clean up once at session start
+# The old pytest_testnodeready hook was removed in modern pytest-xdist
+def pytest_configure(config):
+    """Clean up port allocation files at the start of a test session."""
+    # Only run cleanup on the main process, not on xdist workers
+    if not hasattr(config, 'workerinput'):
+        PortAllocator().setup_once_per_node()
 
 
 class PortAllocator:
