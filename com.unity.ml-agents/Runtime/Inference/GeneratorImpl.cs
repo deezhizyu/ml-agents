@@ -253,16 +253,11 @@ namespace Unity.MLAgents.Inference
         List<int> m_SensorIndices = new List<int>(8);
         ObservationWriter m_ObservationWriter = new ObservationWriter();
 
-        // Pre-calculated total observation size for this generator
-        int m_TotalObservationSize = -1;
-
         public ObservationGenerator() { }
 
         public void AddSensorIndex(int sensorIndex)
         {
             m_SensorIndices.Add(sensorIndex);
-            // Invalidate cached size
-            m_TotalObservationSize = -1;
         }
 
         public void Generate(TensorProxy tensorProxy, int batchSize, IList<AgentInfoSensorsPair> infos)
