@@ -13,6 +13,7 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 from multiprocessing import shared_memory, Process, Queue
 import queue
+import cloudpickle
 from mlagents_envs.base_env import BaseEnv, BehaviorSpec, DecisionSteps, TerminalSteps
 from mlagents.trainers.env_manager import EnvManager, EnvironmentStep, AllStepResult
 from mlagents.trainers.action_info import ActionInfo
@@ -199,13 +200,16 @@ class SharedMemoryEnvManager(EnvManager):
 
     def _initialize_workers(self):
         """Initialize worker processes"""
+        # Pickle env_factory for Windows compatibility (same as SubprocessEnvManager)
+        pickled_env_factory = cloudpickle.dumps(self.env_factory)
+
         for i in range(self.num_envs):
             cmd_queue = Queue()
             res_queue = Queue()
 
             worker = Process(
                 target=self._worker_process,
-                args=(i, cmd_queue, res_queue, self.env_factory),
+                args=(i, cmd_queue, res_queue, pickled_env_factory),
                 daemon=True,
             )
             worker.start()
@@ -237,11 +241,13 @@ class SharedMemoryEnvManager(EnvManager):
         worker_id: int,
         cmd_queue: Queue,
         res_queue: Queue,
-        env_factory,
+        pickled_env_factory: bytes,
     ):
         """Worker process that runs environment"""
         env = None
         try:
+            # Deserialize env_factory (same pattern as SubprocessEnvManager)
+            env_factory = cloudpickle.loads(pickled_env_factory)
             env = env_factory(worker_id, [])
             logger.info(f"Worker {worker_id} initialized environment")
 
