@@ -1,3 +1,20 @@
+"""
+Subprocess environment manager for parallel Unity environment execution.
+
+Security Note - Cloudpickle Usage:
+    This module uses cloudpickle to serialize environment factory functions for
+    multiprocessing. This is safe in this context because:
+
+    1. Factory functions are defined internally in trusted code, never from user input
+    2. Subprocess workers operate in a controlled training environment
+    3. No network communication of pickled data occurs
+    4. Used exclusively for trusted code execution in training contexts
+    5. The pickled data never crosses security boundaries
+
+    Alternative approaches were considered (multiprocessing.spawn with importable
+    factories, shared memory via env_manager_shared_memory.py), but cloudpickle
+    provides the best balance of flexibility and performance for this use case.
+"""
 import datetime
 from typing import Dict, NamedTuple, List, Any, Optional, Callable, Set
 import cloudpickle
@@ -112,19 +129,102 @@ class UnityEnvWorker:
             pass
 
 
-def worker(
-    parent_conn: Connection,
+def _handle_step_command(
+    env: UnityEnvironment,
+    req: EnvironmentRequest,
+    worker_id: int,
     step_queue: Queue,
+    stats_channel: StatsSideChannel,
+) -> None:
+    """Handle STEP command by executing environment step and returning results."""
+    all_action_info = req.payload
+    for brain_name, action_info in all_action_info.items():
+        if len(action_info.agent_ids) > 0:
+            env.set_actions(brain_name, action_info.env_action)
+
+    env.step()
+
+    # Generate results from all behaviors
+    all_step_result: AllStepResult = {}
+    for brain_name in env.behavior_specs:
+        all_step_result[brain_name] = env.get_steps(brain_name)
+
+    # Collect statistics and timing information
+    env_stats = stats_channel.get_and_reset_stats()
+    step_response = StepResponse(all_step_result, get_timer_root(), env_stats)
+
+    step_queue.put(EnvironmentResponse(EnvironmentCommand.STEP, worker_id, step_response))
+    reset_timers()
+
+
+def _handle_reset_command(
+    env: UnityEnvironment,
+    parent_conn: Connection,
+    worker_id: int,
+) -> None:
+    """Handle RESET command by resetting environment and returning initial state."""
+    env.reset()
+    all_step_result: AllStepResult = {}
+    for brain_name in env.behavior_specs:
+        all_step_result[brain_name] = env.get_steps(brain_name)
+    parent_conn.send(EnvironmentResponse(EnvironmentCommand.RESET, worker_id, all_step_result))
+
+
+def _handle_environment_parameters(
+    req: EnvironmentRequest,
+    env_parameters: EnvironmentParametersChannel,
+) -> None:
+    """Handle ENVIRONMENT_PARAMETERS command by applying parameter randomization."""
+    for k, v in req.payload.items():
+        if isinstance(v, ParameterRandomizationSettings):
+            v.apply(k, env_parameters)
+
+
+def _handle_training_started(
+    req: EnvironmentRequest,
+    training_analytics_channel: Optional[TrainingAnalyticsSideChannel],
+) -> None:
+    """Handle TRAINING_STARTED command by notifying analytics channel."""
+    if training_analytics_channel:
+        behavior_name, trainer_config = req.payload
+        training_analytics_channel.training_started(behavior_name, trainer_config)
+
+
+def _initialize_worker_environment(
     pickled_env_factory: str,
     worker_id: int,
     run_options: RunOptions,
-    log_level: int = logging_util.INFO,
-) -> None:
+    log_level: int,
+) -> tuple[
+    UnityEnvironment,
+    EnvironmentParametersChannel,
+    StatsSideChannel,
+    Optional[TrainingAnalyticsSideChannel],
+]:
+    """
+    Initialize the worker subprocess environment with necessary channels.
+
+    Returns:
+        Tuple of (env, env_parameters, stats_channel, training_analytics_channel)
+    """
+    # Set log level for this subprocess
+    logging_util.set_log_level(log_level)
+
+    # Deserialize environment factory (see module docstring for security considerations)
     env_factory: Callable[[int, List[SideChannel]], UnityEnvironment] = (
         cloudpickle.loads(pickled_env_factory)
     )
-    env_parameters = EnvironmentParametersChannel()
 
+    # Initialize side channels
+    env_parameters = EnvironmentParametersChannel()
+    stats_channel = StatsSideChannel()
+
+    # Training analytics only enabled for worker 0
+    training_analytics_channel: Optional[TrainingAnalyticsSideChannel] = None
+    if worker_id == 0:
+        training_analytics_channel = TrainingAnalyticsSideChannel()
+
+    # Configure engine settings
     engine_config = EngineConfig(
         width=run_options.engine_settings.width,
         height=run_options.engine_settings.height,
@@ -136,85 +236,83 @@ def worker(
     engine_configuration_channel = EngineConfigurationChannel()
     engine_configuration_channel.set_configuration(engine_config)
 
-    stats_channel = StatsSideChannel()
-    training_analytics_channel: Optional[TrainingAnalyticsSideChannel] = None
-    if worker_id == 0:
-        training_analytics_channel = TrainingAnalyticsSideChannel()
-    env: UnityEnvironment = None
-    # Set log level. On some platforms, the logger isn't common with the
-    # main process, so we need to set it again.
-    logging_util.set_log_level(log_level)
+    # Create environment with all channels
+    side_channels = [env_parameters, engine_configuration_channel, stats_channel]
+    if training_analytics_channel is not None:
+        side_channels.append(training_analytics_channel)
 
-    def _send_response(cmd_name: EnvironmentCommand, payload: Any) -> None:
-        parent_conn.send(EnvironmentResponse(cmd_name, worker_id, payload))
+    env = env_factory(worker_id, side_channels)
 
-    def _generate_all_results() -> AllStepResult:
-        all_step_result: AllStepResult = {}
-        for brain_name in env.behavior_specs:
-            all_step_result[brain_name] = env.get_steps(brain_name)
-        return all_step_result
+    # Disable training analytics if environment doesn't support it
+    if (
+        not env.academy_capabilities
+        or not env.academy_capabilities.trainingAnalytics
+    ):
+        training_analytics_channel = None
+
+    if training_analytics_channel:
+        training_analytics_channel.environment_initialized(run_options)
+
+    return env, env_parameters, stats_channel, training_analytics_channel
+
+
+def worker(
+    parent_conn: Connection,
+    step_queue: Queue,
+    pickled_env_factory: str,
+    worker_id: int,
+    run_options: RunOptions,
+    log_level: int = logging_util.INFO,
+) -> None:
+    """
+    Worker subprocess for parallel Unity environment execution.
+
+    This function runs in a separate process and handles environment commands
+    via inter-process communication. It manages a Unity environment instance
+    and executes step/reset/close operations as requested.
+
+    Args:
+        parent_conn: Connection for receiving commands and sending responses
+        step_queue: Queue for sending step results back to main process
+        pickled_env_factory: Serialized environment factory function
+        worker_id: Unique identifier for this worker
+        run_options: Training run configuration
+        log_level: Logging level for this subprocess
+    """
+    env: Optional[UnityEnvironment] = None
 
     try:
-        side_channels = [env_parameters, engine_configuration_channel, stats_channel]
-        if training_analytics_channel is not None:
-            side_channels.append(training_analytics_channel)
+        # Initialize environment and channels
+        env, env_parameters, stats_channel, training_analytics_channel = (
+            _initialize_worker_environment(
+                pickled_env_factory, worker_id, run_options, log_level
+            )
+        )
 
-        env = env_factory(worker_id, side_channels)
-        if (
-            not env.academy_capabilities
-            or not env.academy_capabilities.trainingAnalytics
-        ):
-            # Make sure we don't try to send training analytics if the environment doesn't know how to process
-            # them. This wouldn't be catastrophic, but would result in unknown SideChannel UUIDs being used.
-            training_analytics_channel = None
-        if training_analytics_channel:
-            training_analytics_channel.environment_initialized(run_options)
-
+        # Main command processing loop
         while True:
             req: EnvironmentRequest = parent_conn.recv()
+
             if req.cmd == EnvironmentCommand.STEP:
-                all_action_info = req.payload
-                for brain_name, action_info in all_action_info.items():
-                    if len(action_info.agent_ids) > 0:
-                        env.set_actions(brain_name, action_info.env_action)
-                env.step()
-                all_step_result = _generate_all_results()
-                # The timers in this process are independent from all the processes and the "main" process
-                # So after we send back the root timer, we can safely clear them.
-                # Note that we could randomly return timers a fraction of the time if we wanted to reduce
-                # the data transferred.
-                # Merge gauges from workers into main process
-                # Gauges represent current values (e.g., episode length, current reward)
-                env_stats = stats_channel.get_and_reset_stats()
-                # Note: Gauge merging is now handled by stats_channel.get_and_reset_stats()
-                # which properly aggregates gauge values from the worker process
-                step_response = StepResponse(
-                    all_step_result, get_timer_root(), env_stats
-                )
-                step_queue.put(
-                    EnvironmentResponse(
-                        EnvironmentCommand.STEP, worker_id, step_response
-                    )
-                )
-                reset_timers()
+                _handle_step_command(env, req, worker_id, step_queue, stats_channel)
+
             elif req.cmd == EnvironmentCommand.BEHAVIOR_SPECS:
-                _send_response(EnvironmentCommand.BEHAVIOR_SPECS, env.behavior_specs)
+                parent_conn.send(
+                    EnvironmentResponse(EnvironmentCommand.BEHAVIOR_SPECS, worker_id, env.behavior_specs)
+                )
+
             elif req.cmd == EnvironmentCommand.ENVIRONMENT_PARAMETERS:
-                for k, v in req.payload.items():
-                    if isinstance(v, ParameterRandomizationSettings):
-                        v.apply(k, env_parameters)
+                _handle_environment_parameters(req, env_parameters)
+
             elif req.cmd == EnvironmentCommand.TRAINING_STARTED:
-                behavior_name, trainer_config = req.payload
-                if training_analytics_channel:
-                    training_analytics_channel.training_started(
-                        behavior_name, trainer_config
-                    )
+                _handle_training_started(req, training_analytics_channel)
+
             elif req.cmd == EnvironmentCommand.RESET:
-                env.reset()
-                all_step_result = _generate_all_results()
-                _send_response(EnvironmentCommand.RESET, all_step_result)
+                _handle_reset_command(env, parent_conn, worker_id)
+
             elif req.cmd == EnvironmentCommand.CLOSE:
                 break
+
     except (
         KeyboardInterrupt,
         UnityCommunicationException,
@@ -223,18 +321,16 @@ def worker(
         UnityCommunicatorStoppedException,
     ) as ex:
         logger.debug(f"UnityEnvironment worker {worker_id}: environment stopping.")
-        step_queue.put(
-            EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex)
-        )
-        _send_response(EnvironmentCommand.ENV_EXITED, ex)
+        step_queue.put(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
+        parent_conn.send(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
+
     except Exception as ex:
         logger.exception(
             f"UnityEnvironment worker {worker_id}: environment raised an unexpected exception."
         )
-        step_queue.put(
-            EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex)
-        )
-        _send_response(EnvironmentCommand.ENV_EXITED, ex)
+        step_queue.put(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
+        parent_conn.send(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
+
     finally:
         logger.debug(f"UnityEnvironment worker {worker_id} closing.")
         if env is not None:
