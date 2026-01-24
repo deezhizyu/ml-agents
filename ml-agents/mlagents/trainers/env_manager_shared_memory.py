@@ -244,11 +244,21 @@ class SharedMemoryEnvManager(EnvManager):
         pickled_env_factory: bytes,
     ):
         """Worker process that runs environment"""
+        from mlagents_envs.side_channel.environment_parameters_channel import EnvironmentParametersChannel
+        from mlagents_envs.side_channel.stats_side_channel import StatsSideChannel
+
         env = None
         try:
             # Deserialize env_factory (same pattern as SubprocessEnvManager)
             env_factory = cloudpickle.loads(pickled_env_factory)
-            env = env_factory(worker_id, [])
+
+            # Initialize side channels (required for Unity connection)
+            env_parameters = EnvironmentParametersChannel()
+            stats_channel = StatsSideChannel()
+            side_channels = [env_parameters, stats_channel]
+
+            # Create environment with proper side channels
+            env = env_factory(worker_id, side_channels)
             logger.info(f"Worker {worker_id} initialized environment")
 
             # Get behavior specs

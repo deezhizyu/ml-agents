@@ -8,11 +8,14 @@ from mlagents.trainers.behavior_id_utils import get_global_agent_id
 from mlagents.trainers.policy import Policy
 from mlagents_envs.base_env import DecisionSteps, BehaviorSpec
 from mlagents_envs.timers import timed
+from mlagents_envs.logging_util import get_logger
 
 from mlagents.trainers.settings import NetworkSettings
 from mlagents.trainers.torch_entities.networks import GlobalSteps
 
 from mlagents.trainers.torch_entities.utils import ModelUtils
+
+logger = get_logger(__name__)
 
 EPSILON = 1e-7  # Small value to avoid divide by zero
 
@@ -60,6 +63,16 @@ class TorchPolicy(Policy):
 
         self.actor.to(default_device())
 
+        # Initialize GPU observation processor if CUDA available
+        self.gpu_processor = None
+        if torch.cuda.is_available():
+            try:
+                from mlagents.trainers.gpu_processing import GPUObservationProcessor
+                self.gpu_processor = GPUObservationProcessor(device='cuda')
+                logger.info("GPU observation processing enabled for faster training")
+            except ImportError:
+                pass
+
     @property
     def export_memory_size(self) -> int:
         """
@@ -96,7 +109,17 @@ class TorchPolicy(Policy):
         obs = decision_requests.obs
         masks = self._extract_masks(decision_requests)
         device = default_device()
-        tensor_obs = [torch.as_tensor(np_ob, device=device) for np_ob in obs]
+
+        # Use GPU processing if available (processes and normalizes on GPU)
+        if self.gpu_processor is not None:
+            tensor_obs = []
+            for np_ob in obs:
+                # GPU processor handles normalization on GPU
+                processed = self.gpu_processor.process_batch(np_ob, normalize=True, update_stats=True)
+                tensor_obs.append(processed)
+        else:
+            # Standard CPU path
+            tensor_obs = [torch.as_tensor(np_ob, device=device) for np_ob in obs]
 
         memories = torch.as_tensor(
             self.retrieve_memories(global_agent_ids), device=device
