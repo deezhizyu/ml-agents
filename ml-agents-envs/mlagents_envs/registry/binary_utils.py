@@ -87,7 +87,7 @@ def get_local_binary_path_if_exists(name: str, url: str, tmp_dir: str) -> Option
         extension = "*.exe"
     if extension is None:
         raise NotImplementedError("No extensions found for this platform.")
-    url_hash = "-" + hashlib.md5(url.encode()).hexdigest()
+    url_hash = "-" + hashlib.md5(url.encode(), usedforsecurity=False).hexdigest()
     path = os.path.join(bin_dir, name + url_hash, "**", extension)
     candidates = glob.glob(path, recursive=True)
     if len(candidates) == 0:
@@ -142,7 +142,7 @@ def download_and_extract_zip(
     :param: tmp_dir: Optional override for the temporary directory to save binaries and zips in.
     """
     zip_dir, bin_dir = get_tmp_dirs(tmp_dir)
-    url_hash = "-" + hashlib.md5(url.encode()).hexdigest()
+    url_hash = "-" + hashlib.md5(url.encode(), usedforsecurity=False).hexdigest()
     binary_path = os.path.join(bin_dir, name + url_hash)
     if os.path.exists(binary_path):
         shutil.rmtree(binary_path)

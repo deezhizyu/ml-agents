@@ -50,6 +50,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     # find_namespace_packages will recurse through the directories and find all the packages
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),

@@ -1,6 +1,8 @@
 //This script lets you change time scale during training. It is not a required script for this demo to function
+// Press 1-9 to set time scale, 0 to double current time scale
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace MLAgentsExamples
 {
@@ -9,45 +11,58 @@ namespace MLAgentsExamples
         // Update is called once per frame
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return;
+
+            if (keyboard.digit1Key.wasPressedThisFrame)
             {
                 Time.timeScale = 1f;
+                Debug.Log("Time scale set to 1x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha2))
+            if (keyboard.digit2Key.wasPressedThisFrame)
             {
                 Time.timeScale = 2f;
+                Debug.Log("Time scale set to 2x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha3))
+            if (keyboard.digit3Key.wasPressedThisFrame)
             {
                 Time.timeScale = 3f;
+                Debug.Log("Time scale set to 3x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha4))
+            if (keyboard.digit4Key.wasPressedThisFrame)
             {
                 Time.timeScale = 4f;
+                Debug.Log("Time scale set to 4x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha5))
+            if (keyboard.digit5Key.wasPressedThisFrame)
             {
                 Time.timeScale = 5f;
+                Debug.Log("Time scale set to 5x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha6))
+            if (keyboard.digit6Key.wasPressedThisFrame)
             {
                 Time.timeScale = 6f;
+                Debug.Log("Time scale set to 6x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha7))
+            if (keyboard.digit7Key.wasPressedThisFrame)
             {
                 Time.timeScale = 7f;
+                Debug.Log("Time scale set to 7x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha8))
+            if (keyboard.digit8Key.wasPressedThisFrame)
             {
                 Time.timeScale = 8f;
+                Debug.Log("Time scale set to 8x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha9))
+            if (keyboard.digit9Key.wasPressedThisFrame)
             {
                 Time.timeScale = 9f;
+                Debug.Log("Time scale set to 9x");
             }
-            if (Input.GetKeyDown(KeyCode.Alpha0))
+            if (keyboard.digit0Key.wasPressedThisFrame)
             {
                 Time.timeScale *= 2f;
+                Debug.Log($"Time scale doubled to {Time.timeScale}x");
             }
         }
     }

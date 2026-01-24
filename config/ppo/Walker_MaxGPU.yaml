@@ -36,3 +36,5 @@ torch_settings:
   enable_tf32: true
   enable_amp: true
   enable_fused_optimizer: true
+  # torch.compile() - PyTorch 2.0+ graph optimization (20-50% faster!)
+  enable_compile: true
