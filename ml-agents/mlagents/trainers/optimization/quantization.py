@@ -95,8 +95,18 @@ def quantize_and_save(
     """
     logger.info(f"Loading model from {model_path}")
 
-    # Load model
-    model = torch.load(model_path, weights_only=False)
+    # Load model with weights_only=True for security (prevents arbitrary code execution)
+    try:
+        model = torch.load(model_path, weights_only=True)
+    except Exception as e:
+        # Fallback for legacy model formats (with security warning)
+        logger.warning(
+            f"Failed to load {model_path} with weights_only=True ({e}). "
+            "Falling back to weights_only=False. "
+            "SECURITY WARNING: This is a potential security risk. "
+            "Re-save model with TorchScript for secure loading."
+        )
+        model = torch.load(model_path, weights_only=False)
 
     # Load validation data if provided
     validation_data = None

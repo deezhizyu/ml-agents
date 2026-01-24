@@ -417,26 +417,36 @@ class SharedMemoryEnvManager(EnvManager):
         """Close all workers and clean up shared memory"""
         logger.info("Closing SharedMemoryEnvManager...")
 
-        # Send close commands to all workers
-        for cmd_queue in self.command_queues:
-            try:
-                cmd_queue.put(("close", None), timeout=1.0)
-            except (queue.Full, OSError, ValueError) as e:
-                logger.warning(f"Failed to send close command to worker: {e}")
+        try:
+            # Send close commands to all workers
+            for i, cmd_queue in enumerate(self.command_queues):
+                try:
+                    cmd_queue.put(("close", None), timeout=1.0)
+                except (queue.Full, OSError, ValueError) as e:
+                    logger.warning(f"Failed to send close command to worker {i}: {e}")
 
-        # Wait for workers to finish
-        for worker in self.workers:
-            worker.join(timeout=2.0)
-            if worker.is_alive():
-                worker.terminate()
+            # Wait for workers to finish
+            for i, worker in enumerate(self.workers):
+                try:
+                    worker.join(timeout=2.0)
+                    if worker.is_alive():
+                        logger.warning(f"Worker {i} did not shut down cleanly, terminating...")
+                        worker.terminate()
+                        worker.join(timeout=1.0)
+                except Exception as e:
+                    logger.error(f"Error terminating worker {i}: {e}")
 
-        # Clean up shared memory
-        for buffer in self.buffers.values():
-            buffer.close()
-            buffer.unlink()
+        finally:
+            # Always clean up shared memory, even if worker shutdown fails
+            for buffer_name, buffer in list(self.buffers.items()):
+                try:
+                    buffer.close()
+                    buffer.unlink()
+                except Exception as e:
+                    logger.error(f"Error cleaning up buffer {buffer_name}: {e}")
 
-        self.buffers.clear()
-        logger.info("SharedMemoryEnvManager closed")
+            self.buffers.clear()
+            logger.info("SharedMemoryEnvManager closed")
 
     @property
     def training_behaviors(self) -> Dict[str, BehaviorSpec]:
