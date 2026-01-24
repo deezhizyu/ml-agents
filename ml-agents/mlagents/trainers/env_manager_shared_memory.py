@@ -174,6 +174,9 @@ class SharedMemoryEnvManager(EnvManager):
         :param num_envs: Number of parallel environments
         :param timeout_wait: Timeout for environment operations
         """
+        # Initialize base class
+        super().__init__()
+
         self.env_factory = env_factory
         self.num_envs = num_envs
         self.timeout = timeout_wait
