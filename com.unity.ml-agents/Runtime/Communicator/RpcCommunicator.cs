@@ -33,20 +33,25 @@ namespace Unity.MLAgents
         List<string> m_BehaviorNames = new List<string>();
         bool m_NeedCommunicateThisStep;
         ObservationWriter m_ObservationWriter = new ObservationWriter();
-        Dictionary<string, SensorShapeValidator> m_SensorShapeValidators = new Dictionary<string, SensorShapeValidator>();
-        Dictionary<string, List<int>> m_OrderedAgentsRequestingDecisions = new Dictionary<string, List<int>>();
+
+        // Behavior ID registry for fast integer-based lookups
+        BehaviorIdRegistry m_BehaviorIdRegistry = new BehaviorIdRegistry();
+
+        // Use integer IDs internally for faster dictionary operations
+        Dictionary<int, SensorShapeValidator> m_SensorShapeValidators = new Dictionary<int, SensorShapeValidator>();
+        Dictionary<int, List<int>> m_OrderedAgentsRequestingDecisions = new Dictionary<int, List<int>>();
 
         /// The current UnityRLOutput to be sent when all the brains queried the communicator
         UnityRLOutputProto m_CurrentUnityRlOutput =
             new UnityRLOutputProto();
 
-        Dictionary<string, Dictionary<int, ActionBuffers>> m_LastActionsReceived =
-            new Dictionary<string, Dictionary<int, ActionBuffers>>();
+        // Use integer behavior IDs for inner dictionary lookup
+        Dictionary<int, Dictionary<int, ActionBuffers>> m_LastActionsReceived =
+            new Dictionary<int, Dictionary<int, ActionBuffers>>();
 
         // Brains that we have sent over the communicator with agents.
-        HashSet<string> m_SentBrainKeys = new HashSet<string>();
-        Dictionary<string, ActionSpec> m_UnsentBrainKeys = new Dictionary<string, ActionSpec>();
-
+        HashSet<int> m_SentBrainKeys = new HashSet<int>();
+        Dictionary<int, ActionSpec> m_UnsentBrainKeys = new Dictionary<int, ActionSpec>();
 
         /// The Unity to External client.
         UnityToExternalProto.UnityToExternalProtoClient m_Client;
@@ -212,6 +217,10 @@ namespace Unity.MLAgents
                 return;
             }
             m_BehaviorNames.Add(brainKey);
+
+            // Register behavior with integer ID
+            var behaviorId = m_BehaviorIdRegistry.GetOrCreateId(brainKey);
+
             m_CurrentUnityRlOutput.AgentInfos.Add(
                 brainKey,
                 new UnityRLOutputProto.Types.ListAgentInfoProto()
@@ -336,11 +345,14 @@ namespace Unity.MLAgents
         /// <param name="sensors">Sensors that will produce the observations</param>
         public void PutObservations(string behaviorName, AgentInfo info, List<ISensor> sensors)
         {
+            // Convert string to integer ID for faster internal lookups
+            var behaviorId = m_BehaviorIdRegistry.GetOrCreateId(behaviorName);
+
 #if DEBUG
-            if (!m_SensorShapeValidators.TryGetValue(behaviorName, out var validator))
+            if (!m_SensorShapeValidators.TryGetValue(behaviorId, out var validator))
             {
                 validator = new SensorShapeValidator();
-                m_SensorShapeValidators[behaviorName] = validator;
+                m_SensorShapeValidators[behaviorId] = validator;
             }
             validator.ValidateSensors(sensors);
 #endif
@@ -361,19 +373,19 @@ namespace Unity.MLAgents
             }
 
             m_NeedCommunicateThisStep = true;
-            if (!m_OrderedAgentsRequestingDecisions.TryGetValue(behaviorName, out var orderedAgents))
+            if (!m_OrderedAgentsRequestingDecisions.TryGetValue(behaviorId, out var orderedAgents))
             {
                 orderedAgents = new List<int>();
-                m_OrderedAgentsRequestingDecisions[behaviorName] = orderedAgents;
+                m_OrderedAgentsRequestingDecisions[behaviorId] = orderedAgents;
             }
             if (!info.done)
             {
                 orderedAgents.Add(info.episodeId);
             }
-            if (!m_LastActionsReceived.TryGetValue(behaviorName, out var behaviorActions))
+            if (!m_LastActionsReceived.TryGetValue(behaviorId, out var behaviorActions))
             {
                 behaviorActions = new Dictionary<int, ActionBuffers>();
-                m_LastActionsReceived[behaviorName] = behaviorActions;
+                m_LastActionsReceived[behaviorId] = behaviorActions;
             }
             behaviorActions[info.episodeId] = ActionBuffers.Empty;
             if (info.done)
@@ -402,6 +414,7 @@ namespace Unity.MLAgents
             message.RlOutput.SideChannel = ByteString.CopyFrom(messageAggregated);
 
             var input = Exchange(message);
+
             UpdateSentActionSpec(tempUnityRlInitializationOutput);
 
             foreach (var k in m_CurrentUnityRlOutput.AgentInfos.Keys)
@@ -420,7 +433,10 @@ namespace Unity.MLAgents
 
             foreach (var brainName in rlInput.AgentActions.Keys)
             {
-                if (!m_OrderedAgentsRequestingDecisions[brainName].Any())
+                // Convert string to int for internal lookup
+                var behaviorId = m_BehaviorIdRegistry.GetOrCreateId(brainName);
+
+                if (!m_OrderedAgentsRequestingDecisions.TryGetValue(behaviorId, out var orderedAgents) || !orderedAgents.Any())
                 {
                     continue;
                 }
@@ -431,26 +447,33 @@ namespace Unity.MLAgents
                 }
 
                 var agentActions = rlInput.AgentActions[brainName].ToAgentActionList();
-                var numAgents = m_OrderedAgentsRequestingDecisions[brainName].Count;
+                var numAgents = orderedAgents.Count;
                 for (var i = 0; i < numAgents; i++)
                 {
                     var agentAction = agentActions[i];
-                    var agentId = m_OrderedAgentsRequestingDecisions[brainName][i];
-                    if (m_LastActionsReceived.TryGetValue(brainName, out var brainActions) && brainActions.ContainsKey(agentId))
+                    var agentId = orderedAgents[i];
+                    if (m_LastActionsReceived.TryGetValue(behaviorId, out var brainActions))
                     {
                         brainActions[agentId] = agentAction;
                     }
                 }
             }
-            foreach (var brainName in m_OrderedAgentsRequestingDecisions.Keys)
+            foreach (var behaviorId in m_OrderedAgentsRequestingDecisions.Keys)
             {
-                m_OrderedAgentsRequestingDecisions[brainName].Clear();
+                m_OrderedAgentsRequestingDecisions[behaviorId].Clear();
             }
         }
 
         public ActionBuffers GetActions(string behaviorName, int agentId)
         {
-            if (m_LastActionsReceived.TryGetValue(behaviorName, out var agentActions))
+            // Convert string to int for fast lookup
+            var behaviorId = m_BehaviorIdRegistry.GetId(behaviorName);
+            if (behaviorId < 0)
+            {
+                return ActionBuffers.Empty;
+            }
+
+            if (m_LastActionsReceived.TryGetValue(behaviorId, out var agentActions))
             {
                 if (agentActions.TryGetValue(agentId, out var action))
                 {
@@ -538,20 +561,30 @@ namespace Unity.MLAgents
 
         void CacheActionSpec(string behaviorName, ActionSpec actionSpec)
         {
-            if (m_SentBrainKeys.Contains(behaviorName))
+            var behaviorId = m_BehaviorIdRegistry.GetOrCreateId(behaviorName);
+
+            if (m_SentBrainKeys.Contains(behaviorId))
             {
                 return;
             }
 
             // TODO We should check that if m_unsentBrainKeys has brainKey, it equals actionSpec
-            m_UnsentBrainKeys[behaviorName] = actionSpec;
+            m_UnsentBrainKeys[behaviorId] = actionSpec;
         }
 
         UnityRLInitializationOutputProto GetTempUnityRlInitializationOutput()
         {
             UnityRLInitializationOutputProto output = null;
-            foreach (var behaviorName in m_UnsentBrainKeys.Keys)
+            foreach (var kvp in m_UnsentBrainKeys)
             {
+                var behaviorId = kvp.Key;
+                var actionSpec = kvp.Value;
+
+                // Convert back to string for protobuf message
+                var behaviorName = m_BehaviorIdRegistry.GetName(behaviorId);
+                if (behaviorName == null)
+                    continue;
+
                 if (m_CurrentUnityRlOutput.AgentInfos.TryGetValue(behaviorName, out var agentInfoList))
                 {
                     if (agentInfoList.CalculateSize() > 0)
@@ -565,7 +598,6 @@ namespace Unity.MLAgents
                             output = new UnityRLInitializationOutputProto();
                         }
 
-                        var actionSpec = m_UnsentBrainKeys[behaviorName];
                         output.BrainParameters.Add(actionSpec.ToBrainParametersProto(behaviorName, true));
                     }
                 }
@@ -583,8 +615,9 @@ namespace Unity.MLAgents
 
             foreach (var brainProto in output.BrainParameters)
             {
-                m_SentBrainKeys.Add(brainProto.BrainName);
-                m_UnsentBrainKeys.Remove(brainProto.BrainName);
+                var behaviorId = m_BehaviorIdRegistry.GetOrCreateId(brainProto.BrainName);
+                m_SentBrainKeys.Add(behaviorId);
+                m_UnsentBrainKeys.Remove(behaviorId);
             }
         }
 

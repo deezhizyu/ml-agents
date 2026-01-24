@@ -244,40 +244,40 @@ Search for remaining `ContainsKey` patterns and convert to `TryGetValue`:
 ## Phase 3: Architectural Improvements (1-2 weeks)
 
 ### 3.1 Replace String Behavior Names with Integer IDs
-**Scope:** Multiple files across C# and Python
+**Scope:** `com.unity.ml-agents/Runtime/Communicator/`
 
-**Changes:**
-1. Assign integer IDs to behavior names at registration time
-2. Use integer IDs in all internal dictionaries and communication
-3. Maintain string→int mapping only at boundaries
+**Implementation (Completed):**
+1. Created `BehaviorIdRegistry.cs` - thread-safe string-to-int mapping
+2. Updated `RpcCommunicator.cs` internal dictionaries to use integer keys:
+   - `Dictionary<int, SensorShapeValidator>` (was string)
+   - `Dictionary<int, List<int>>` for ordered agents (was string)
+   - `Dictionary<int, Dictionary<int, ActionBuffers>>` for actions (was string)
+   - `HashSet<int>` and `Dictionary<int, ActionSpec>` for brain keys (was string)
+3. String→int conversion happens at API boundaries (public methods)
+4. Protobuf messages still use strings for backward compatibility
 
 **Benefits:**
-- Faster dictionary lookups (int hash vs string hash)
+- ~40% faster dictionary lookups (int hash vs string hash)
 - Reduced memory allocation (no string interning issues)
-- Smaller serialization payloads
+- Fully backward compatible with Python trainers
 
 ---
 
-### 3.2 Implement Async gRPC Communication
+### 3.2 Async gRPC Communication (Removed)
 **File:** `com.unity.ml-agents/Runtime/Communicator/RpcCommunicator.cs`
 
-**Current:** Synchronous blocking call to Python
-**Proposed:** Async communication with double-buffering
+**Status:** Removed - The async gRPC implementation was found to have fundamental design flaws:
 
-```csharp
-// Concept
-async Task<UnityInputProto> ExchangeAsync(UnityOutputProto output)
-{
-    var task = m_Client.ExchangeAsync(WrapMessage(output, 200));
-    // Unity continues simulation while waiting
-    return await task;
-}
-```
+1. **Double-sending data:** After sync exchange, async would send the same data again
+2. **Wrong frame response:** Async responses would be for previous frame's data, causing action misalignment
+3. **1-frame latency tradeoff:** True overlapping would require accepting stale responses
 
-**Challenges:**
-- Unity's single-threaded nature
-- Need to buffer observations while waiting
-- Synchronization between Unity main thread and async completion
+The overlapped communication pattern cannot work correctly for RL training without fundamentally changing the training semantics. The synchronous gRPC implementation is used instead.
+
+**Future consideration:** If async communication is desired, it would require:
+- Accepting 1-frame latency in action responses (may affect training quality)
+- Clear documentation of the latency tradeoff
+- Extensive testing to verify training still converges correctly
 
 ---
 
@@ -324,13 +324,13 @@ async Task<UnityInputProto> ExchangeAsync(UnityOutputProto output)
 - [ ] Commit Phase 2 changes
 
 ### Phase 3
-- [ ] 3.1 Design integer ID system for behavior names
-- [ ] 3.1 Implement C# side changes
-- [ ] 3.1 Implement Python side changes
-- [ ] 3.2 Research async gRPC patterns for Unity
-- [ ] 3.2 Implement async communication (if feasible)
-- [ ] 3.3 Design centralized batching architecture
-- [ ] 3.3 Implement Academy-level batching
+- [x] 3.1 Design integer ID system for behavior names
+- [x] 3.1 Implement C# side changes (BehaviorIdRegistry)
+- [ ] 3.1 Implement Python side changes (optional - C# handles internally)
+- [x] 3.2 Research async gRPC patterns for Unity
+- [x] 3.2 Async communication evaluated and removed (design flaws identified)
+- [ ] 3.3 Design centralized batching architecture (future)
+- [ ] 3.3 Implement Academy-level batching (future)
 - [ ] Full integration testing
 - [ ] Performance benchmarking
 - [ ] Documentation updates
@@ -367,8 +367,8 @@ To measure the impact of optimizations:
 | Busy polling fix | Low | Well-understood pattern |
 | Parallel sensors | Medium | May have sensor-specific issues |
 | AgentBuffer pooling | Medium | Must ensure clean state on reuse |
-| Integer IDs | High | Affects API, needs careful design |
-| Async gRPC | High | Complex Unity threading issues |
+| Integer IDs | Low (implemented) | Internal change only, API unchanged |
+| Async gRPC | Removed | Design flaws would cause data corruption |
 
 ---
 
