@@ -11,7 +11,7 @@ This is an enhanced fork of [Unity ML-Agents Toolkit](https://github.com/Unity-T
 
 ## Fork Improvements
 
-### 🚀 Performance Optimizations
+### Performance Optimizations
 
 **Inference Pipeline:**
 - Pre-allocated collections with 512 capacity in `ModelRunner.cs` (reduces GC pressure)
@@ -34,7 +34,7 @@ This is an enhanced fork of [Unity ML-Agents Toolkit](https://github.com/Unity-T
 - `com.unity.ml-agents/Runtime/Inference/ApplierImpl.cs`
 - `com.unity.ml-agents/Runtime/Inference/BatchedObservationManager.cs` (new)
 
-### 🐍 Python 3.11 Support
+### Python 3.11 Support
 
 - Updated deprecated `pkg_resources` → `importlib.metadata`
 - Fixed `distutils.version.LooseVersion` → `packaging.version.Version`
@@ -43,7 +43,7 @@ This is an enhanced fork of [Unity ML-Agents Toolkit](https://github.com/Unity-T
 
 **Supported Python versions:** 3.10.1 - 3.11.9
 
-### 🎮 Unity 6 Compatibility
+### Unity 6 Compatibility
 
 - **Input System Migration:** All 17+ example environments migrated from legacy `Input.GetKey()` to new Input System (`Keyboard.current`)
 - Fixed package manifest for Unity 6 (removed non-existent modules)
@@ -56,7 +56,7 @@ This is an enhanced fork of [Unity ML-Agents Toolkit](https://github.com/Unity-T
 - `AgentSoccer.cs`, `SorterAgent.cs`, `WallJumpAgent.cs`
 - `AdjustTrainingTimescale.cs`, `FlyCamera.cs`
 
-### 🔧 Bug Fixes
+### Bug Fixes
 
 - Fixed CPUTensorData resource leak in `TensorProxy.cs`
 - Fixed unused variable warnings causing compilation errors
@@ -163,6 +163,18 @@ pytest --cov=ml-agents --cov=ml-agents-envs -m "not slow"
 # Window → General → Test Runner → EditMode
 ```
 
+### Quick Verification
+
+To verify your installation works beyond basic imports:
+
+```bash
+# Run a quick training test (takes ~30 seconds)
+mlagents-learn config/ppo/3DBall.yaml --run-id=test --max-steps=1000
+
+# Or run the Python test suite
+pytest ml-agents-envs/tests/ -v -x --tb=short
+```
+
 ---
 
 ## Upstream Project
@@ -178,6 +190,18 @@ This fork is based on [Unity ML-Agents Toolkit](https://github.com/Unity-Technol
 - Gym and PettingZoo wrappers
 
 For the full upstream documentation, see the [Unity ML-Agents Documentation](https://docs.unity3d.com/Packages/com.unity.ml-agents@latest).
+
+---
+
+## Community and Support
+
+For help with ML-Agents (this fork or upstream):
+
+- [Unity ML-Agents Discussions](https://discussions.unity.com/tag/ml-agents) - Q&A and community support
+- [Discord](https://discord.com/channels/489222168727519232/1202574086115557446) - Real-time chat
+- [GitHub Issues](https://github.com/Unity-Technologies/ml-agents/issues) - Bug reports (upstream)
+- [ML-Agents Tutorials](https://www.youtube.com/playlist?list=PLzDRvYVwl53vehwiN_odYJkPBzcqFw110) - Video tutorials by CodeMonkeyUnity
+- [Hugging Face Course](https://huggingface.co/learn/deep-rl-course/en/unit5/introduction) - Introduction to ML-Agents
 
 ---
 
