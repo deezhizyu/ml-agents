@@ -4,9 +4,11 @@ Async batching inference server for ML-Agents
 Provides low-latency inference through dynamic batching and async processing
 """
 
+from __future__ import annotations
+
 import asyncio
 import time
-from typing import Optional, List, Tuple, Any, Dict
+from typing import Optional, List, Tuple, Any, Dict, Dict
 from collections import deque
 import numpy as np
 

@@ -7,6 +7,8 @@ shared memory to avoid pickle serialization/deserialization overhead.
 Expected performance improvement: 20-40% for environments with large observations
 """
 
+from __future__ import annotations
+
 import numpy as np
 from typing import Dict, List, Optional, Tuple
 from multiprocessing import shared_memory, Process, Queue
