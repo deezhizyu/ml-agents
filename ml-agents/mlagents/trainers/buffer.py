@@ -2,6 +2,7 @@ from collections import defaultdict
 from collections.abc import MutableMapping
 import enum
 import itertools
+import threading
 from typing import BinaryIO, DefaultDict, List, Tuple, Union, Optional
 
 import numpy as np
@@ -207,7 +208,7 @@ class AgentBufferField(list):
         self[:] = []
 
     def padded_to_batch(
-        self, pad_value: np.float = 0, dtype: np.dtype = np.float32
+        self, pad_value: float = 0.0, dtype: np.dtype = np.float32
     ) -> Union[np.ndarray, List[np.ndarray]]:
         """
         Converts this AgentBufferField (which is a List[BufferEntry]) into a numpy array
@@ -249,6 +250,109 @@ class AgentBufferField(list):
         Returns the AgentBufferField which is a list of numpy ndarrays (or List[np.ndarray]) as an ndarray.
         """
         return np.array(self)
+
+
+class AgentBufferPool:
+    """
+    A pool of AgentBuffer objects to reduce allocation overhead during training.
+    Thread-safe for use in multi-threaded training scenarios.
+    """
+
+    def __init__(self, pool_size: int = 32):
+        """
+        Initialize the buffer pool.
+        :param pool_size: Maximum number of buffers to keep in the pool.
+        """
+        self._pool: List["AgentBuffer"] = []
+        self._pool_size = pool_size
+        self._lock = threading.Lock()
+        self._acquired_count = 0
+        self._created_count = 0
+
+    def acquire(self) -> "AgentBuffer":
+        """
+        Acquire an AgentBuffer from the pool, or create a new one if the pool is empty.
+        The returned buffer is reset and ready for use.
+        :return: An AgentBuffer instance.
+        """
+        with self._lock:
+            self._acquired_count += 1
+            if self._pool:
+                buffer = self._pool.pop()
+                buffer.reset_agent()
+                return buffer
+            self._created_count += 1
+        return AgentBuffer()
+
+    def release(self, buffer: "AgentBuffer") -> None:
+        """
+        Return an AgentBuffer to the pool for reuse.
+        If the pool is full, the buffer is discarded.
+        :param buffer: The AgentBuffer to return to the pool.
+        """
+        if buffer is None:
+            return
+        with self._lock:
+            if len(self._pool) < self._pool_size:
+                buffer.reset_agent()
+                self._pool.append(buffer)
+
+    def clear(self) -> None:
+        """
+        Clear all buffers from the pool.
+        """
+        with self._lock:
+            self._pool.clear()
+
+    @property
+    def pool_size(self) -> int:
+        """
+        Returns the current number of buffers in the pool.
+        """
+        with self._lock:
+            return len(self._pool)
+
+    @property
+    def stats(self) -> dict:
+        """
+        Returns statistics about pool usage.
+        """
+        with self._lock:
+            return {
+                "pool_size": len(self._pool),
+                "max_pool_size": self._pool_size,
+                "acquired_count": self._acquired_count,
+                "created_count": self._created_count,
+                "reuse_rate": (
+                    (self._acquired_count - self._created_count) / self._acquired_count
+                    if self._acquired_count > 0
+                    else 0.0
+                ),
+            }
+
+
+# Global buffer pool instance for use across the training pipeline
+_global_buffer_pool: Optional[AgentBufferPool] = None
+
+
+def get_global_buffer_pool() -> AgentBufferPool:
+    """
+    Get or create the global AgentBufferPool instance.
+    :return: The global AgentBufferPool.
+    """
+    global _global_buffer_pool
+    if _global_buffer_pool is None:
+        _global_buffer_pool = AgentBufferPool()
+    return _global_buffer_pool
+
+
+def set_global_buffer_pool(pool: Optional[AgentBufferPool]) -> None:
+    """
+    Set the global AgentBufferPool instance.
+    :param pool: The pool to use, or None to reset.
+    """
+    global _global_buffer_pool
+    _global_buffer_pool = pool
 
 
 class AgentBuffer(MutableMapping):
@@ -403,30 +507,40 @@ class AgentBuffer(MutableMapping):
                 tmp += buffer_field[i * sequence_length : (i + 1) * sequence_length]
             buffer_field.set(tmp)
 
-    def make_mini_batch(self, start: int, end: int) -> "AgentBuffer":
+    def make_mini_batch(
+        self, start: int, end: int, use_pool: bool = True
+    ) -> "AgentBuffer":
         """
         Creates a mini-batch from buffer.
         :param start: Starting index of buffer.
         :param end: Ending index of buffer.
+        :param use_pool: Whether to acquire the buffer from the global pool.
         :return: Dict of mini batch.
         """
-        mini_batch = AgentBuffer()
+        if use_pool:
+            mini_batch = get_global_buffer_pool().acquire()
+        else:
+            mini_batch = AgentBuffer()
         for key, field in self._fields.items():
             # slicing AgentBufferField returns a List[Any}
             mini_batch[key] = field[start:end]  # type: ignore
         return mini_batch
 
     def sample_mini_batch(
-        self, batch_size: int, sequence_length: int = 1
+        self, batch_size: int, sequence_length: int = 1, use_pool: bool = True
     ) -> "AgentBuffer":
         """
         Creates a mini-batch from a random start and end.
         :param batch_size: number of elements to withdraw.
         :param sequence_length: Length of sequences to sample.
             Number of sequences to sample will be batch_size/sequence_length.
+        :param use_pool: Whether to acquire the buffer from the global pool.
         """
         num_seq_to_sample = batch_size // sequence_length
-        mini_batch = AgentBuffer()
+        if use_pool:
+            mini_batch = get_global_buffer_pool().acquire()
+        else:
+            mini_batch = AgentBuffer()
         buff_len = self.num_experiences
         num_sequences_in_buffer = buff_len // sequence_length
         start_idxes = (

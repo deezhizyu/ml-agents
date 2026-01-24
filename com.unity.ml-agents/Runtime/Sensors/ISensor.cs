@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Jobs;
 
 namespace Unity.MLAgents.Sensors
 {
@@ -126,6 +127,28 @@ namespace Unity.MLAgents.Sensors
 
             return count;
         }
+    }
+
+    /// <summary>
+    /// Interface for sensors that support job-based parallel updates.
+    /// Sensors implementing this interface can have their Update() work scheduled as a job,
+    /// allowing multiple sensors to update in parallel.
+    /// </summary>
+    public interface ISensorJobified : ISensor
+    {
+        /// <summary>
+        /// Schedule the sensor update as a job. The job should perform the same work as Update().
+        /// The returned JobHandle must be completed before Write() is called.
+        /// </summary>
+        /// <param name="dependency">Optional dependency for job scheduling.</param>
+        /// <returns>A JobHandle for the scheduled work.</returns>
+        JobHandle ScheduleUpdate(JobHandle dependency = default);
+
+        /// <summary>
+        /// Returns true if the sensor's job-based update is ready to be scheduled.
+        /// Some sensors may need to fall back to synchronous Update() in certain conditions.
+        /// </summary>
+        bool CanScheduleJob { get; }
     }
 
     internal static class SensorUtils

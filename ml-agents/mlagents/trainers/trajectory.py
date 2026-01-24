@@ -6,6 +6,7 @@ from mlagents.trainers.buffer import (
     ObservationKeyPrefix,
     AgentBufferKey,
     BufferKey,
+    get_global_buffer_pool,
 )
 from mlagents_envs.base_env import ActionTuple
 from mlagents.trainers.torch_entities.action_log_probs import LogProbsTuple
@@ -142,15 +143,19 @@ class Trajectory(NamedTuple):
     agent_id: str
     behavior_id: str
 
-    def to_agentbuffer(self) -> AgentBuffer:
+    def to_agentbuffer(self, use_pool: bool = True) -> AgentBuffer:
         """
         Converts a Trajectory to an AgentBuffer
         :param trajectory: A Trajectory
+        :param use_pool: Whether to acquire the buffer from the global pool.
         :returns: AgentBuffer. Note that the length of the AgentBuffer will be one
         less than the trajectory, as the next observation need to be populated from the last
         step of the trajectory.
         """
-        agent_buffer_trajectory = AgentBuffer()
+        if use_pool:
+            agent_buffer_trajectory = get_global_buffer_pool().acquire()
+        else:
+            agent_buffer_trajectory = AgentBuffer()
         obs = self.steps[0].obs
         for step, exp in enumerate(self.steps):
             is_last_step = step == len(self.steps) - 1

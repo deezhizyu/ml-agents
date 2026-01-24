@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 using Unity.InferenceEngine;
+using Unity.Jobs;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Sensors.Reflection;
@@ -325,6 +326,12 @@ namespace Unity.MLAgents
         /// Currently generated from attached SensorComponents, and a legacy VectorSensor
         /// </summary>
         internal List<ISensor> sensors;
+
+        /// <summary>
+        /// Cached list of job handles for parallel sensor updates.
+        /// Pre-allocated to avoid per-frame allocations.
+        /// </summary>
+        List<JobHandle> m_SensorJobHandles = new List<JobHandle>(16);
 
         /// <summary>
         /// VectorSensor which is written to by AddVectorObs
@@ -1149,9 +1156,33 @@ namespace Unity.MLAgents
 
         void UpdateSensors()
         {
-            foreach (var sensor in sensors)
+            // Clear the cached list (no allocation)
+            m_SensorJobHandles.Clear();
+
+            // Phase 1: Schedule all jobified sensors in parallel
+            for (int i = 0; i < sensors.Count; i++)
             {
-                sensor.Update();
+                var sensor = sensors[i];
+                if (sensor is ISensorJobified jobSensor && jobSensor.CanScheduleJob)
+                {
+                    m_SensorJobHandles.Add(jobSensor.ScheduleUpdate());
+                }
+            }
+
+            // Phase 2: Update non-jobified sensors while jobs are running
+            for (int i = 0; i < sensors.Count; i++)
+            {
+                var sensor = sensors[i];
+                if (!(sensor is ISensorJobified jobSensor) || !jobSensor.CanScheduleJob)
+                {
+                    sensor.Update();
+                }
+            }
+
+            // Phase 3: Complete all scheduled jobs
+            for (int i = 0; i < m_SensorJobHandles.Count; i++)
+            {
+                m_SensorJobHandles[i].Complete();
             }
         }
 
