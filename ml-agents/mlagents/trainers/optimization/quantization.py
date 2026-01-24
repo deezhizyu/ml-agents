@@ -6,7 +6,7 @@ Provides INT8 and FP16 quantization for faster inference and smaller model sizes
 
 import argparse
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 import numpy as np
 
 from mlagents.torch_utils import torch
