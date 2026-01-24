@@ -1,0 +1,36 @@
+behaviors:
+  Walker:
+    trainer_type: ppo
+    hyperparameters:
+      # Large batch size for GPU parallelism
+      batch_size: 4096
+      buffer_size: 409600
+      learning_rate: 0.0003
+      beta: 0.005
+      epsilon: 0.2
+      lambd: 0.95
+      # More epochs = more GPU training per data collection
+      num_epoch: 8
+      learning_rate_schedule: linear
+    network_settings:
+      normalize: true
+      # Larger network = more GPU compute
+      hidden_units: 512
+      num_layers: 4
+      vis_encode_type: simple
+    reward_signals:
+      extrinsic:
+        gamma: 0.995
+        strength: 1.0
+    keep_checkpoints: 5
+    max_steps: 30000000
+    time_horizon: 1000
+    summary_freq: 30000
+
+# Enable GPU optimizations
+torch_settings:
+  device: cuda
+  enable_cudnn_benchmark: true
+  enable_tf32: true
+  enable_amp: true
+  enable_fused_optimizer: true

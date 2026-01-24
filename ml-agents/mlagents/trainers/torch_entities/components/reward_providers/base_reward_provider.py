@@ -6,6 +6,9 @@ from typing import Dict
 from mlagents.trainers.buffer import AgentBuffer
 from mlagents.trainers.settings import RewardSignalSettings
 from mlagents_envs.base_env import BehaviorSpec
+from mlagents_envs.logging_util import get_logger
+
+logger = get_logger(__name__)
 
 
 class BaseRewardProvider(ABC):
@@ -45,6 +48,19 @@ class BaseRewardProvider(ABC):
         Is used to mitigate the positive bias in rewards with no natural end.
         """
         return self._ignore_done
+
+    def _warn_if_memory_specified(self, settings: RewardSignalSettings, reward_type: str) -> None:
+        """
+        Helper method to warn if memory is specified in network settings but not supported.
+        
+        :param settings: The reward signal settings to check
+        :param reward_type: Name of the reward provider type (e.g., "RND", "GAIL", "Curiosity")
+        """
+        if settings.network_settings.memory is not None:
+            logger.warning(
+                f"memory was specified in network_settings but is not supported by {reward_type}. "
+                "It is being ignored."
+            )
 
     @abstractmethod
     def evaluate(self, mini_batch: AgentBuffer) -> np.ndarray:

@@ -59,11 +59,11 @@ setup(
         "grpcio>=1.11.0,<=1.53.2",
         "h5py>=2.9.0",
         f"mlagents_envs=={VERSION}",
-        "numpy>=1.23.5,<1.24.0",
+        "numpy>=1.23.5",  # Relaxed to support newer numpy versions
         "Pillow>=4.2.1",
         "protobuf>=3.6,<3.21",
         "pyyaml>=3.1.0",
-        "torch>=2.1.1,<=2.8.0",
+        "torch>=2.1.1",  # Relaxed to support newer PyTorch versions with CUDA
         "tensorboard>=2.14",
         # adding six explicit dependency since tensorboard needs it but doesn't declare it as a dep
         "six>=1.16",
@@ -76,7 +76,7 @@ setup(
         "onnx==1.15.0",
         "packaging",
     ],
-    python_requires=">=3.10.1,<=3.11.9",
+    python_requires=">=3.10.1",  # Relaxed to support Python 3.12+
     entry_points={
         "console_scripts": [
             "mlagents-learn=mlagents.trainers.learn:main",

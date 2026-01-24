@@ -92,11 +92,11 @@ class CuriosityNetwork(torch.nn.Module):
 
         if self._action_spec.continuous_size > 0:
             self.continuous_action_prediction = linear_layer(
-                256, self._action_spec.continuous_size
+                CURIOSITY_HIDDEN_SIZE, self._action_spec.continuous_size
             )
         if self._action_spec.discrete_size > 0:
             self.discrete_action_prediction = linear_layer(
-                256, sum(self._action_spec.discrete_branches)
+                CURIOSITY_HIDDEN_SIZE, sum(self._action_spec.discrete_branches)
             )
 
         self.forward_model_next_state_prediction = torch.nn.Sequential(
@@ -104,9 +104,9 @@ class CuriosityNetwork(torch.nn.Module):
                 state_encoder_settings.hidden_units
                 + self._action_flattener.flattened_size,
                 1,
-                256,
+                CURIOSITY_HIDDEN_SIZE,
             ),
-            linear_layer(256, state_encoder_settings.hidden_units),
+            linear_layer(CURIOSITY_HIDDEN_SIZE, state_encoder_settings.hidden_units),
         )
 
     def get_current_state(self, mini_batch: AgentBuffer) -> torch.Tensor:

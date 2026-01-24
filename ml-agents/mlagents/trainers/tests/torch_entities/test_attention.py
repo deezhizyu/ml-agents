@@ -176,7 +176,6 @@ def test_predict_closest_training():
         prediction = prediction.reshape((batch_size, size))
         error = torch.mean((prediction - target) ** 2, dim=1)
         error = torch.mean(error) / 2
-        print(error.item())
         optimizer.zero_grad()
         error.backward()
         optimizer.step()

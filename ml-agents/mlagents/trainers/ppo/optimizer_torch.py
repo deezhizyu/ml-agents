@@ -98,7 +98,7 @@ class TorchPPOOptimizer(TorchOptimizer):
         # Initialize AMP GradScaler if AMP is enabled
         self._use_amp = is_amp_enabled()
         if self._use_amp:
-            self._grad_scaler = torch.cuda.amp.GradScaler()
+            self._grad_scaler = torch.amp.GradScaler()
 
     @property
     def critic(self):
@@ -152,7 +152,7 @@ class TorchPPOOptimizer(TorchOptimizer):
             value_memories = torch.stack(value_memories).unsqueeze(0)
 
         # Use AMP autocast if enabled for mixed precision training
-        with torch.cuda.amp.autocast(enabled=self._use_amp):
+        with torch.amp.autocast(device_type=default_device().type, dtype=torch.float16, enabled=self._use_amp):
             run_out = self.policy.actor.get_stats(
                 current_obs,
                 actions,
