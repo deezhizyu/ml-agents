@@ -1,0 +1,31 @@
+behaviors:
+  3DBall:
+    trainer_type: dt
+    hyperparameters:
+      # Decision Transformer architecture
+      hidden_dim: 128
+      num_layers: 3
+      num_heads: 1
+      max_len: 20
+
+      # Training
+      batch_size: 64
+      learning_rate: 0.0001
+
+    # Data source
+    offline_data:
+      # Path to demonstration file or saved trajectories
+      demo_file: "demos/3DBall_expert.demo"
+      # Or use logged trajectories
+      # buffer_file: "results/3DBall/buffer.pkl"
+
+    max_steps: 100000
+    time_horizon: 1000
+    summary_freq: 1000
+
+env_settings:
+  env_path: null
+  env_args: null
+  base_port: 5005
+  num_envs: 1  # Offline learning doesn't need many envs
+  seed: 0
