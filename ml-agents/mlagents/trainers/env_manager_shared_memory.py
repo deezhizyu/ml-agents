@@ -229,6 +229,7 @@ class SharedMemoryEnvManager(EnvManager):
                     # Store behavior specs from first worker
                     if i == 0:
                         self._behavior_specs = data
+                        logger.info(f"Received behavior specs: {list(data.keys())}")
                     logger.info(f"Worker {i} initialized successfully")
                 elif cmd == "error":
                     self._worker_alive[i] = False
@@ -479,7 +480,10 @@ class SharedMemoryEnvManager(EnvManager):
     @property
     def training_behaviors(self) -> Dict[str, BehaviorSpec]:
         """Get training behaviors from first environment"""
-        return self._behavior_specs
+        # BehaviorMapping is a Mapping, convert to dict if needed
+        if hasattr(self._behavior_specs, '_dict'):
+            return self._behavior_specs._dict
+        return dict(self._behavior_specs)
 
     def set_actions(self, behavior_name: str, action_info: ActionInfo) -> None:
         """
