@@ -20,15 +20,15 @@ class TestNetworkSettingsTorchScript:
         
         assert hasattr(settings, 'enable_torchscript')
         assert hasattr(settings, 'torchscript_optimize_for_inference')
-        assert settings.enable_torchscript == False
-        assert settings.torchscript_optimize_for_inference == True
+        assert not settings.enable_torchscript
+        assert settings.torchscript_optimize_for_inference
     
     def test_enable_torchscript(self):
         """Test enabling TorchScript"""
         settings = NetworkSettings(enable_torchscript=True)
         
-        assert settings.enable_torchscript == True
-        assert settings.torchscript_optimize_for_inference == True
+        assert settings.enable_torchscript
+        assert settings.torchscript_optimize_for_inference
     
     def test_disable_torchscript_optimization(self):
         """Test disabling TorchScript inference optimization"""
@@ -37,8 +37,8 @@ class TestNetworkSettingsTorchScript:
             torchscript_optimize_for_inference=False
         )
         
-        assert settings.enable_torchscript == True
-        assert settings.torchscript_optimize_for_inference == False
+        assert settings.enable_torchscript
+        assert not settings.torchscript_optimize_for_inference
     
     def test_torchscript_with_other_settings(self):
         """Test TorchScript settings combined with other network settings"""
@@ -51,8 +51,8 @@ class TestNetworkSettingsTorchScript:
         
         assert settings.hidden_units == 256
         assert settings.num_layers == 3
-        assert settings.enable_torchscript == True
-        assert settings.normalize == True
+        assert settings.enable_torchscript
+        assert settings.normalize
 
 
 class TestNetworkSettingsValidation:
@@ -89,6 +89,7 @@ class TestNetworkSettingsValidation:
         settings = NetworkSettings(memory=memory_settings)
         assert settings.memory is not None
         assert settings.memory.sequence_length == 128
+        assert settings.memory.memory_size == 256
 
 
 class TestPPOSettingsExtended:
@@ -158,7 +159,7 @@ class TestTrainerSettingsExtended:
         )
         
         assert trainer_settings.network_settings.hidden_units == 256
-        assert trainer_settings.network_settings.enable_torchscript == True
+        assert trainer_settings.network_settings.enable_torchscript
 
 
 class TestSettingsEdgeCases:
@@ -226,7 +227,7 @@ class TestSettingsIntegration:
         )
         
         # Verify all settings are correctly configured
-        assert trainer_settings.network_settings.enable_torchscript == True
+        assert trainer_settings.network_settings.enable_torchscript
         assert trainer_settings.hyperparameters.beta == 0.001
         assert trainer_settings.max_steps == 1000000
 

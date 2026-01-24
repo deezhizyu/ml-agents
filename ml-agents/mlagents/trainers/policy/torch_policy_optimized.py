@@ -129,7 +129,7 @@ class TorchPolicyOptimized(TorchPolicy):
                 if tensor_obs is not None:
                     self._compile_actor_if_needed((tensor_obs,))
             except Exception as e:
-                logger.debug(f"Could not create example inputs for compilation: {e}")
+                logger.warning(f"Could not create example inputs for TorchScript compilation: {e}")
         
         return result
     

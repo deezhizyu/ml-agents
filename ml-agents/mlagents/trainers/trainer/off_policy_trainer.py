@@ -229,7 +229,9 @@ class OffPolicyTrainer(RLTrainer):
             self.update_buffer.truncate(
                 int(self.hyperparameters.buffer_size * BUFFER_TRUNCATE_PERCENT)
             )
-        # TODO: revisit this update
+        # Update reward signals after policy update
+        # Note: This updates all reward signal modules (curiosity, GAIL, RND, etc.)
+        # based on the latest experiences in the buffer
         self._update_reward_signals()
         return has_updated
 

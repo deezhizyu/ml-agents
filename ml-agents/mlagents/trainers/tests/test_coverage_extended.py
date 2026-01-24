@@ -16,6 +16,7 @@ class TestAgentBufferExtended:
         buffer = AgentBuffer()
         assert buffer is not None
         assert buffer.num_experiences == 0
+        assert isinstance(buffer, AgentBuffer)
     
     def test_buffer_append_data(self):
         """Test appending data to buffer"""
@@ -295,8 +296,8 @@ class TestCheckpointSettingsExtended:
         )
         
         assert settings.run_id == "test_run"
-        assert settings.train_model == True
-        assert settings.inference == False
+        assert settings.train_model
+        assert not settings.inference
 
 
 if __name__ == "__main__":

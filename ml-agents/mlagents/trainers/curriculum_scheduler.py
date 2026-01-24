@@ -2,7 +2,6 @@
 Lesson-Based Curriculum Scheduling
 
 Implements automatic curriculum progression based on performance metrics.
-This resolves TODO in settings.py line 108.
 
 Usage:
     scheduler = CurriculumScheduler(lessons)

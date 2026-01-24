@@ -57,8 +57,8 @@ class TestProfilingOverhead:
         time.sleep(0.001)
         profiler.stop()
         
-        assert profiler.started == True
-        assert profiler.stopped == True
+        assert profiler.started
+        assert profiler.stopped
 
 
 class TestProfilingMetrics:

@@ -85,13 +85,13 @@ class TrainerController:
         try:
             if not os.path.exists(output_path):
                 os.makedirs(output_path)
-        except Exception:
+        except OSError as e:
             raise UnityEnvironmentException(
                 f"The folder {output_path} containing the "
                 "generated model could not be "
-                "accessed. Please make sure the "
+                f"accessed: {e}. Please make sure the "
                 "permissions are set correctly."
-            )
+            ) from e
 
     @timed
     def _reset_env(self, env_manager: EnvManager) -> None:

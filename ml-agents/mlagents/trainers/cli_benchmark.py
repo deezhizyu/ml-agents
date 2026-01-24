@@ -263,7 +263,8 @@ def main():
         benchmark.run_quick_benchmark()
     else:
         logger.info(f"Benchmarking config: {args.config}")
-        # TODO: Load config and run full benchmark
+        # Full benchmark with config loading not yet implemented
+        # Would load YAML config and run comprehensive benchmarks for each behavior
         logger.warning("Full benchmark not implemented yet. Running quick benchmark.")
         benchmark.run_quick_benchmark()
     

@@ -28,11 +28,10 @@ def create_agent_buffer(
             buffer[ObsUtil.get_name_at(i)].append(obs)
         for i, obs in enumerate(next_obs):
             buffer[ObsUtil.get_name_at_next(i)].append(obs)
-        # TODO
-        # buffer[AgentBufferKey.ACTIONS].append(action)
+        # Append actions by type (continuous, discrete)
         for _act_type, _act in action.items():
             buffer[_act_type].append(_act[0, :])
-        # TODO was "rewards"
+        # Append environment rewards (updated from old "rewards" key to ENVIRONMENT_REWARDS)
         buffer[BufferKey.ENVIRONMENT_REWARDS].append(
             np.ones(1, dtype=np.float32) * reward
         )

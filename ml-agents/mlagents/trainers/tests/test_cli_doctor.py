@@ -28,7 +28,7 @@ class TestDiagnosticCheck:
         )
         
         result = check.run()
-        assert result == True
+        assert result
         assert check.result == (True, "All good")
     
     def test_diagnostic_check_run_failure(self):
@@ -39,7 +39,7 @@ class TestDiagnosticCheck:
         )
         
         result = check.run()
-        assert result == False
+        assert not result
         assert check.result == (False, "Failed")
     
     def test_diagnostic_check_exception(self):

@@ -49,7 +49,7 @@ class TestConfigurationIntegration:
         
         # Verify all settings are properly configured
         assert trainer_settings.trainer_type == "ppo"
-        assert trainer_settings.network_settings.enable_torchscript == True
+        assert trainer_settings.network_settings.enable_torchscript
         assert trainer_settings.hyperparameters.batch_size == 1024
         assert trainer_settings.max_steps == 1000000
         
@@ -128,8 +128,8 @@ class TestPhase2Integration:
             torchscript_optimize_for_inference=True
         )
         
-        assert network_settings.enable_torchscript == True
-        assert network_settings.torchscript_optimize_for_inference == True
+        assert network_settings.enable_torchscript
+        assert network_settings.torchscript_optimize_for_inference
     
     def test_profiling_compatible_config(self):
         """Test configuration compatible with profiling"""

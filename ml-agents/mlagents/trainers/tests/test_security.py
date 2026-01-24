@@ -30,6 +30,7 @@ class TestSubprocessSecurity:
         shell_true_pattern = re.compile(r'subprocess\.(call|run|check_call|Popen).*shell\s*=\s*True')
         
         violations = []
+        skipped_files = []
         for file_path in production_files:
             try:
                 content = file_path.read_text(encoding='utf-8')
@@ -38,8 +39,15 @@ class TestSubprocessSecurity:
                     for i, line in enumerate(content.splitlines(), 1):
                         if shell_true_pattern.search(line):
                             violations.append(f"{file_path}:{i} - {line.strip()}")
-            except Exception:
-                pass  # Skip files that can't be read
+            except Exception as e:
+                skipped_files.append((str(file_path), str(e)))
+        
+        # Fail if too many files were skipped (potential security blind spot)
+        if len(skipped_files) > len(production_files) * 0.1:
+            pytest.fail(
+                f"Too many files skipped during shell=True security check ({len(skipped_files)}/{len(production_files)}). "
+                f"This could hide security vulnerabilities. First 3: {skipped_files[:3]}"
+            )
         
         if violations:
             pytest.fail(

@@ -129,7 +129,7 @@ class TestRewardSignalUpdates:
         # Both are updated together each step
         
         parallel = True
-        assert parallel == True
+        assert parallel
 
 
 class TestOffPolicyIntegration:

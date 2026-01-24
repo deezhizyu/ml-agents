@@ -63,6 +63,7 @@ class TestCurriculumScheduler:
         assert scheduler.current_lesson_index == 0
         assert scheduler.parameter_name == "difficulty"
         assert len(scheduler.lessons) == 3
+        assert scheduler.min_lesson_steps == 100
     
     def test_current_lesson(self, simple_curriculum):
         """Test getting current lesson"""
@@ -75,11 +76,11 @@ class TestCurriculumScheduler:
         """Test final lesson detection"""
         scheduler = CurriculumScheduler(simple_curriculum, "difficulty")
         
-        assert scheduler.is_final_lesson == False
+        assert not scheduler.is_final_lesson
         
         # Advance to final lesson
         scheduler.current_lesson_index = 2
-        assert scheduler.is_final_lesson == True
+        assert scheduler.is_final_lesson
     
     def test_progress_percentage(self, simple_curriculum):
         """Test progress percentage calculation"""
@@ -111,7 +112,7 @@ class TestCurriculumScheduler:
         reward_buffer = [10.0] * 100  # High rewards
         should_advance, reason = scheduler.should_progress(reward_buffer, 0.5)
         
-        assert should_advance == False
+        assert not should_advance
         assert "steps" in reason.lower()
     
     def test_should_progress_with_high_reward(self, simple_curriculum):
@@ -131,7 +132,7 @@ class TestCurriculumScheduler:
         reward_buffer = [8.0] * 100  # Mean = 8.0 > threshold of 5.0
         should_advance, reason = scheduler.should_progress(reward_buffer, 0.5)
         
-        assert should_advance == True
+        assert should_advance
         assert "reward" in reason.lower()
     
     def test_advance_lesson(self, simple_curriculum):
@@ -141,7 +142,7 @@ class TestCurriculumScheduler:
         # Advance from lesson 0 to 1
         success = scheduler.advance_lesson()
         
-        assert success == True
+        assert success
         assert scheduler.current_lesson_index == 1
         assert scheduler.current_lesson.name == "Medium"
         assert scheduler.steps_in_current_lesson == 0
@@ -154,7 +155,7 @@ class TestCurriculumScheduler:
         
         success = scheduler.advance_lesson()
         
-        assert success == False
+        assert not success
         assert scheduler.current_lesson_index == 2
     
     def test_get_progress(self, simple_curriculum):

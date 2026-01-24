@@ -75,7 +75,8 @@ class GhostController:
     # Adapted from https://github.com/Unity-Technologies/ml-agents/pull/1975 and
     # https://metinmediamath.wordpress.com/2013/11/27/how-to-calculate-the-elo-rating-including-example/
     # ELO calculation
-    # TODO : Generalize this to more than two teams
+    # Note: Currently limited to two-team scenarios (team 0 vs team 1)
+    # For multi-team support (>2 teams), would need pairwise ELO updates or different ranking system
     def compute_elo_rating_changes(self, rating: float, result: float) -> float:
         """
         Calculates ELO. Given the rating of the learning team and result.  The GhostController

@@ -18,8 +18,8 @@ class TestTorchScriptCompilation:
             torchscript_optimize_for_inference=True
         )
         
-        assert settings.enable_torchscript == True
-        assert settings.torchscript_optimize_for_inference == True
+        assert settings.enable_torchscript
+        assert settings.torchscript_optimize_for_inference
     
     def test_torchscript_disabled_setting(self):
         """Test TorchScript disabled setting"""
@@ -27,7 +27,7 @@ class TestTorchScriptCompilation:
             enable_torchscript=False
         )
         
-        assert settings.enable_torchscript == False
+        assert not settings.enable_torchscript
     
     def test_simple_model_compilation(self):
         """Test compiling a simple model with TorchScript"""

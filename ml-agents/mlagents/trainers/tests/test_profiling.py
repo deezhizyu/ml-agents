@@ -22,6 +22,7 @@ class TestPerformanceMonitor:
         monitor = PerformanceMonitor()
         assert monitor is not None
         assert isinstance(monitor.metrics, dict)
+        assert len(monitor.metrics) > 0  # Should have initialized metric keys
     
     def test_record_metric(self):
         """Test recording metrics"""
