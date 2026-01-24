@@ -4,7 +4,7 @@ Decision Transformer trainer for ML-Agents
 Trains Decision Transformer on offline trajectory data
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import numpy as np
 from mlagents.torch_utils import torch, default_device
 import torch.nn.functional as F

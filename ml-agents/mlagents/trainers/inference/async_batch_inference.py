@@ -6,7 +6,7 @@ Provides low-latency inference through dynamic batching and async processing
 
 import asyncio
 import time
-from typing import Optional, List, Tuple, Any
+from typing import Optional, List, Tuple, Any, Dict
 from collections import deque
 import numpy as np
 
