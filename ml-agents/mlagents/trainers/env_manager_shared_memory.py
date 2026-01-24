@@ -282,6 +282,11 @@ class SharedMemoryEnvManager(EnvManager):
 
                         res_queue.put(("reset_done", all_step_result))
 
+                    elif cmd == "set_params":
+                        # Environment parameter updates handled here if needed
+                        # For now, just acknowledge
+                        res_queue.put(("params_set", None))
+
                     elif cmd == "close":
                         logger.info(f"Worker {worker_id} received close command")
                         break
@@ -312,7 +317,7 @@ class SharedMemoryEnvManager(EnvManager):
         return buffer
 
     @timed
-    def step(self) -> List[EnvironmentStep]:
+    def _step(self) -> List[EnvironmentStep]:
         """
         Step all environments
 
@@ -348,7 +353,8 @@ class SharedMemoryEnvManager(EnvManager):
                     env_step = EnvironmentStep(
                         current_all_step_result=data,
                         worker_id=i,
-                        previous_all_action_info={}
+                        brain_name_to_action_info={},
+                        environment_stats={}
                     )
                     env_steps.append(env_step)
 
@@ -370,7 +376,7 @@ class SharedMemoryEnvManager(EnvManager):
 
         return env_steps
 
-    def reset(self, config: Optional[Dict] = None) -> List[EnvironmentStep]:
+    def _reset_env(self, config: Optional[Dict] = None) -> List[EnvironmentStep]:
         """Reset all environments"""
         # Send reset commands to all workers
         for i, cmd_queue in enumerate(self.command_queues):
@@ -395,7 +401,8 @@ class SharedMemoryEnvManager(EnvManager):
                     env_step = EnvironmentStep(
                         current_all_step_result=data,
                         worker_id=i,
-                        previous_all_action_info={}
+                        brain_name_to_action_info={},
+                        environment_stats={}
                     )
                     env_steps.append(env_step)
 
@@ -466,6 +473,20 @@ class SharedMemoryEnvManager(EnvManager):
         if not hasattr(self, '_pending_actions'):
             self._pending_actions = {}
         self._pending_actions[behavior_name] = action_info
+
+    def set_env_parameters(self, config: Dict = None) -> None:
+        """
+        Set environment parameters (curriculum, randomization)
+
+        :param config: Dictionary of parameter settings
+        """
+        # Send parameters to all workers
+        for i, cmd_queue in enumerate(self.command_queues):
+            if self._worker_alive[i]:
+                try:
+                    cmd_queue.put(("set_params", config), timeout=1.0)
+                except queue.Full:
+                    logger.warning(f"Cannot send parameters to worker {i} - queue full")
 
 
 # Performance comparison utilities
