@@ -6,7 +6,7 @@ and enable faster training with large batch sizes.
 """
 
 import numpy as np
-from typing import Union, Optional, Dict
+from typing import Union, Optional, Dict, Tuple
 from mlagents.torch_utils import torch
 from mlagents_envs import logging_util
 
