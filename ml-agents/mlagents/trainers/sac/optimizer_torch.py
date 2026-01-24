@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict, List, NamedTuple, cast, Tuple, Optional
 import attr
 
-from mlagents.torch_utils import torch, nn, default_device
+from mlagents.torch_utils import torch, nn, default_device, is_amp_enabled, maybe_compile, create_optimizer
 
 from mlagents_envs.logging_util import get_logger
 from mlagents.trainers.optimizer.torch_optimizer import TorchOptimizer
@@ -219,16 +219,22 @@ class TorchSACOptimizer(TorchOptimizer):
             1e-10,
             self.trainer_settings.max_steps,
         )
-        self.policy_optimizer = torch.optim.Adam(
+        # Use fused optimizer if available for better GPU performance
+        self.policy_optimizer = create_optimizer(
             policy_params, lr=hyperparameters.learning_rate
         )
-        self.value_optimizer = torch.optim.Adam(
+        self.value_optimizer = create_optimizer(
             value_params, lr=hyperparameters.learning_rate
         )
-        self.entropy_optimizer = torch.optim.Adam(
-            self._log_ent_coef.parameters(), lr=hyperparameters.learning_rate
+        self.entropy_optimizer = create_optimizer(
+            list(self._log_ent_coef.parameters()), lr=hyperparameters.learning_rate
         )
         self._move_to_device(default_device())
+
+        # Initialize AMP GradScaler if AMP is enabled
+        self._use_amp = is_amp_enabled()
+        if self._use_amp:
+            self._grad_scaler = torch.cuda.amp.GradScaler()
 
     @property
     def critic(self):
@@ -239,6 +245,10 @@ class TorchSACOptimizer(TorchOptimizer):
         self.target_network.to(device)
         self._critic.to(device)
         self.q_network.to(device)
+        # Optionally compile networks for faster execution
+        self._critic = maybe_compile(self._critic)
+        self.q_network = maybe_compile(self.q_network)
+        self.target_network = maybe_compile(self.target_network)
 
     def sac_q_loss(
         self,
@@ -541,87 +551,108 @@ class TorchSACOptimizer(TorchOptimizer):
             self.policy.actor.network_body
         )
         self._critic.network_body.copy_normalization(self.policy.actor.network_body)
-        sampled_actions, run_out, _, = self.policy.actor.get_action_and_stats(
-            current_obs,
-            masks=act_masks,
-            memories=memories,
-            sequence_length=self.policy.sequence_length,
-        )
-        log_probs = run_out["log_probs"]
-        value_estimates, _ = self._critic.critic_pass(
-            current_obs, value_memories, sequence_length=self.policy.sequence_length
-        )
 
-        cont_sampled_actions = sampled_actions.continuous_tensor
-        cont_actions = actions.continuous_tensor
-        q1p_out, q2p_out = self.q_network(
-            current_obs,
-            cont_sampled_actions,
-            memories=q_memories,
-            sequence_length=self.policy.sequence_length,
-            q2_grad=False,
-        )
-        q1_out, q2_out = self.q_network(
-            current_obs,
-            cont_actions,
-            memories=q_memories,
-            sequence_length=self.policy.sequence_length,
-        )
-
-        if self._action_spec.discrete_size > 0:
-            disc_actions = actions.discrete_tensor
-            q1_stream = self._condense_q_streams(q1_out, disc_actions)
-            q2_stream = self._condense_q_streams(q2_out, disc_actions)
-        else:
-            q1_stream, q2_stream = q1_out, q2_out
-
-        with torch.no_grad():
-            # Since we didn't record the next value memories, evaluate one step in the critic to
-            # get them.
-            if value_memories is not None:
-                # Get the first observation in each sequence
-                just_first_obs = [
-                    _obs[:: self.policy.sequence_length] for _obs in current_obs
-                ]
-                _, next_value_memories = self._critic.critic_pass(
-                    just_first_obs, value_memories, sequence_length=1
-                )
-            else:
-                next_value_memories = None
-            target_values, _ = self.target_network(
-                next_obs,
-                memories=next_value_memories,
+        # Use AMP autocast if enabled for mixed precision training
+        # Wrap both forward passes and loss computation in autocast for maximum benefit
+        with torch.cuda.amp.autocast(enabled=self._use_amp):
+            sampled_actions, run_out, _, = self.policy.actor.get_action_and_stats(
+                current_obs,
+                masks=act_masks,
+                memories=memories,
                 sequence_length=self.policy.sequence_length,
             )
-        masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
-        dones = ModelUtils.list_to_tensor(batch[BufferKey.DONE])
+            log_probs = run_out["log_probs"]
+            value_estimates, _ = self._critic.critic_pass(
+                current_obs, value_memories, sequence_length=self.policy.sequence_length
+            )
 
-        q1_loss, q2_loss = self.sac_q_loss(
-            q1_stream, q2_stream, target_values, dones, rewards, masks
-        )
-        value_loss = self.sac_value_loss(
-            log_probs, value_estimates, q1p_out, q2p_out, masks
-        )
-        policy_loss = self.sac_policy_loss(log_probs, q1p_out, masks)
-        entropy_loss = self.sac_entropy_loss(log_probs, masks)
+            cont_sampled_actions = sampled_actions.continuous_tensor
+            cont_actions = actions.continuous_tensor
+            q1p_out, q2p_out = self.q_network(
+                current_obs,
+                cont_sampled_actions,
+                memories=q_memories,
+                sequence_length=self.policy.sequence_length,
+                q2_grad=False,
+            )
+            q1_out, q2_out = self.q_network(
+                current_obs,
+                cont_actions,
+                memories=q_memories,
+                sequence_length=self.policy.sequence_length,
+            )
+
+            if self._action_spec.discrete_size > 0:
+                disc_actions = actions.discrete_tensor
+                q1_stream = self._condense_q_streams(q1_out, disc_actions)
+                q2_stream = self._condense_q_streams(q2_out, disc_actions)
+            else:
+                q1_stream, q2_stream = q1_out, q2_out
+
+            with torch.no_grad():
+                # Since we didn't record the next value memories, evaluate one step in the critic to
+                # get them.
+                if value_memories is not None:
+                    # Get the first observation in each sequence
+                    just_first_obs = [
+                        _obs[:: self.policy.sequence_length] for _obs in current_obs
+                    ]
+                    _, next_value_memories = self._critic.critic_pass(
+                        just_first_obs, value_memories, sequence_length=1
+                    )
+                else:
+                    next_value_memories = None
+                target_values, _ = self.target_network(
+                    next_obs,
+                    memories=next_value_memories,
+                    sequence_length=self.policy.sequence_length,
+                )
+            masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
+            dones = ModelUtils.list_to_tensor(batch[BufferKey.DONE])
+
+            q1_loss, q2_loss = self.sac_q_loss(
+                q1_stream, q2_stream, target_values, dones, rewards, masks
+            )
+            value_loss = self.sac_value_loss(
+                log_probs, value_estimates, q1p_out, q2p_out, masks
+            )
+            policy_loss = self.sac_policy_loss(log_probs, q1p_out, masks)
+            entropy_loss = self.sac_entropy_loss(log_probs, masks)
 
         total_value_loss = q1_loss + q2_loss + value_loss
 
         decay_lr = self.decay_learning_rate.get_value(self.policy.get_current_step())
+
+        # Update policy
         ModelUtils.update_learning_rate(self.policy_optimizer, decay_lr)
-        self.policy_optimizer.zero_grad()
-        policy_loss.backward()
-        self.policy_optimizer.step()
+        self.policy_optimizer.zero_grad(set_to_none=True)  # Faster than zero_grad()
+        if self._use_amp:
+            self._grad_scaler.scale(policy_loss).backward()
+            self._grad_scaler.step(self.policy_optimizer)
+        else:
+            policy_loss.backward()
+            self.policy_optimizer.step()
 
+        # Update value networks
         ModelUtils.update_learning_rate(self.value_optimizer, decay_lr)
-        self.value_optimizer.zero_grad()
-        total_value_loss.backward()
-        self.value_optimizer.step()
+        self.value_optimizer.zero_grad(set_to_none=True)
+        if self._use_amp:
+            self._grad_scaler.scale(total_value_loss).backward()
+            self._grad_scaler.step(self.value_optimizer)
+        else:
+            total_value_loss.backward()
+            self.value_optimizer.step()
 
+        # Update entropy
         ModelUtils.update_learning_rate(self.entropy_optimizer, decay_lr)
-        self.entropy_optimizer.zero_grad()
-        entropy_loss.backward()
-        self.entropy_optimizer.step()
+        self.entropy_optimizer.zero_grad(set_to_none=True)
+        if self._use_amp:
+            self._grad_scaler.scale(entropy_loss).backward()
+            self._grad_scaler.step(self.entropy_optimizer)
+            self._grad_scaler.update()  # Update scaler once at the end
+        else:
+            entropy_loss.backward()
+            self.entropy_optimizer.step()
 
         # Update target network
         ModelUtils.soft_update(self._critic, self.target_network, self.tau)

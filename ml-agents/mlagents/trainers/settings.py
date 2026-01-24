@@ -139,6 +139,9 @@ class NetworkSettings:
     memory: Optional[MemorySettings] = None
     goal_conditioning_type: ConditioningType = ConditioningType.HYPER
     deterministic: bool = parser.get_default("deterministic")
+    # Performance optimization settings
+    enable_torchscript: bool = False  # Enable TorchScript compilation for 2-3x faster inference
+    torchscript_optimize_for_inference: bool = True  # Apply inference optimizations
 
 
 @attr.s(auto_attribs=True)
@@ -851,6 +854,12 @@ class EngineSettings:
 @attr.s(auto_attribs=True)
 class TorchSettings:
     device: Optional[str] = parser.get_default("device")
+    # GPU Performance Optimizations
+    enable_cudnn_benchmark: bool = True  # Enable cudnn.benchmark for consistent input sizes
+    enable_tf32: bool = True  # Enable TF32 on Ampere+ GPUs for faster matmul
+    enable_amp: bool = False  # Enable Automatic Mixed Precision (FP16) training
+    enable_compile: bool = False  # Enable torch.compile() for PyTorch 2.0+
+    enable_fused_optimizer: bool = True  # Enable fused Adam optimizer when available
 
 
 @attr.s(auto_attribs=True)

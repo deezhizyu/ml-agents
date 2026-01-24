@@ -232,9 +232,13 @@ class ModelUtils:
         """
         Converts a list of numpy arrays into a tensor. MUCH faster than
         calling as_tensor on the list directly.
+        Uses non-blocking transfer for GPU to overlap data transfer with computation.
         """
         device = default_device()
-        return torch.as_tensor(np.asanyarray(ndarray_list), dtype=dtype, device=device)
+        tensor = torch.as_tensor(np.asanyarray(ndarray_list), dtype=dtype)
+        if device.type == "cuda":
+            return tensor.to(device, non_blocking=True)
+        return tensor.to(device)
 
     @staticmethod
     def list_to_tensor_list(

@@ -6,7 +6,7 @@ from mlagents.trainers.torch_entities.components.reward_providers.extrinsic_rewa
     ExtrinsicRewardProvider,
 )
 import numpy as np
-from mlagents.torch_utils import torch, default_device
+from mlagents.torch_utils import torch, default_device, is_amp_enabled, maybe_compile, create_optimizer
 
 from mlagents.trainers.buffer import (
     AgentBuffer,
@@ -200,7 +200,8 @@ class TorchPOCAOptimizer(TorchOptimizer):
             self.trainer_settings.max_steps,
         )
 
-        self.optimizer = torch.optim.Adam(
+        # Use fused optimizer if available for better GPU performance
+        self.optimizer = create_optimizer(
             params, lr=self.trainer_settings.hyperparameters.learning_rate
         )
         self.stats_name_to_update_name = {
@@ -211,6 +212,14 @@ class TorchPOCAOptimizer(TorchOptimizer):
         self.stream_names = list(self.reward_signals.keys())
         self.value_memory_dict: Dict[str, torch.Tensor] = {}
         self.baseline_memory_dict: Dict[str, torch.Tensor] = {}
+
+        # Initialize AMP GradScaler if AMP is enabled
+        self._use_amp = is_amp_enabled()
+        if self._use_amp:
+            self._grad_scaler = torch.cuda.amp.GradScaler()
+
+        # Optionally compile critic for faster execution
+        self._critic = maybe_compile(self._critic)
 
     def create_reward_signals(
         self, reward_signal_configs: Dict[RewardSignalType, RewardSignalSettings]
@@ -301,60 +310,68 @@ class TorchPOCAOptimizer(TorchOptimizer):
             value_memories = torch.stack(value_memories).unsqueeze(0)
             baseline_memories = torch.stack(baseline_memories).unsqueeze(0)
 
-        run_out = self.policy.actor.get_stats(
-            current_obs,
-            actions,
-            masks=act_masks,
-            memories=memories,
-            sequence_length=self.policy.sequence_length,
-        )
+        # Use AMP autocast if enabled for mixed precision training
+        with torch.cuda.amp.autocast(enabled=self._use_amp):
+            run_out = self.policy.actor.get_stats(
+                current_obs,
+                actions,
+                masks=act_masks,
+                memories=memories,
+                sequence_length=self.policy.sequence_length,
+            )
 
-        log_probs = run_out["log_probs"]
-        entropy = run_out["entropy"]
+            log_probs = run_out["log_probs"]
+            entropy = run_out["entropy"]
 
-        all_obs = [current_obs] + groupmate_obs
-        values, _ = self.critic.critic_pass(
-            all_obs,
-            memories=value_memories,
-            sequence_length=self.policy.sequence_length,
-        )
-        groupmate_obs_and_actions = (groupmate_obs, groupmate_actions)
-        baselines, _ = self.critic.baseline(
-            current_obs,
-            groupmate_obs_and_actions,
-            memories=baseline_memories,
-            sequence_length=self.policy.sequence_length,
-        )
-        old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
-        log_probs = log_probs.flatten()
-        loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
+            all_obs = [current_obs] + groupmate_obs
+            values, _ = self.critic.critic_pass(
+                all_obs,
+                memories=value_memories,
+                sequence_length=self.policy.sequence_length,
+            )
+            groupmate_obs_and_actions = (groupmate_obs, groupmate_actions)
+            baselines, _ = self.critic.baseline(
+                current_obs,
+                groupmate_obs_and_actions,
+                memories=baseline_memories,
+                sequence_length=self.policy.sequence_length,
+            )
+            old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
+            log_probs = log_probs.flatten()
+            loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
 
-        baseline_loss = ModelUtils.trust_region_value_loss(
-            baselines, old_baseline_values, returns, decay_eps, loss_masks
-        )
-        value_loss = ModelUtils.trust_region_value_loss(
-            values, old_values, returns, decay_eps, loss_masks
-        )
-        policy_loss = ModelUtils.trust_region_policy_loss(
-            ModelUtils.list_to_tensor(batch[BufferKey.ADVANTAGES]),
-            log_probs,
-            old_log_probs,
-            loss_masks,
-            decay_eps,
-        )
+            baseline_loss = ModelUtils.trust_region_value_loss(
+                baselines, old_baseline_values, returns, decay_eps, loss_masks
+            )
+            value_loss = ModelUtils.trust_region_value_loss(
+                values, old_values, returns, decay_eps, loss_masks
+            )
+            policy_loss = ModelUtils.trust_region_policy_loss(
+                ModelUtils.list_to_tensor(batch[BufferKey.ADVANTAGES]),
+                log_probs,
+                old_log_probs,
+                loss_masks,
+                decay_eps,
+            )
 
-        loss = (
-            policy_loss
-            + 0.5 * (value_loss + 0.5 * baseline_loss)
-            - decay_bet * ModelUtils.masked_mean(entropy, loss_masks)
-        )
+            loss = (
+                policy_loss
+                + 0.5 * (value_loss + 0.5 * baseline_loss)
+                - decay_bet * ModelUtils.masked_mean(entropy, loss_masks)
+            )
 
         # Set optimizer learning rate
         ModelUtils.update_learning_rate(self.optimizer, decay_lr)
-        self.optimizer.zero_grad()
-        loss.backward()
+        self.optimizer.zero_grad(set_to_none=True)  # Faster than zero_grad()
 
-        self.optimizer.step()
+        if self._use_amp:
+            # Use gradient scaling for mixed precision
+            self._grad_scaler.scale(loss).backward()
+            self._grad_scaler.step(self.optimizer)
+            self._grad_scaler.update()
+        else:
+            loss.backward()
+            self.optimizer.step()
         update_stats = {
             "Losses/Policy Loss": policy_loss.item(),
             "Losses/Value Loss": value_loss.item(),

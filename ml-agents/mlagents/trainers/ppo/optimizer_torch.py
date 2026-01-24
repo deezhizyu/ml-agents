@@ -1,7 +1,7 @@
 from typing import Dict, cast
 import attr
 
-from mlagents.torch_utils import torch, default_device
+from mlagents.torch_utils import torch, default_device, is_amp_enabled, maybe_compile, create_optimizer
 
 from mlagents.trainers.buffer import AgentBuffer, BufferKey, RewardSignalUtil
 
@@ -61,6 +61,8 @@ class TorchPPOOptimizer(TorchOptimizer):
                 network_settings=trainer_settings.network_settings,
             )
             self._critic.to(default_device())
+            # Optionally compile critic for faster execution
+            self._critic = maybe_compile(self._critic)
             params += list(self._critic.parameters())
 
         self.decay_learning_rate = ModelUtils.DecayedValue(
@@ -82,7 +84,8 @@ class TorchPPOOptimizer(TorchOptimizer):
             self.trainer_settings.max_steps,
         )
 
-        self.optimizer = torch.optim.Adam(
+        # Use fused optimizer if available for better GPU performance
+        self.optimizer = create_optimizer(
             params, lr=self.trainer_settings.hyperparameters.learning_rate
         )
         self.stats_name_to_update_name = {
@@ -91,6 +94,11 @@ class TorchPPOOptimizer(TorchOptimizer):
         }
 
         self.stream_names = list(self.reward_signals.keys())
+
+        # Initialize AMP GradScaler if AMP is enabled
+        self._use_amp = is_amp_enabled()
+        if self._use_amp:
+            self._grad_scaler = torch.cuda.amp.GradScaler()
 
     @property
     def critic(self):
@@ -143,47 +151,56 @@ class TorchPPOOptimizer(TorchOptimizer):
         if len(value_memories) > 0:
             value_memories = torch.stack(value_memories).unsqueeze(0)
 
-        run_out = self.policy.actor.get_stats(
-            current_obs,
-            actions,
-            masks=act_masks,
-            memories=memories,
-            sequence_length=self.policy.sequence_length,
-        )
+        # Use AMP autocast if enabled for mixed precision training
+        with torch.cuda.amp.autocast(enabled=self._use_amp):
+            run_out = self.policy.actor.get_stats(
+                current_obs,
+                actions,
+                masks=act_masks,
+                memories=memories,
+                sequence_length=self.policy.sequence_length,
+            )
 
-        log_probs = run_out["log_probs"]
-        entropy = run_out["entropy"]
+            log_probs = run_out["log_probs"]
+            entropy = run_out["entropy"]
 
-        values, _ = self.critic.critic_pass(
-            current_obs,
-            memories=value_memories,
-            sequence_length=self.policy.sequence_length,
-        )
-        old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
-        log_probs = log_probs.flatten()
-        loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
-        value_loss = ModelUtils.trust_region_value_loss(
-            values, old_values, returns, decay_eps, loss_masks
-        )
-        policy_loss = ModelUtils.trust_region_policy_loss(
-            ModelUtils.list_to_tensor(batch[BufferKey.ADVANTAGES]),
-            log_probs,
-            old_log_probs,
-            loss_masks,
-            decay_eps,
-        )
-        loss = (
-            policy_loss
-            + 0.5 * value_loss
-            - decay_bet * ModelUtils.masked_mean(entropy, loss_masks)
-        )
+            values, _ = self.critic.critic_pass(
+                current_obs,
+                memories=value_memories,
+                sequence_length=self.policy.sequence_length,
+            )
+            old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
+            log_probs = log_probs.flatten()
+            loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
+            value_loss = ModelUtils.trust_region_value_loss(
+                values, old_values, returns, decay_eps, loss_masks
+            )
+            policy_loss = ModelUtils.trust_region_policy_loss(
+                ModelUtils.list_to_tensor(batch[BufferKey.ADVANTAGES]),
+                log_probs,
+                old_log_probs,
+                loss_masks,
+                decay_eps,
+            )
+            loss = (
+                policy_loss
+                + 0.5 * value_loss
+                - decay_bet * ModelUtils.masked_mean(entropy, loss_masks)
+            )
 
         # Set optimizer learning rate
         ModelUtils.update_learning_rate(self.optimizer, decay_lr)
-        self.optimizer.zero_grad()
-        loss.backward()
+        self.optimizer.zero_grad(set_to_none=True)  # Faster than zero_grad()
 
-        self.optimizer.step()
+        if self._use_amp:
+            # Use gradient scaling for mixed precision
+            self._grad_scaler.scale(loss).backward()
+            self._grad_scaler.step(self.optimizer)
+            self._grad_scaler.update()
+        else:
+            loss.backward()
+            self.optimizer.step()
+
         update_stats = {
             "Losses/Policy Loss": policy_loss.item(),
             "Losses/Value Loss": value_loss.item(),
@@ -194,12 +211,15 @@ class TorchPPOOptimizer(TorchOptimizer):
 
         return update_stats
 
-    # TODO move module update into TorchOptimizer for reward_provider
     def get_modules(self):
+        """
+        Get all modules including optimizer, critic, and reward providers.
+        Reward provider modules are handled by base class.
+        """
         modules = {
             "Optimizer:value_optimizer": self.optimizer,
             "Optimizer:critic": self._critic,
         }
-        for reward_provider in self.reward_signals.values():
-            modules.update(reward_provider.get_modules())
+        # Get reward provider modules from base class
+        modules.update(super().get_modules())
         return modules
