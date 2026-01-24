@@ -26,6 +26,8 @@ behaviors:
     max_steps: 30000000
     time_horizon: 1000
     summary_freq: 30000
+    # Enable threaded training - runs Python training in parallel with Unity data collection
+    threaded: true
 
 # Enable GPU optimizations
 torch_settings:

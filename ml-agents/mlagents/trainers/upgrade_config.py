@@ -1,250 +1,266 @@
-# NOTE: This upgrade script is a temporary measure for the transition between the old-format
-# configuration file and the new format. It will be marked for deprecation once the
-# Python CLI and configuration files are finalized, and removed the following release.
+"""
+Configuration Upgrade Tool for ML-Agents
 
-import attr
-import cattr
-import yaml
-from typing import Dict, Any, Optional
+This tool helps migrate deprecated configuration options to their current equivalents.
+It scans YAML configuration files and automatically updates deprecated fields.
+
+Usage:
+    python -m mlagents.trainers.upgrade_config <config_file.yaml> [--output <output_file.yaml>] [--dry-run]
+
+Examples:
+    # Show what would be changed without modifying the file
+    python -m mlagents.trainers.upgrade_config my_config.yaml --dry-run
+    
+    # Upgrade in place (backs up original to .backup)
+    python -m mlagents.trainers.upgrade_config my_config.yaml
+    
+    # Upgrade and save to new file
+    python -m mlagents.trainers.upgrade_config old.yaml --output new.yaml
+"""
+
 import argparse
-from mlagents.trainers.settings import TrainerSettings, NetworkSettings
-from mlagents.trainers.cli_utils import load_config
-from mlagents.trainers.exception import TrainerConfigError
-from mlagents.plugins import all_trainer_settings
+import shutil
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+import yaml
+from mlagents_envs.logging_util import get_logger
+
+logger = get_logger(__name__)
 
 
-# Take an existing trainer config (e.g. trainer_config.yaml) and turn it into the new format.
-def convert_behaviors(old_trainer_config: Dict[str, Any]) -> Dict[str, Any]:
-    all_behavior_config_dict = {}
-    default_config = old_trainer_config.get("default", {})
-    for behavior_name, config in old_trainer_config.items():
-        if behavior_name != "default":
-            config = default_config.copy()
-            config.update(old_trainer_config[behavior_name])
-
-            # Convert to split TrainerSettings, Hyperparameters, NetworkSettings
-            # Set trainer_type and get appropriate hyperparameter settings
-            try:
-                trainer_type = config["trainer"]
-            except KeyError:
-                raise TrainerConfigError(
-                    "Config doesn't specify a trainer type. "
-                    "Please specify trainer: in your config."
+class ConfigUpgrader:
+    """Upgrades deprecated ML-Agents configuration fields to current versions."""
+    
+    # Deprecation timeline: These fields will be REMOVED in version 5.0
+    REMOVAL_VERSION = "5.0"
+    CURRENT_VERSION = "4.0"
+    
+    DEPRECATED_REWARD_SIGNAL_FIELDS = {
+        "encoding_size": {
+            "replacement": "network_settings.hidden_units",
+            "migration": lambda v: {"network_settings": {"hidden_units": v}},
+            "message": "'encoding_size' is deprecated. Use 'network_settings.hidden_units' instead.",
+        }
+    }
+    
+    DEPRECATED_ROOT_FIELDS = {
+        "framework": {
+            "replacement": None,  # No replacement - PyTorch only now
+            "migration": lambda v: {},
+            "message": "'framework' field is deprecated. ML-Agents now uses PyTorch only.",
+        }
+    }
+    
+    def __init__(self, dry_run: bool = False):
+        self.dry_run = dry_run
+        self.changes: List[str] = []
+        self.warnings: List[str] = []
+    
+    def upgrade_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Upgrade configuration dictionary, replacing deprecated fields.
+        
+        :param config: Configuration dictionary to upgrade
+        :return: Upgraded configuration dictionary
+        """
+        upgraded = config.copy()
+        
+        # Check root-level deprecated fields
+        for field_name, deprecation in self.DEPRECATED_ROOT_FIELDS.items():
+            if field_name in upgraded:
+                self._handle_deprecation(
+                    upgraded, field_name, deprecation, path="root"
                 )
-            new_config = {}
-            new_config["trainer_type"] = trainer_type
-            hyperparam_cls = all_trainer_settings[trainer_type]
-            # Try to absorb as much as possible into the hyperparam_cls
-            new_config["hyperparameters"] = cattr.structure(config, hyperparam_cls)
-
-            # Try to absorb as much as possible into the network settings
-            new_config["network_settings"] = cattr.structure(config, NetworkSettings)
-            # Deal with recurrent
-            try:
-                if config["use_recurrent"]:
-                    new_config[
-                        "network_settings"
-                    ].memory = NetworkSettings.MemorySettings(
-                        sequence_length=config["sequence_length"],
-                        memory_size=config["memory_size"],
-                    )
-            except KeyError:
-                raise TrainerConfigError(
-                    "Config doesn't specify use_recurrent. "
-                    "Please specify true or false for use_recurrent in your config."
+        
+        # Check behavior-level configs
+        if "behaviors" in upgraded:
+            for behavior_name, behavior_config in upgraded["behaviors"].items():
+                self._upgrade_behavior_config(
+                    behavior_config, path=f"behaviors.{behavior_name}"
                 )
-            # Absorb the rest into the base TrainerSettings
-            for key, val in config.items():
-                if key in attr.fields_dict(TrainerSettings):
-                    new_config[key] = val
-
-            # Structure the whole thing
-            all_behavior_config_dict[behavior_name] = cattr.structure(
-                new_config, TrainerSettings
-            )
-    return all_behavior_config_dict
-
-
-def write_to_yaml_file(unstructed_config: Dict[str, Any], output_config: str) -> None:
-    with open(output_config, "w") as f:
-        try:
-            yaml.dump(unstructed_config, f, sort_keys=False)
-        except TypeError:  # Older versions of pyyaml don't support sort_keys
-            yaml.dump(unstructed_config, f)
-
-
-def remove_nones(config: Dict[Any, Any]) -> Dict[str, Any]:
-    new_config = {}
-    for key, val in config.items():
-        if isinstance(val, dict):
-            new_config[key] = remove_nones(val)
-        elif val is not None:
-            new_config[key] = val
-    return new_config
-
-
-# Take a sampler from the old format and convert to new sampler structure
-def convert_samplers(old_sampler_config: Dict[str, Any]) -> Dict[str, Any]:
-    new_sampler_config: Dict[str, Any] = {}
-    for parameter, parameter_config in old_sampler_config.items():
-        if parameter == "resampling-interval":
-            print(
-                "resampling-interval is no longer necessary for parameter randomization and is being ignored."
-            )
-            continue
-        new_sampler_config[parameter] = {}
-        new_sampler_config[parameter]["sampler_type"] = parameter_config["sampler-type"]
-        new_samp_parameters = dict(parameter_config)  # Copy dict
-        new_samp_parameters.pop("sampler-type")
-        new_sampler_config[parameter]["sampler_parameters"] = new_samp_parameters
-    return new_sampler_config
-
-
-def convert_samplers_and_curriculum(
-    parameter_dict: Dict[str, Any], curriculum: Dict[str, Any]
-) -> Dict[str, Any]:
-    for key, sampler in parameter_dict.items():
-        if "sampler_parameters" not in sampler:
-            parameter_dict[key]["sampler_parameters"] = {}
-        for argument in [
-            "seed",
-            "min_value",
-            "max_value",
-            "mean",
-            "st_dev",
-            "intervals",
-        ]:
-            if argument in sampler:
-                parameter_dict[key]["sampler_parameters"][argument] = sampler[argument]
-                parameter_dict[key].pop(argument)
-    param_set = set(parameter_dict.keys())
-    for behavior_name, behavior_dict in curriculum.items():
-        measure = behavior_dict["measure"]
-        min_lesson_length = behavior_dict.get("min_lesson_length", 1)
-        signal_smoothing = behavior_dict.get("signal_smoothing", False)
-        thresholds = behavior_dict["thresholds"]
-        num_lessons = len(thresholds) + 1
-        parameters = behavior_dict["parameters"]
-        for param_name in parameters.keys():
-            if param_name in param_set:
-                print(
-                    f"The parameter {param_name} has both a sampler and a curriculum. Will ignore curriculum"
+        
+        return upgraded
+    
+    def _upgrade_behavior_config(self, config: Dict[str, Any], path: str) -> None:
+        """Upgrade a single behavior configuration."""
+        
+        # Check reward signals
+        if "reward_signals" in config:
+            for signal_name, signal_config in config["reward_signals"].items():
+                self._upgrade_reward_signal(
+                    signal_config, path=f"{path}.reward_signals.{signal_name}"
                 )
+    
+    def _upgrade_reward_signal(self, config: Dict[str, Any], path: str) -> None:
+        """Upgrade reward signal configuration."""
+        for field_name, deprecation in self.DEPRECATED_REWARD_SIGNAL_FIELDS.items():
+            if field_name in config:
+                self._handle_deprecation(config, field_name, deprecation, path=path)
+    
+    def _handle_deprecation(
+        self, 
+        config: Dict[str, Any], 
+        field_name: str, 
+        deprecation: Dict[str, Any],
+        path: str
+    ) -> None:
+        """
+        Handle a deprecated field by migrating it to new format.
+        
+        :param config: Configuration dictionary containing the deprecated field
+        :param field_name: Name of the deprecated field
+        :param deprecation: Deprecation information dictionary
+        :param path: Path to the field in the config (for logging)
+        """
+        old_value = config[field_name]
+        
+        # Log the deprecation
+        warning = f"{path}.{field_name}: {deprecation['message']}"
+        logger.warning(warning)
+        self.warnings.append(warning)
+        
+        # Apply migration
+        if deprecation["migration"]:
+            new_fields = deprecation["migration"](old_value)
+            
+            # Merge new fields into config
+            for key, value in new_fields.items():
+                if isinstance(value, dict) and key in config:
+                    # Merge nested dictionaries
+                    config[key] = self._merge_dicts(config[key], value)
+                else:
+                    config[key] = value
+            
+            change = f"  Migrated {path}.{field_name}={old_value} -> {deprecation['replacement']}"
+            self.changes.append(change)
+        
+        # Remove deprecated field
+        del config[field_name]
+        self.changes.append(f"  Removed deprecated field: {path}.{field_name}")
+    
+    @staticmethod
+    def _merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
+        """Merge two dictionaries, with dict2 taking precedence."""
+        result = dict1.copy()
+        for key, value in dict2.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = ConfigUpgrader._merge_dicts(result[key], value)
             else:
-                param_set.add(param_name)
-                parameter_dict[param_name] = {"curriculum": []}
-                for lesson_index in range(num_lessons - 1):
-                    parameter_dict[param_name]["curriculum"].append(
-                        {
-                            f"Lesson{lesson_index}": {
-                                "completion_criteria": {
-                                    "measure": measure,
-                                    "behavior": behavior_name,
-                                    "signal_smoothing": signal_smoothing,
-                                    "min_lesson_length": min_lesson_length,
-                                    "threshold": thresholds[lesson_index],
-                                },
-                                "value": parameters[param_name][lesson_index],
-                            }
-                        }
-                    )
-                lesson_index += 1  # This is the last lesson
-                parameter_dict[param_name]["curriculum"].append(
-                    {
-                        f"Lesson{lesson_index}": {
-                            "value": parameters[param_name][lesson_index]
-                        }
-                    }
-                )
-    return parameter_dict
+                result[key] = value
+        return result
+    
+    def upgrade_file(self, input_path: Path, output_path: Path) -> bool:
+        """
+        Upgrade a configuration file.
+        
+        :param input_path: Path to input configuration file
+        :param output_path: Path to output configuration file
+        :return: True if changes were made, False otherwise
+        """
+        # Load config
+        try:
+            with open(input_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+        except Exception as e:
+            logger.error(f"Failed to load configuration file {input_path}: {e}")
+            return False
+        
+        if config is None:
+            logger.error(f"Configuration file {input_path} is empty")
+            return False
+        
+        # Upgrade
+        logger.info(f"Upgrading configuration: {input_path}")
+        upgraded_config = self.upgrade_config(config)
+        
+        # Report changes
+        if not self.changes:
+            logger.info("✅ No deprecated fields found. Configuration is up to date!")
+            return False
+        
+        logger.info(f"Found {len(self.warnings)} deprecated field(s):")
+        for warning in self.warnings:
+            logger.info(f"  {warning}")
+        
+        logger.info(f"\nChanges to be made:")
+        for change in self.changes:
+            logger.info(change)
+        
+        # Save if not dry run
+        if not self.dry_run:
+            # Backup original if overwriting
+            if input_path == output_path:
+                backup_path = Path(str(input_path) + ".backup")
+                logger.info(f"\nBacking up original to: {backup_path}")
+                shutil.copy2(input_path, backup_path)
+            
+            # Write upgraded config
+            logger.info(f"Writing upgraded configuration to: {output_path}")
+            with open(output_path, "w", encoding="utf-8") as f:
+                yaml.dump(upgraded_config, f, default_flow_style=False, sort_keys=False)
+            
+            logger.info("✅ Configuration upgraded successfully!")
+        else:
+            logger.info("\n[DRY RUN] No files were modified.")
+        
+        return True
 
 
-def parse_args():
-    argparser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+def main():
+    """Main entry point for the configuration upgrade tool."""
+    parser = argparse.ArgumentParser(
+        description="Upgrade ML-Agents configuration files by migrating deprecated fields.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__
     )
-    argparser.add_argument(
-        "trainer_config_path",
-        help="Path to old format (<=0.18.X) trainer configuration YAML.",
+    parser.add_argument(
+        "config_file",
+        type=Path,
+        help="Path to configuration file to upgrade"
     )
-    argparser.add_argument(
-        "--curriculum",
-        help="Path to old format (<=0.16.X) curriculum configuration YAML.",
+    parser.add_argument(
+        "--output", "-o",
+        type=Path,
         default=None,
+        help="Path to output file (default: overwrite input file)"
     )
-    argparser.add_argument(
-        "--sampler",
-        help="Path to old format (<=0.16.X) parameter randomization configuration YAML.",
-        default=None,
+    parser.add_argument(
+        "--dry-run", "-n",
+        action="store_true",
+        help="Show what would be changed without modifying files"
     )
-    argparser.add_argument(
-        "output_config_path", help="Path to write converted YAML file."
-    )
-    args = argparser.parse_args()
-    return args
-
-
-def convert(
-    config: Dict[str, Any],
-    old_curriculum: Optional[Dict[str, Any]],
-    old_param_random: Optional[Dict[str, Any]],
-) -> Dict[str, Any]:
-    if "behaviors" not in config:
-        print("Config file format version :  version <= 0.16.X")
-        behavior_config_dict = convert_behaviors(config)
-        full_config = {"behaviors": behavior_config_dict}
-
-        # Convert curriculum and sampler. note that we don't validate these; if it was correct
-        # before it should be correct now.
-        if old_curriculum is not None:
-            full_config["curriculum"] = old_curriculum
-
-        if old_param_random is not None:
-            sampler_config_dict = convert_samplers(old_param_random)
-            full_config["parameter_randomization"] = sampler_config_dict
-
-        # Convert config to dict
-        config = cattr.unstructure(full_config)
-    if "curriculum" in config or "parameter_randomization" in config:
-        print("Config file format version :  0.16.X < version <= 0.18.X")
-        full_config = {"behaviors": config["behaviors"]}
-
-        param_randomization = config.get("parameter_randomization", {})
-        if "resampling-interval" in param_randomization:
-            param_randomization.pop("resampling-interval")
-        if len(param_randomization) > 0:
-            # check if we use the old format sampler-type vs sampler_type
-            if (
-                "sampler-type"
-                in param_randomization[list(param_randomization.keys())[0]]
-            ):
-                param_randomization = convert_samplers(param_randomization)
-
-        full_config["environment_parameters"] = convert_samplers_and_curriculum(
-            param_randomization, config.get("curriculum", {})
-        )
-
-        # Convert config to dict
-        config = cattr.unstructure(full_config)
-    return config
-
-
-def main() -> None:
-    args = parse_args()
-    print(
-        f"Converting {args.trainer_config_path} and saving to {args.output_config_path}."
-    )
-
-    old_config = load_config(args.trainer_config_path)
-    curriculum_config_dict = None
-    old_sampler_config_dict = None
-    if args.curriculum is not None:
-        curriculum_config_dict = load_config(args.curriculum)
-    if args.sampler is not None:
-        old_sampler_config_dict = load_config(args.sampler)
-    new_config = convert(old_config, curriculum_config_dict, old_sampler_config_dict)
-    unstructed_config = remove_nones(new_config)
-    write_to_yaml_file(unstructed_config, args.output_config_path)
+    
+    args = parser.parse_args()
+    
+    # Validate input file
+    if not args.config_file.exists():
+        logger.error(f"Configuration file not found: {args.config_file}")
+        sys.exit(1)
+    
+    # Default output to input file
+    output_path = args.output if args.output else args.config_file
+    
+    # Create upgrader and process file
+    upgrader = ConfigUpgrader(dry_run=args.dry_run)
+    
+    try:
+        had_changes = upgrader.upgrade_file(args.config_file, output_path)
+        
+        if had_changes and not args.dry_run:
+            logger.info(
+                f"\n⚠️  DEPRECATION NOTICE: "
+                f"These deprecated fields will be REMOVED in ML-Agents {ConfigUpgrader.REMOVAL_VERSION}. "
+                f"Please update your configurations before upgrading."
+            )
+        
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f"Failed to upgrade configuration: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
