@@ -10,7 +10,6 @@ from mlagents.trainers.ghost.controller import GhostController
 from mlagents.trainers.settings import TrainerSettings
 from mlagents.plugins import all_trainer_types
 
-
 logger = get_logger(__name__)
 
 

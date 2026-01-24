@@ -25,11 +25,11 @@ _SCRUB_PATTERNS: List[Pattern] = [
     re.compile(r'secret["\']?\s*[:=]\s*["\']?([^"\'\s]+)', re.IGNORECASE),
     re.compile(r'auth["\']?\s*[:=]\s*["\']?([^"\'\s]+)', re.IGNORECASE),
     # Email addresses
-    re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'),
+    re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
     # Credit card patterns (simple check)
-    re.compile(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'),
+    re.compile(r"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b"),
     # IP addresses (private ranges)
-    re.compile(r'\b(?:10|172\.(?:1[6-9]|2\d|3[01])|192\.168)\.\d{1,3}\.\d{1,3}\b'),
+    re.compile(r"\b(?:10|172\.(?:1[6-9]|2\d|3[01])|192\.168)\.\d{1,3}\.\d{1,3}\b"),
 ]
 
 _SCRUB_REPLACEMENT = "***REDACTED***"
@@ -85,16 +85,16 @@ def _set_formatter_for_all_loggers(formatter: logging.Formatter) -> None:
 def scrub_sensitive_data(message: str) -> str:
     """
     Scrub sensitive data from log messages.
-    
+
     Removes patterns that look like:
     - Passwords, API keys, tokens, secrets
     - Email addresses
     - Credit card numbers
     - Private IP addresses
-    
+
     Args:
         message: The log message to scrub
-    
+
     Returns:
         The message with sensitive data replaced by ***REDACTED***
     """
@@ -107,17 +107,17 @@ def scrub_sensitive_data(message: str) -> str:
 class ScrubberFilter(logging.Filter):
     """
     Logging filter that scrubs sensitive data from log records.
-    
+
     Usage:
         logger = get_logger(__name__)
         for handler in logger.handlers:
             handler.addFilter(ScrubberFilter())
     """
-    
+
     def filter(self, record: logging.LogRecord) -> bool:
         # Scrub the message
         record.msg = scrub_sensitive_data(str(record.msg))
-        
+
         # Scrub args if present
         if record.args:
             if isinstance(record.args, dict):
@@ -130,14 +130,14 @@ class ScrubberFilter(logging.Filter):
                     scrub_sensitive_data(str(arg)) if isinstance(arg, str) else arg
                     for arg in record.args
                 )
-        
+
         return True
 
 
 def enable_log_scrubbing() -> None:
     """
     Enable log scrubbing for all existing loggers.
-    
+
     Call this function to add scrubbing filters to all handlers.
     Should be called early in application startup.
     """

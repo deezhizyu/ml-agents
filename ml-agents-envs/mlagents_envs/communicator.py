@@ -2,7 +2,6 @@ from typing import Callable, Optional
 from mlagents_envs.communicator_objects.unity_output_pb2 import UnityOutputProto
 from mlagents_envs.communicator_objects.unity_input_pb2 import UnityInputProto
 
-
 # Function to call while waiting for a connection timeout.
 # This should raise an exception if it needs to break from waiting for the timeout.
 PollCallback = Callable[[], None]

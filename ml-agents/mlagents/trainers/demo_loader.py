@@ -16,7 +16,6 @@ from mlagents_envs.timers import timed, hierarchical_timer
 from google.protobuf.internal.decoder import _DecodeVarint32  # type: ignore
 from google.protobuf.internal.encoder import _EncodeVarint  # type: ignore
 
-
 INITIAL_POS = 33
 SUPPORTED_DEMONSTRATION_VERSIONS = frozenset([0, 1])
 

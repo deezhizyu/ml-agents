@@ -12,7 +12,6 @@ from mlagents.trainers.policy import Policy
 from mlagents.trainers.behavior_id_utils import BehaviorIdentifiers
 from mlagents.trainers.settings import TrainerSettings
 
-
 logger = get_logger(__name__)
 
 

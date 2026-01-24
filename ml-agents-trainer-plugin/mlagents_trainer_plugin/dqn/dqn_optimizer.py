@@ -17,7 +17,6 @@ from mlagents.trainers.torch_entities.networks import Critic
 import numpy as np
 import attr
 
-
 # TODO: fix saving to onnx
 
 

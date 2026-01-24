@@ -43,7 +43,6 @@ from mlagents.trainers.training_analytics_side_channel import (
 )
 from mlagents_envs.side_channel.side_channel import SideChannel
 
-
 logger = logging_util.get_logger(__name__)
 WORKER_SHUTDOWN_TIMEOUT_S = 10
 
@@ -121,9 +120,9 @@ def worker(
     run_options: RunOptions,
     log_level: int = logging_util.INFO,
 ) -> None:
-    env_factory: Callable[
-        [int, List[SideChannel]], UnityEnvironment
-    ] = cloudpickle.loads(pickled_env_factory)
+    env_factory: Callable[[int, List[SideChannel]], UnityEnvironment] = (
+        cloudpickle.loads(pickled_env_factory)
+    )
     env_parameters = EnvironmentParametersChannel()
 
     engine_config = EngineConfig(

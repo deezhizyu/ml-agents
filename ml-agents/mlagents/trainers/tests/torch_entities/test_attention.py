@@ -90,7 +90,10 @@ def test_all_masking(mask_value):
     # We make sure that a mask of all zeros or all ones will not trigger an error
     np.random.seed(1336)
     torch.manual_seed(1336)
-    size, n_k, = (
+    (
+        size,
+        n_k,
+    ) = (
         3,
         5,
     )
@@ -137,7 +140,10 @@ def test_all_masking(mask_value):
 def test_predict_closest_training():
     np.random.seed(1336)
     torch.manual_seed(1336)
-    size, n_k, = (
+    (
+        size,
+        n_k,
+    ) = (
         3,
         5,
     )

@@ -12,6 +12,7 @@ import sys
 
 # Suppress warp deprecation warnings
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message=".*warp.*")
 
@@ -29,7 +30,9 @@ print(f"Devices: {jax.devices()}")
 print(f"Default backend: {jax.default_backend()}")
 
 # Check if GPU is available
-gpu_available = any('cuda' in str(d).lower() or 'gpu' in str(d).lower() for d in jax.devices())
+gpu_available = any(
+    "cuda" in str(d).lower() or "gpu" in str(d).lower() for d in jax.devices()
+)
 if not gpu_available:
     print("WARNING: No GPU detected! Training will be slow.")
 else:
@@ -76,79 +79,85 @@ def run_benchmark(env_name: str, num_timesteps: int = 1_000_000, num_envs: int =
     print(f"   Timesteps: {num_timesteps:,}")
     print(f"   Parallel Envs: {num_envs}")
     print(f"{'-' * 60}")
-    
+
     try:
         # Load environment from MuJoCo Playground dm_control_suite
         env = dm_control_suite.load(env_name)
-        
+
         print(f"   Observation size: {env.observation_size}")
         print(f"   Action size: {env.action_size}")
-        
+
         # JIT compile reset and step functions
         jit_reset = jax.jit(env.reset)
         jit_step = jax.jit(env.step)
-        
+
         # Vectorize for parallel environments
         batch_reset = jax.vmap(jit_reset)
         batch_step = jax.vmap(jit_step)
-        
+
         # Initialize random keys
         rng = jax.random.PRNGKey(0)
         rng, *reset_keys = jax.random.split(rng, num_envs + 1)
         reset_keys = jnp.array(reset_keys)
-        
+
         # Warm-up / JIT compilation
         print("   JIT compiling (first run)...")
         warmup_start = time.time()
         states = batch_reset(reset_keys)
-        
+
         # Take one step to compile step function
         rng, action_key = jax.random.split(rng)
-        actions = jax.random.uniform(action_key, (num_envs, env.action_size), minval=-1, maxval=1)
+        actions = jax.random.uniform(
+            action_key, (num_envs, env.action_size), minval=-1, maxval=1
+        )
         states = batch_step(states, actions)
         jax.block_until_ready(states)
         warmup_time = time.time() - warmup_start
         print(f"   JIT compilation done in {warmup_time:.1f}s")
-        
+
         # Benchmark: Run many environment steps
         num_steps = num_timesteps // num_envs
-        print(f"   Running {num_steps:,} batched steps ({num_timesteps:,} total env steps)...")
-        
+        print(
+            f"   Running {num_steps:,} batched steps ({num_timesteps:,} total env steps)..."
+        )
+
         start_time = time.time()
         total_reward = 0.0
-        
+
         for step in range(num_steps):
             # Generate random actions
             rng, action_key = jax.random.split(rng)
-            actions = jax.random.uniform(action_key, (num_envs, env.action_size), minval=-1, maxval=1)
-            
+            actions = jax.random.uniform(
+                action_key, (num_envs, env.action_size), minval=-1, maxval=1
+            )
+
             # Step environments
             states = batch_step(states, actions)
-            
+
             # Track rewards (sample every 100 steps to reduce overhead)
             if step % 100 == 0:
                 total_reward += float(jnp.mean(states.reward))
-            
+
             # Progress update
             if step > 0 and step % (num_steps // 5) == 0:
                 elapsed = time.time() - start_time
                 steps_done = step * num_envs
                 rate = steps_done / elapsed
                 print(f"   Step {step:,}/{num_steps:,}: {rate:,.0f} steps/sec")
-        
+
         # Wait for all computations to finish
         jax.block_until_ready(states)
-        
+
         elapsed = time.time() - start_time
         steps_per_sec = num_timesteps / elapsed
         avg_reward = total_reward / (num_steps // 100)
-        
+
         print(f"\n   Benchmark Complete!")
         print(f"   Time: {elapsed:.2f} seconds")
         print(f"   Avg Reward (random policy): {avg_reward:.3f}")
         print(f"   Throughput: {steps_per_sec:,.0f} steps/sec")
         print(f"   Throughput: {steps_per_sec/1e6:.2f} M steps/sec")
-        
+
         return {
             "env": env_name,
             "timesteps": num_timesteps,
@@ -158,10 +167,11 @@ def run_benchmark(env_name: str, num_timesteps: int = 1_000_000, num_envs: int =
             "avg_reward": avg_reward,
             "success": True,
         }
-        
+
     except Exception as e:
         print(f"\n   Error: {e}")
         import traceback
+
         traceback.print_exc()
         return {
             "env": env_name,
@@ -188,26 +198,28 @@ def warmup_gpu():
 def main():
     # GPU warmup
     warmup_gpu()
-    
+
     print("\n" + "=" * 70)
     print("Choose benchmark type:")
     print("  1. Quick benchmark (Cheetah, ~30 seconds)")
     print("  2. Full benchmark (multiple environments)")
     print("  3. Single custom environment")
     print("=" * 70)
-    
+
     try:
         choice = input("Enter choice (1/2/3) [default: 1]: ").strip() or "1"
     except EOFError:
         choice = "1"
-    
+
     results = []
-    
+
     if choice == "1":
         # Quick benchmark with Cheetah
         print("\nRunning quick Cheetah benchmark...")
-        results.append(run_benchmark("CheetahRun", num_timesteps=10_000_000, num_envs=4096))
-        
+        results.append(
+            run_benchmark("CheetahRun", num_timesteps=10_000_000, num_envs=4096)
+        )
+
     elif choice == "2":
         # Full benchmark
         print("\nRunning full benchmark suite...")
@@ -218,43 +230,56 @@ def main():
         ]
         for env_name, steps, envs in benchmarks:
             results.append(run_benchmark(env_name, steps, envs))
-            
+
     elif choice == "3":
         # Custom environment
         print("\nAvailable environments:")
         for i, (env_id, desc) in enumerate(DM_CONTROL_ENVS.items(), 1):
             print(f"  {i}. {env_id}: {desc}")
-        
+
         try:
-            env_choice = input("Enter environment name [default: CheetahRun]: ").strip() or "CheetahRun"
-            steps = int(input("Enter timesteps [default: 10000000]: ").strip() or "10000000")
+            env_choice = (
+                input("Enter environment name [default: CheetahRun]: ").strip()
+                or "CheetahRun"
+            )
+            steps = int(
+                input("Enter timesteps [default: 10000000]: ").strip() or "10000000"
+            )
             envs = int(input("Enter parallel envs [default: 4096]: ").strip() or "4096")
         except (EOFError, ValueError):
             env_choice, steps, envs = "CheetahRun", 10_000_000, 4096
-            
+
         results.append(run_benchmark(env_choice, steps, envs))
-    
+
     # Print summary
     print("\n" + "=" * 70)
     print("BENCHMARK SUMMARY")
     print("=" * 70)
-    print(f"{'Environment':<20} {'Steps':<14} {'Envs':<8} {'Time':<10} {'Steps/sec':<18}")
+    print(
+        f"{'Environment':<20} {'Steps':<14} {'Envs':<8} {'Time':<10} {'Steps/sec':<18}"
+    )
     print("-" * 70)
-    
+
     total_steps_per_sec = []
     for r in results:
         if r["success"]:
-            print(f"{r['env']:<20} {r['timesteps']:>12,} {r['num_envs']:>6} {r['time']:>8.1f}s {r['steps_per_sec']:>16,.0f}")
-            total_steps_per_sec.append(r['steps_per_sec'])
+            print(
+                f"{r['env']:<20} {r['timesteps']:>12,} {r['num_envs']:>6} {r['time']:>8.1f}s {r['steps_per_sec']:>16,.0f}"
+            )
+            total_steps_per_sec.append(r["steps_per_sec"])
         else:
-            print(f"{r['env']:<20} {r['timesteps']:>12,} {r['num_envs']:>6} {'FAILED':<10} {'-':<18}")
-    
+            print(
+                f"{r['env']:<20} {r['timesteps']:>12,} {r['num_envs']:>6} {'FAILED':<10} {'-':<18}"
+            )
+
     print("-" * 70)
-    
+
     if total_steps_per_sec:
         avg_throughput = sum(total_steps_per_sec) / len(total_steps_per_sec)
-        print(f"\nAverage Throughput: {avg_throughput:,.0f} steps/sec ({avg_throughput/1e6:.2f} M steps/sec)")
-    
+        print(
+            f"\nAverage Throughput: {avg_throughput:,.0f} steps/sec ({avg_throughput/1e6:.2f} M steps/sec)"
+        )
+
     print("=" * 70)
     print("\nBenchmark complete!")
 

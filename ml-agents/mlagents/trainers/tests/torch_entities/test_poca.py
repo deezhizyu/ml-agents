@@ -49,9 +49,9 @@ def create_test_poca_optimizer(dummy_config, use_rnn, use_discrete, use_visual):
     mock_specs = mb.setup_test_behavior_specs(
         use_discrete,
         use_visual,
-        vector_action_space=DISCRETE_ACTION_SPACE
-        if use_discrete
-        else VECTOR_ACTION_SPACE,
+        vector_action_space=(
+            DISCRETE_ACTION_SPACE if use_discrete else VECTOR_ACTION_SPACE
+        ),
         vector_obs_space=VECTOR_OBS_SPACE,
     )
 

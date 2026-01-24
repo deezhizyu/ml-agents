@@ -21,7 +21,6 @@ from mlagents.trainers.torch_entities.attention import (
 )
 from mlagents.trainers.exception import UnityTrainerException
 
-
 ActivationFunction = Callable[[torch.Tensor], torch.Tensor]
 EncoderFunction = Callable[
     [torch.Tensor, int, ActivationFunction, int, str, bool], torch.Tensor

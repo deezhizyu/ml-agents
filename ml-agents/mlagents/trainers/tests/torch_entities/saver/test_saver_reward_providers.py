@@ -20,7 +20,6 @@ from mlagents.trainers.tests.torch_entities.test_reward_providers.utils import (
     create_agent_buffer,
 )
 
-
 DEMO_PATH = (
     os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir)
     + "/test.demo"

@@ -12,7 +12,6 @@ from mlagents.trainers.settings import (
     CompletionCriteriaSettings,
 )
 
-
 test_sampler_config_yaml = """
 environment_parameters:
   param_1:

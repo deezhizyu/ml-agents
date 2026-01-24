@@ -8,6 +8,7 @@ Usage:
 With py-spy:
     py-spy record -o profile.svg -- python scripts/profile_training.py --config config/ppo/3DBall.yaml
 """
+
 import argparse
 import sys
 import time
@@ -30,28 +31,28 @@ from mlagents.trainers.utils.profiling import (
 def profile_with_cprofile(args):
     """Profile using Python's cProfile"""
     print("Profiling with cProfile...")
-    
+
     profiler = cProfile.Profile()
     profiler.enable()
-    
+
     try:
         # Run training for limited steps
         run_cli(args)
     finally:
         profiler.disable()
-        
+
         # Print results
         s = io.StringIO()
-        ps = pstats.Stats(profiler, stream=s).sort_stats('cumulative')
+        ps = pstats.Stats(profiler, stream=s).sort_stats("cumulative")
         ps.print_stats(50)  # Top 50 functions
-        
-        print("\n" + "="*80)
+
+        print("\n" + "=" * 80)
         print("TOP 50 FUNCTIONS BY CUMULATIVE TIME")
-        print("="*80)
+        print("=" * 80)
         print(s.getvalue())
-        
+
         # Save to file
-        profiler.dump_stats('training_profile.prof')
+        profiler.dump_stats("training_profile.prof")
         print(f"\nProfile saved to: training_profile.prof")
         print("Visualize with: snakeviz training_profile.prof")
 
@@ -61,7 +62,7 @@ def profile_with_custom_monitor():
     print("Custom performance monitoring enabled")
     enable_profiling(True)
     monitor = get_global_monitor()
-    
+
     # Monitor will collect metrics during training
     # Log summary at the end
     return monitor
@@ -97,28 +98,29 @@ def main():
         "--env",
         help="Path to Unity environment executable",
     )
-    
+
     args = parser.parse_args()
-    
+
     # Build arguments for mlagents-learn
     train_args = [
         args.config,
-        "--run-id", args.run_id,
+        "--run-id",
+        args.run_id,
         "--force",  # Overwrite existing run
     ]
-    
+
     if args.env:
         train_args.extend(["--env", args.env])
-    
+
     # Add max steps
     train_args.extend(["--max-steps", str(args.max_steps)])
-    
+
     print(f"Profiling training with config: {args.config}")
     print(f"Run ID: {args.run_id}")
     print(f"Max steps: {args.max_steps}")
     print(f"Profiler: {args.profiler}")
-    print("="*80)
-    
+    print("=" * 80)
+
     if args.profiler == "cprofile":
         profile_with_cprofile(train_args)
     elif args.profiler == "custom":
@@ -130,16 +132,16 @@ def main():
     else:
         # No profiling
         run_cli(train_args)
-    
-    print("\n" + "="*80)
+
+    print("\n" + "=" * 80)
     print("PROFILING COMPLETE")
-    print("="*80)
-    
+    print("=" * 80)
+
     if args.profiler == "cprofile":
         print("\nAnalyze with:")
         print("  snakeviz training_profile.prof")
         print("  python -m pstats training_profile.prof")
-    
+
     print("\nFor detailed profiling, use py-spy:")
     print(f"  py-spy record -o profile.svg -- python {' '.join(sys.argv)}")
     print(f"  py-spy top -- python {' '.join(sys.argv)}")

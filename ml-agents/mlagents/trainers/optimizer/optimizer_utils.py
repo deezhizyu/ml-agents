@@ -14,7 +14,7 @@ from mlagents.trainers.settings import ScheduleType
 class OptimizerSetupHelper:
     """
     Helper class for common optimizer setup patterns.
-    
+
     Provides static methods for creating optimizers with AMP support
     and managing related training infrastructure.
     """
@@ -59,7 +59,7 @@ class OptimizerSetupHelper:
 class HyperparameterScheduler:
     """
     Manages multiple scheduled hyperparameters for on-policy algorithms.
-    
+
     Simplifies the management of epsilon, beta, and learning rate schedules
     commonly used in PPO and POCA.
     """
@@ -68,7 +68,12 @@ class HyperparameterScheduler:
         self._schedules = {}
 
     def add_schedule(
-        self, name: str, schedule_type: ScheduleType, initial: float, min_val: float, max_steps: int
+        self,
+        name: str,
+        schedule_type: ScheduleType,
+        initial: float,
+        min_val: float,
+        max_steps: int,
     ) -> None:
         """
         Add a hyperparameter schedule.
@@ -103,7 +108,10 @@ class HyperparameterScheduler:
         :param steps: Current training step
         :return: Dictionary mapping hyperparameter names to their current values
         """
-        return {name: schedule.get_value(steps) for name, schedule in self._schedules.items()}
+        return {
+            name: schedule.get_value(steps)
+            for name, schedule in self._schedules.items()
+        }
 
     def has_schedule(self, name: str) -> bool:
         """
@@ -118,7 +126,7 @@ class HyperparameterScheduler:
 class OnPolicyScheduleHelper:
     """
     Helper for setting up common on-policy algorithm schedules (PPO, POCA).
-    
+
     Provides a convenient way to set up learning rate, epsilon, and beta schedules
     with sensible defaults.
     """
@@ -148,7 +156,9 @@ class OnPolicyScheduleHelper:
         scheduler = HyperparameterScheduler()
 
         # Add learning rate schedule
-        scheduler.add_schedule("learning_rate", lr_schedule, learning_rate, 1e-10, max_steps)
+        scheduler.add_schedule(
+            "learning_rate", lr_schedule, learning_rate, 1e-10, max_steps
+        )
 
         # Add epsilon schedule
         scheduler.add_schedule("epsilon", epsilon_schedule, epsilon, 0.1, max_steps)

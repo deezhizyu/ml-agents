@@ -49,10 +49,12 @@ class BaseRewardProvider(ABC):
         """
         return self._ignore_done
 
-    def _warn_if_memory_specified(self, settings: RewardSignalSettings, reward_type: str) -> None:
+    def _warn_if_memory_specified(
+        self, settings: RewardSignalSettings, reward_type: str
+    ) -> None:
         """
         Helper method to warn if memory is specified in network settings but not supported.
-        
+
         :param settings: The reward signal settings to check
         :param reward_type: Name of the reward provider type (e.g., "RND", "GAIL", "Curiosity")
         """

@@ -90,9 +90,9 @@ class GlobalTrainingStatus:
         Save a JSON file that contains saved state.
         :param path: Path to the JSON file containing the state.
         """
-        GlobalTrainingStatus.saved_state[
-            StatusType.STATS_METADATA.value
-        ] = StatusMetaData().to_dict()
+        GlobalTrainingStatus.saved_state[StatusType.STATS_METADATA.value] = (
+            StatusMetaData().to_dict()
+        )
         with open(path, "w") as f:
             json.dump(GlobalTrainingStatus.saved_state, f, indent=4)
 

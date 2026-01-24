@@ -190,9 +190,9 @@ class UnityEnvironment(BaseEnv):
         self._worker_id = worker_id
         if side_channels is None:
             side_channels = []
-        default_training_side_channel: Optional[
-            DefaultTrainingAnalyticsSideChannel
-        ] = None
+        default_training_side_channel: Optional[DefaultTrainingAnalyticsSideChannel] = (
+            None
+        )
         if DefaultTrainingAnalyticsSideChannel.CHANNEL_ID not in [
             _.channel_id for _ in side_channels
         ]:

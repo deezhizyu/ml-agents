@@ -207,8 +207,7 @@ def create_environment_factory(
 
 def run_cli(options: RunOptions) -> None:
     try:
-        print(
-            """
+        print("""
             ┐  ╖
         ╓╖╬│╡  ││╬╖╖
     ╓╖╬│││││┘  ╬│││││╬╖
@@ -223,8 +222,7 @@ def run_cli(options: RunOptions) -> None:
       ╙╬╬╬╬╬╬╬╣╣╣╣╣╣╝╜
           ╙╬╬╬╣╣╣╜
              ╙
-        """
-        )
+        """)
     except Exception:
         pass  # Ignore logo printing errors (e.g., encoding issues)
     print(get_version_string())

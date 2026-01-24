@@ -2,7 +2,14 @@ import numpy as np
 from typing import Dict, List, NamedTuple, cast, Tuple, Optional
 import attr
 
-from mlagents.torch_utils import torch, nn, default_device, is_amp_enabled, maybe_compile, create_optimizer
+from mlagents.torch_utils import (
+    torch,
+    nn,
+    default_device,
+    is_amp_enabled,
+    maybe_compile,
+    create_optimizer,
+)
 
 from mlagents_envs.logging_util import get_logger
 from mlagents.trainers.optimizer.torch_optimizer import TorchOptimizer
@@ -554,8 +561,16 @@ class TorchSACOptimizer(TorchOptimizer):
 
         # Use AMP autocast if enabled for mixed precision training
         # Wrap both forward passes and loss computation in autocast for maximum benefit
-        with torch.amp.autocast(device_type=default_device().type, dtype=torch.float16, enabled=self._use_amp):
-            sampled_actions, run_out, _, = self.policy.actor.get_action_and_stats(
+        with torch.amp.autocast(
+            device_type=default_device().type,
+            dtype=torch.float16,
+            enabled=self._use_amp,
+        ):
+            (
+                sampled_actions,
+                run_out,
+                _,
+            ) = self.policy.actor.get_action_and_stats(
                 current_obs,
                 masks=act_masks,
                 memories=memories,

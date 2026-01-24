@@ -169,9 +169,7 @@ def test_setup_init_path(tmpdir, dir_exists):
     checkpoint_settings:
         run_id: test_run_id
         initialize_from: test_run_id
-    """.format(
-        tmpdir
-    )
+    """.format(tmpdir)
     run_options = RunOptions.from_dict(yaml.safe_load(test_yaml))
     if dir_exists:
         init_path = tmpdir.mkdir("test_setup_init_path_results").mkdir("test_run_id")

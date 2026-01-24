@@ -37,9 +37,9 @@ class UnityPettingzooBaseEnv:
         self._cumm_rewards: Dict[str, float] = {}  # agent_id: reward
         self._infos: Dict[str, Dict] = {}  # agent_id: info
         self._action_spaces: Dict[str, spaces.Space] = {}  # behavior_name: action_space
-        self._observation_spaces: Dict[
-            str, spaces.Space
-        ] = {}  # behavior_name: obs_space
+        self._observation_spaces: Dict[str, spaces.Space] = (
+            {}
+        )  # behavior_name: obs_space
         self._current_action: Dict[str, ActionTuple] = {}  # behavior_name: ActionTuple
         # Take a single step so that the brain information will be sent over
         if not self._env.behavior_specs:
@@ -166,13 +166,13 @@ class UnityPettingzooBaseEnv:
             current_behavior = _agent_id_to_behavior(current_agent)
             current_index = self._agent_id_to_index[current_agent]
             if action.continuous is not None:
-                self._current_action[current_behavior].continuous[
-                    current_index
-                ] = action.continuous[0]
+                self._current_action[current_behavior].continuous[current_index] = (
+                    action.continuous[0]
+                )
             if action.discrete is not None:
-                self._current_action[current_behavior].discrete[
-                    current_index
-                ] = action.discrete[0]
+                self._current_action[current_behavior].discrete[current_index] = (
+                    action.discrete[0]
+                )
         else:
             self._live_agents.remove(current_agent)
             del self._observations[current_agent]

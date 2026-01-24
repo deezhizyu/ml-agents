@@ -96,7 +96,7 @@ def extrinsic_dummy_config():
 
 
 def create_observation_specs_with_shapes(
-    shapes: List[Tuple[int, ...]]
+    shapes: List[Tuple[int, ...]],
 ) -> List[ObservationSpec]:
     obs_specs: List[ObservationSpec] = []
     for i, shape in enumerate(shapes):

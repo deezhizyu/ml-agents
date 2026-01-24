@@ -6,7 +6,6 @@ from typing import Optional, List
 from mlagents_envs.logging_util import get_logger, DEBUG
 from mlagents_envs.exception import UnityEnvironmentException
 
-
 logger = get_logger(__name__)
 
 

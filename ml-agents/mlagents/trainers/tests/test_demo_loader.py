@@ -20,7 +20,6 @@ from mlagents.trainers.demo_loader import (
 )
 from mlagents.trainers.buffer import BufferKey
 
-
 BEHAVIOR_SPEC = create_mock_3dball_behavior_specs()
 
 

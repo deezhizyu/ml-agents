@@ -6,7 +6,6 @@ import yaml
 import argparse
 import hashlib
 
-
 # pydoc-markdown -I . -m module_name --render_toc > doc.md
 
 

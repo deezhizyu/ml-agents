@@ -12,7 +12,6 @@ from mlagents.trainers.tests.torch_entities.test_reward_providers.utils import (
 )
 from mlagents.trainers.tests.dummy_config import create_observation_specs_with_shapes
 
-
 SEED = [42]
 
 ACTIONSPEC_CONTINUOUS = ActionSpec.create_continuous(5)

@@ -1,6 +1,7 @@
 """
 Performance profiling utilities for ML-Agents training
 """
+
 import time
 import functools
 import os
@@ -11,6 +12,7 @@ from mlagents_envs import logging_util
 # Optional psutil for system metrics
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
@@ -23,7 +25,7 @@ _psutil_warning_shown = False
 
 class PerformanceMonitor:
     """Monitor performance metrics during training"""
-    
+
     def __init__(self):
         self.metrics: Dict[str, list] = {
             "step_time": [],
@@ -34,17 +36,17 @@ class PerformanceMonitor:
             "cpu_percent": [],
         }
         self.process = psutil.Process(os.getpid()) if PSUTIL_AVAILABLE else None
-    
+
     def record_metric(self, name: str, value: float):
         """Record a performance metric"""
         if name not in self.metrics:
             self.metrics[name] = []
         self.metrics[name].append(value)
-    
+
     def get_summary(self) -> Dict[str, Dict[str, float]]:
         """Get summary statistics for all metrics"""
         import numpy as np
-        
+
         summary = {}
         for name, values in self.metrics.items():
             if values:
@@ -58,7 +60,7 @@ class PerformanceMonitor:
                     "p99": float(np.percentile(values, 99)),
                 }
         return summary
-    
+
     def log_summary(self):
         """Log performance summary"""
         summary = self.get_summary()
@@ -73,7 +75,7 @@ class PerformanceMonitor:
             logger.info(f"  P95:  {stats['p95']:.4f}")
             logger.info(f"  P99:  {stats['p99']:.4f}")
         logger.info("=" * 60)
-    
+
     def check_memory_usage(self) -> float:
         """Get current memory usage in MB"""
         global _psutil_warning_shown
@@ -86,7 +88,7 @@ class PerformanceMonitor:
             )
             _psutil_warning_shown = True
         return 0.0
-    
+
     def check_cpu_usage(self) -> float:
         """Get current CPU usage percentage"""
         if self.process is not None:
@@ -107,55 +109,58 @@ def profile_block(monitor: PerformanceMonitor, metric_name: str):
 
 def profile_function(metric_name: Optional[str] = None):
     """Decorator to profile function execution time"""
+
     def decorator(func: Callable) -> Callable:
         name = metric_name or f"{func.__module__}.{func.__name__}"
-        
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             start_time = time.perf_counter()
             result = func(*args, **kwargs)
             elapsed = time.perf_counter() - start_time
-            
+
             # Log slow functions (>100ms)
             if elapsed > 0.1:
                 logger.debug(f"[PERF] {name} took {elapsed:.3f}s")
-            
+
             return result
+
         return wrapper
+
     return decorator
 
 
 class BatchedInference:
     """Helper for batched inference to reduce overhead"""
-    
+
     def __init__(self, policy, max_batch_size: int = 128):
         self.policy = policy
         self.max_batch_size = max_batch_size
         self.pending_observations = []
         self.pending_agent_ids = []
-    
+
     def add_observation(self, agent_id: str, observation):
         """Add observation to batch"""
         self.pending_observations.append(observation)
         self.pending_agent_ids.append(agent_id)
-    
+
     def should_flush(self) -> bool:
         """Check if batch should be processed"""
         return len(self.pending_observations) >= self.max_batch_size
-    
+
     def flush(self):
         """Process all pending observations"""
         if not self.pending_observations:
             return {}
-        
+
         # Batch process all observations
         results = {}
         # Implementation would call policy.evaluate in batch
-        
+
         # Clear pending
         self.pending_observations = []
         self.pending_agent_ids = []
-        
+
         return results
 
 

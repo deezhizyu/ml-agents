@@ -7,11 +7,10 @@ from mlagents.torch_utils import cpu_utils
 from mlagents.trainers.settings import TorchSettings
 from mlagents_envs.logging_util import get_logger
 
-
 logger = get_logger(__name__)
 
 # Type variable for torch.compile
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def assert_torch_installed():
@@ -34,7 +33,6 @@ assert_torch_installed()
 # This should be the only place that we import torch directly.
 # Everywhere else is caught by the banned-modules setting for flake8
 import torch  # noqa I201
-
 
 torch.set_num_threads(cpu_utils.get_num_threads_to_use())
 os.environ["KMP_BLOCKTIME"] = "0"
@@ -70,9 +68,11 @@ def set_torch_config(torch_settings: TorchSettings) -> None:
 
         # Enable TF32 on Ampere+ GPUs for faster matmul operations
         if torch_settings.enable_tf32:
-            if hasattr(torch.backends.cuda, 'matmul') and hasattr(torch.backends.cuda.matmul, 'allow_tf32'):
+            if hasattr(torch.backends.cuda, "matmul") and hasattr(
+                torch.backends.cuda.matmul, "allow_tf32"
+            ):
                 torch.backends.cuda.matmul.allow_tf32 = True
-            if hasattr(torch.backends.cudnn, 'allow_tf32'):
+            if hasattr(torch.backends.cudnn, "allow_tf32"):
                 torch.backends.cudnn.allow_tf32 = True
             logger.debug("Enabled TF32 for faster matrix operations on Ampere+ GPUs")
 
@@ -82,9 +82,11 @@ def set_torch_config(torch_settings: TorchSettings) -> None:
             logger.info("Automatic Mixed Precision (AMP) training enabled")
 
         # Check if torch.compile is available and enabled (PyTorch 2.0+)
-        _compile_enabled = torch_settings.enable_compile and hasattr(torch, 'compile')
-        if torch_settings.enable_compile and not hasattr(torch, 'compile'):
-            logger.warning("torch.compile requested but not available (requires PyTorch 2.0+)")
+        _compile_enabled = torch_settings.enable_compile and hasattr(torch, "compile")
+        if torch_settings.enable_compile and not hasattr(torch, "compile"):
+            logger.warning(
+                "torch.compile requested but not available (requires PyTorch 2.0+)"
+            )
         elif _compile_enabled:
             logger.info("torch.compile enabled for model optimization")
 
@@ -99,7 +101,9 @@ def set_torch_config(torch_settings: TorchSettings) -> None:
                 logger.debug("Fused optimizer available and enabled")
             except (TypeError, RuntimeError):
                 _fused_optimizer_available = False
-                logger.debug("Fused optimizer not available, falling back to standard optimizer")
+                logger.debug(
+                    "Fused optimizer not available, falling back to standard optimizer"
+                )
     else:
         torch.set_default_dtype(torch.float32)
         _amp_enabled = False
@@ -137,12 +141,12 @@ def is_fused_optimizer_available() -> bool:
 def maybe_compile(model: T, mode: str = "reduce-overhead") -> T:
     """
     Optionally compile a model using torch.compile if enabled and available.
-    
+
     :param model: The model to potentially compile.
     :param mode: Compilation mode ('default', 'reduce-overhead', 'max-autotune').
     :return: The compiled model if compilation is enabled, otherwise the original model.
     """
-    if _compile_enabled and hasattr(torch, 'compile'):
+    if _compile_enabled and hasattr(torch, "compile"):
         try:
             return torch.compile(model, mode=mode)
         except Exception as e:
@@ -154,7 +158,7 @@ def maybe_compile(model: T, mode: str = "reduce-overhead") -> T:
 def create_optimizer(params, lr: float, **kwargs) -> torch.optim.Adam:
     """
     Create an Adam optimizer with optional fused optimization.
-    
+
     :param params: Model parameters to optimize.
     :param lr: Learning rate.
     :param kwargs: Additional optimizer arguments.

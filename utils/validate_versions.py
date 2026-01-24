@@ -126,8 +126,7 @@ def print_release_tag_commands(
     python_tag = f"python-packages_{python_version}"
     csharp_tag = f"com.unity.ml-agents_{csharp_version}"
     docs_tag = f"{release_tag}_docs"
-    print(
-        f"""
+    print(f"""
 ###
 Use these commands to create the tags after the release:
 ###
@@ -140,8 +139,7 @@ git tag {python_tag}
 git push -f origin {python_tag}
 git tag {csharp_tag}
 git push -f origin {csharp_tag}
-"""
-    )
+""")
 
 
 if __name__ == "__main__":

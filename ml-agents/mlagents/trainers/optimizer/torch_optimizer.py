@@ -137,7 +137,7 @@ class TorchOptimizer(Optimizer):
         for reward_provider in self.reward_signals.values():
             update_stats.update(reward_provider.update(batch))
         return update_stats
-    
+
     def get_modules(self) -> Dict[str, any]:
         """
         Get all modules for this optimizer including reward provider modules.

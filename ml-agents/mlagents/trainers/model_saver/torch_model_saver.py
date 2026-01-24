@@ -10,7 +10,6 @@ from mlagents.trainers.policy.torch_policy import TorchPolicy
 from mlagents.trainers.optimizer.torch_optimizer import TorchOptimizer
 from mlagents.trainers.torch_entities.model_serialization import ModelSerializer
 
-
 logger = get_logger(__name__)
 DEFAULT_CHECKPOINT_NAME = "checkpoint.pt"
 

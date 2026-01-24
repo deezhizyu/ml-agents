@@ -18,7 +18,6 @@ from mlagents.trainers.torch_entities.components.reward_providers.gail_reward_pr
 )
 from mlagents.trainers.tests.dummy_config import create_observation_specs_with_shapes
 
-
 CONTINUOUS_PATH = (
     os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir)
     + "/test.demo"

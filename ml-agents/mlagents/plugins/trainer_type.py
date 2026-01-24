@@ -45,11 +45,13 @@ def register_trainer_plugins() -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
     # Use .select() method instead of dict interface (deprecated in importlib_metadata)
     try:
-        entry_points = importlib_metadata.entry_points().select(group=ML_AGENTS_TRAINER_TYPE)
+        entry_points = importlib_metadata.entry_points().select(
+            group=ML_AGENTS_TRAINER_TYPE
+        )
     except AttributeError:
         # Fallback for older importlib_metadata versions
         entry_points = importlib_metadata.entry_points().get(ML_AGENTS_TRAINER_TYPE, [])
-    
+
     if not entry_points:
         logger.warning(
             f"Unable to find any entry points for {ML_AGENTS_TRAINER_TYPE}, even the default ones. "

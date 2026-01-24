@@ -149,7 +149,11 @@ def init_venv(
         pip_index_url = "--index-url https://artifactory.prd.it.unity3d.com/artifactory/api/pypi/pypi/simple"
         # Split cmd if it contains spaces (e.g., "package==version")
         cmd_parts = cmd.split() if isinstance(cmd, str) else [cmd]
-        install_args = ["python3", "-m", "pip", "install", "-q"] + cmd_parts + pip_index_url.split()
+        install_args = (
+            ["python3", "-m", "pip", "install", "-q"]
+            + cmd_parts
+            + pip_index_url.split()
+        )
         print(f'Running "python3 -m pip install -q {cmd} {pip_index_url}"')
         # SECURITY FIX: Use list args instead of shell=True to prevent command injection
         subprocess.check_call(install_args)

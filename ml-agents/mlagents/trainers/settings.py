@@ -139,7 +139,9 @@ class NetworkSettings:
     goal_conditioning_type: ConditioningType = ConditioningType.HYPER
     deterministic: bool = parser.get_default("deterministic")
     # Performance optimization settings
-    enable_torchscript: bool = False  # Enable TorchScript compilation for 2-3x faster inference
+    enable_torchscript: bool = (
+        False  # Enable TorchScript compilation for 2-3x faster inference
+    )
     torchscript_optimize_for_inference: bool = True  # Apply inference optimizations
 
 
@@ -264,7 +266,7 @@ class ParameterRandomizationType(Enum):
             ParameterRandomizationType.UNIFORM: UniformSettings,
             ParameterRandomizationType.GAUSSIAN: GaussianSettings,
             ParameterRandomizationType.MULTIRANGEUNIFORM: MultiRangeUniformSettings,
-            ParameterRandomizationType.CONSTANT: ConstantSettings
+            ParameterRandomizationType.CONSTANT: ConstantSettings,
             # Constant type is handled if a float is provided instead of a config
         }
         return _mapping[self]
@@ -854,7 +856,9 @@ class EngineSettings:
 class TorchSettings:
     device: Optional[str] = parser.get_default("device")
     # GPU Performance Optimizations
-    enable_cudnn_benchmark: bool = True  # Enable cudnn.benchmark for consistent input sizes
+    enable_cudnn_benchmark: bool = (
+        True  # Enable cudnn.benchmark for consistent input sizes
+    )
     enable_tf32: bool = True  # Enable TF32 on Ampere+ GPUs for faster matmul
     enable_amp: bool = False  # Enable Automatic Mixed Precision (FP16) training
     enable_compile: bool = False  # Enable torch.compile() for PyTorch 2.0+
@@ -960,9 +964,9 @@ class RunOptions(ExportableSettings):
         # Prioritize the deterministic mode from the cli for deterministic actions.
         if "deterministic" in _non_default_args:
             for behaviour in final_runoptions.behaviors.keys():
-                final_runoptions.behaviors[
-                    behaviour
-                ].network_settings.deterministic = argparse_args["deterministic"]
+                final_runoptions.behaviors[behaviour].network_settings.deterministic = (
+                    argparse_args["deterministic"]
+                )
 
         return final_runoptions
 

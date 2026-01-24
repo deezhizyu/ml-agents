@@ -10,6 +10,7 @@ This script benchmarks the performance improvements from Phase 2:
 
 No Unity environment required - uses synthetic data.
 """
+
 import sys
 import time
 import numpy as np
@@ -21,9 +22,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "ml-agents"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "ml-agents-envs"))
 
-print("="*60)
+print("=" * 60)
 print("PHASE 2 PERFORMANCE BENCHMARKS")
-print("="*60)
+print("=" * 60)
 print()
 
 # ============================================================================
@@ -33,20 +34,23 @@ print()
 print("Benchmark 1: TorchScript Compilation")
 print("-" * 60)
 
+
 class SimplePolicy(nn.Module):
     """Simple policy network for benchmarking"""
+
     def __init__(self, input_size=84, hidden_size=128, output_size=4):
         super().__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()
-    
+
     def forward(self, x):
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
 
 # Create model
 model = SimplePolicy()
@@ -99,63 +103,69 @@ print(f"\n✓ TorchScript Speedup: {speedup:.2f}x")
 # Benchmark 2: Shared Memory Buffer Performance
 # ============================================================================
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("Benchmark 2: Shared Memory vs Pickle Serialization")
 print("-" * 60)
 
 try:
     from mlagents.trainers.env_manager_shared_memory import SharedMemoryBuffer
-    
+
     # Create test data (simulating visual observations)
     obs_shape = (84, 84, 3)
     obs_dtype = np.uint8
-    
+
     print(f"Observation shape: {obs_shape}")
-    print(f"Observation size: {np.prod(obs_shape) * obs_dtype(0).itemsize / 1024:.1f} KB")
-    
+    print(
+        f"Observation size: {np.prod(obs_shape) * obs_dtype(0).itemsize / 1024:.1f} KB"
+    )
+
     # Test shared memory
     print("\nTesting shared memory buffer...")
     buffer = SharedMemoryBuffer("benchmark_buffer", obs_shape, obs_dtype)
-    
+
     try:
         num_iterations = 1000
         test_data = np.random.randint(0, 255, obs_shape, dtype=obs_dtype)
-        
+
         # Benchmark write
         start = time.perf_counter()
         for _ in range(num_iterations):
             buffer.write(test_data)
         write_time = time.perf_counter() - start
-        
+
         # Benchmark read
         start = time.perf_counter()
         for _ in range(num_iterations):
             _ = buffer.read()
         read_time = time.perf_counter() - start
-        
+
         print(f"  Write: {write_time/num_iterations*1000:.3f}ms per operation")
-        print(f"  Read: {read_time/num_iterations*1000:.3f}ms per operation (zero-copy)")
-        print(f"  Total: {(write_time + read_time)/num_iterations*1000:.3f}ms per cycle")
-        
+        print(
+            f"  Read: {read_time/num_iterations*1000:.3f}ms per operation (zero-copy)"
+        )
+        print(
+            f"  Total: {(write_time + read_time)/num_iterations*1000:.3f}ms per cycle"
+        )
+
     finally:
         buffer.close()
         buffer.unlink()
-    
+
     # Test pickle serialization for comparison
     print("\nTesting pickle serialization...")
     import pickle
-    
+
     start = time.perf_counter()
     for _ in range(num_iterations):
         serialized = pickle.dumps(test_data)
         _ = pickle.loads(serialized)
     pickle_time = time.perf_counter() - start
-    
+
     print(f"  Total: {pickle_time/num_iterations*1000:.3f}ms per cycle")
-    
+
     speedup = pickle_time / (write_time + read_time)
     print(f"\n✓ Shared Memory Speedup: {speedup:.2f}x")
-    
+
 except Exception as e:
     print(f"✗ Shared memory benchmark failed: {e}")
     print("  (This is OK - full integration not complete)")
@@ -164,7 +174,7 @@ except Exception as e:
 # Benchmark 3: Profiling Overhead
 # ============================================================================
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("Benchmark 3: Profiling Overhead")
 print("-" * 60)
 
@@ -173,25 +183,25 @@ try:
         PerformanceMonitor,
         profile_block,
     )
-    
+
     monitor = PerformanceMonitor()
-    
+
     # Benchmark without profiling
     print("Testing without profiling...")
     num_iterations = 10000
-    
+
     def dummy_operation():
         x = np.random.randn(100, 100)
         y = np.random.randn(100, 100)
         return np.matmul(x, y)
-    
+
     start = time.perf_counter()
     for _ in range(num_iterations):
         dummy_operation()
     baseline_time = time.perf_counter() - start
-    
+
     print(f"  Time: {baseline_time:.3f}s")
-    
+
     # Benchmark with profiling
     print("\nTesting with profiling...")
     start = time.perf_counter()
@@ -199,19 +209,19 @@ try:
         with profile_block(monitor, "test_operation"):
             dummy_operation()
     profiled_time = time.perf_counter() - start
-    
+
     print(f"  Time: {profiled_time:.3f}s")
-    
+
     overhead = ((profiled_time - baseline_time) / baseline_time) * 100
     print(f"\n✓ Profiling Overhead: {overhead:.2f}%")
-    
+
     if overhead < 5:
         print("  (Excellent - minimal overhead)")
     elif overhead < 10:
         print("  (Good - acceptable overhead)")
     else:
         print("  (High - consider reducing profiling frequency)")
-    
+
 except Exception as e:
     print(f"✗ Profiling benchmark failed: {e}")
 
@@ -219,9 +229,9 @@ except Exception as e:
 # Summary
 # ============================================================================
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("BENCHMARK SUMMARY")
-print("="*60)
+print("=" * 60)
 print()
 print(f"TorchScript Speedup:        {speedup:.2f}x")
 print(f"Expected Training Impact:   ~30-50% faster overall")
@@ -237,4 +247,4 @@ print("  1. Test with real Unity environments")
 print("  2. Measure end-to-end training speedup")
 print("  3. Compare with baseline training runs")
 print()
-print("="*60)
+print("=" * 60)

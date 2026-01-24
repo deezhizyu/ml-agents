@@ -5,7 +5,6 @@ from mlagents.torch_utils import torch
 from mlagents_envs.logging_util import get_logger
 from mlagents.trainers.settings import SerializationSettings
 
-
 logger = get_logger(__name__)
 
 

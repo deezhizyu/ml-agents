@@ -57,7 +57,7 @@ class TrainingAnalyticsSideChannel(DefaultTrainingAnalyticsSideChannel):
         # Filter potentially PII behavior names
         if "behaviors" in res and res["behaviors"]:
             res["behaviors"] = {cls._hash(k): v for (k, v) in res["behaviors"].items()}
-            for (k, v) in res["behaviors"].items():
+            for k, v in res["behaviors"].items():
                 if "init_path" in v and v["init_path"] is not None:
                     hashed_path = cls._hash(v["init_path"])
                     res["behaviors"][k]["init_path"] = hashed_path
@@ -70,7 +70,7 @@ class TrainingAnalyticsSideChannel(DefaultTrainingAnalyticsSideChannel):
             res["environment_parameters"] = {
                 cls._hash(k): v for (k, v) in res["environment_parameters"].items()
             }
-            for (curriculumName, curriculum) in res["environment_parameters"].items():
+            for curriculumName, curriculum in res["environment_parameters"].items():
                 updated_lessons = []
                 for lesson in curriculum["curriculum"]:
                     new_lesson = copy.deepcopy(lesson)

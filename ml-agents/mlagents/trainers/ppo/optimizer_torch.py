@@ -1,7 +1,13 @@
 from typing import Dict, cast
 import attr
 
-from mlagents.torch_utils import torch, default_device, is_amp_enabled, maybe_compile, create_optimizer
+from mlagents.torch_utils import (
+    torch,
+    default_device,
+    is_amp_enabled,
+    maybe_compile,
+    create_optimizer,
+)
 
 from mlagents.trainers.buffer import AgentBuffer, BufferKey, RewardSignalUtil
 
@@ -152,7 +158,11 @@ class TorchPPOOptimizer(TorchOptimizer):
             value_memories = torch.stack(value_memories).unsqueeze(0)
 
         # Use AMP autocast if enabled for mixed precision training
-        with torch.amp.autocast(device_type=default_device().type, dtype=torch.float16, enabled=self._use_amp):
+        with torch.amp.autocast(
+            device_type=default_device().type,
+            dtype=torch.float16,
+            enabled=self._use_amp,
+        ):
             run_out = self.policy.actor.get_stats(
                 current_obs,
                 actions,
@@ -171,7 +181,9 @@ class TorchPPOOptimizer(TorchOptimizer):
             )
             old_log_probs = ActionLogProbs.from_buffer(batch).flatten()
             log_probs = log_probs.flatten()
-            loss_masks = ModelUtils.list_to_tensor(batch[BufferKey.MASKS], dtype=torch.bool)
+            loss_masks = ModelUtils.list_to_tensor(
+                batch[BufferKey.MASKS], dtype=torch.bool
+            )
             value_loss = ModelUtils.trust_region_value_loss(
                 values, old_values, returns, decay_eps, loss_masks
             )

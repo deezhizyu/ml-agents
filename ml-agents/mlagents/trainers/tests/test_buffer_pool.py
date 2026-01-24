@@ -1,4 +1,5 @@
 """Tests for AgentBufferPool."""
+
 import pytest
 import threading
 from mlagents.trainers.buffer import (
@@ -45,7 +46,7 @@ class TestAgentBufferPool:
         # Add some data
         buffer[BufferKey.CONTINUOUS_ACTION].append(np.array([1.0, 2.0]))
         assert buffer.num_experiences == 1
-        
+
         pool.release(buffer)
         buffer2 = pool.acquire()
         # Buffer should be reset
@@ -55,10 +56,10 @@ class TestAgentBufferPool:
         """Test that pool doesn't exceed max size."""
         pool = AgentBufferPool(pool_size=2)
         buffers = [pool.acquire() for _ in range(5)]
-        
+
         for buf in buffers:
             pool.release(buf)
-        
+
         # Pool should only hold 2 buffers
         assert pool.pool_size == 2
 
@@ -75,25 +76,25 @@ class TestAgentBufferPool:
         for buf in buffers:
             pool.release(buf)
         assert pool.pool_size == 3
-        
+
         pool.clear()
         assert pool.pool_size == 0
 
     def test_stats_tracking(self):
         """Test that pool tracks usage statistics."""
         pool = AgentBufferPool(pool_size=4)
-        
+
         # Acquire 3 new buffers
         buffers = [pool.acquire() for _ in range(3)]
         stats = pool.stats
         assert stats["acquired_count"] == 3
         assert stats["created_count"] == 3
         assert stats["reuse_rate"] == 0.0
-        
+
         # Release and reacquire
         for buf in buffers:
             pool.release(buf)
-        
+
         _ = [pool.acquire() for _ in range(3)]
         stats = pool.stats
         assert stats["acquired_count"] == 6

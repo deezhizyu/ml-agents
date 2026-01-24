@@ -56,9 +56,9 @@ class AgentProcessor:
         :param max_trajectory_length: Maximum length of a trajectory before it is added to the trainer.
         :param stats_category: The category under which to write the stats. Usually, this comes from the Trainer.
         """
-        self._experience_buffers: Dict[
-            GlobalAgentId, List[AgentExperience]
-        ] = defaultdict(list)
+        self._experience_buffers: Dict[GlobalAgentId, List[AgentExperience]] = (
+            defaultdict(list)
+        )
         self._last_step_result: Dict[GlobalAgentId, Tuple[DecisionStep, int]] = {}
         # current_group_obs is used to collect the current (i.e. the most recently seen)
         # obs of all the agents in the same group, and assemble the group obs.
@@ -69,9 +69,9 @@ class AgentProcessor:
         # group_status is used to collect the current, most recently seen
         # group status of all the agents in the same group, and assemble the group's status.
         # It is a dictionary of GlobalGroupId to dictionaries of GlobalAgentId to AgentStatus.
-        self._group_status: Dict[
-            GlobalGroupId, Dict[GlobalAgentId, AgentStatus]
-        ] = defaultdict(lambda: defaultdict(None))
+        self._group_status: Dict[GlobalGroupId, Dict[GlobalAgentId, AgentStatus]] = (
+            defaultdict(lambda: defaultdict(None))
+        )
         # last_take_action_outputs stores the action a_t taken before the current observation s_(t+1), while
         # grabbing previous_action from the policy grabs the action PRIOR to that, a_(t-1).
         self._last_take_action_outputs: Dict[GlobalAgentId, ActionInfoOutputs] = {}

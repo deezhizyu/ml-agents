@@ -280,13 +280,17 @@ class TrainerController:
                 t.join(timeout_seconds)
                 if t.is_alive():
                     failed_threads.append(t.name)
-                    logger.warning(f"Thread {t.name} did not terminate within {timeout_seconds}s")
+                    logger.warning(
+                        f"Thread {t.name} did not terminate within {timeout_seconds}s"
+                    )
             except Exception as e:
                 failed_threads.append(t.name)
                 logger.error(f"Exception while joining thread {t.name}: {e}")
-        
+
         if failed_threads:
-            logger.warning(f"Failed to cleanly join {len(failed_threads)} trainer threads: {failed_threads}")
+            logger.warning(
+                f"Failed to cleanly join {len(failed_threads)} trainer threads: {failed_threads}"
+            )
 
         with hierarchical_timer("trainer_threads") as main_timer_node:
             for trainer_thread in self.trainer_threads:

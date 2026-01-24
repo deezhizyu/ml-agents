@@ -2,6 +2,7 @@
 Generate the "Releases" table on the main readme. Update the versions lists, run this script, and copy the output
 into the markdown file.
 """
+
 from distutils.version import LooseVersion, StrictVersion
 from datetime import datetime
 from typing import NamedTuple

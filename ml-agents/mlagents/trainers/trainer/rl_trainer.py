@@ -28,7 +28,6 @@ from mlagents.trainers.settings import TrainerSettings
 from mlagents.trainers.stats import StatsPropertyType
 from mlagents.trainers.model_saver.model_saver import BaseModelSaver
 
-
 logger = get_logger(__name__)
 
 

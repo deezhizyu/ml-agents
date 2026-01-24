@@ -32,9 +32,9 @@ def test_load_and_set(dummy_config, use_discrete):
     mock_specs = mb.setup_test_behavior_specs(
         use_discrete,
         False,
-        vector_action_space=DISCRETE_ACTION_SPACE
-        if use_discrete
-        else VECTOR_ACTION_SPACE,
+        vector_action_space=(
+            DISCRETE_ACTION_SPACE if use_discrete else VECTOR_ACTION_SPACE
+        ),
         vector_obs_space=VECTOR_OBS_SPACE,
     )
 

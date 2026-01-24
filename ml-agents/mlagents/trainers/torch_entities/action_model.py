@@ -10,7 +10,6 @@ from mlagents.trainers.torch_entities.agent_action import AgentAction
 from mlagents.trainers.torch_entities.action_log_probs import ActionLogProbs
 from mlagents_envs.base_env import ActionSpec
 
-
 EPSILON = 1e-7  # Small value to avoid divide by zero
 
 

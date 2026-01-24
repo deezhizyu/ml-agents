@@ -6,7 +6,6 @@ from mlagents.trainers.settings import RewardSignalType
 from mlagents.trainers.ppo.trainer import PPOSettings, TRAINER_NAME as PPO_TRAINER_NAME
 from mlagents.trainers.sac.trainer import SACSettings, TRAINER_NAME as SAC_TRAINER_NAME
 
-
 BRAIN_NAME = "testbehavior"
 
 # Check one per category
