@@ -191,9 +191,6 @@ class SharedMemoryEnvManager(EnvManager):
         # Worker processes
         self.workers: List[Process] = []
 
-        # Behavior specs (retrieved from workers)
-        self._behavior_specs: Dict[str, BehaviorSpec] = {}
-
         # Track worker status
         self._worker_alive = [True] * num_envs
 
@@ -221,15 +218,11 @@ class SharedMemoryEnvManager(EnvManager):
             self.result_queues.append(res_queue)
             self.workers.append(worker)
 
-        # Wait for workers to initialize and get behavior specs
+        # Wait for workers to initialize
         for i, res_queue in enumerate(self.result_queues):
             try:
                 cmd, data = res_queue.get(timeout=self.timeout)
                 if cmd == "initialized":
-                    # Store behavior specs from first worker
-                    if i == 0:
-                        self._behavior_specs = data
-                        logger.info(f"Received behavior specs: {list(data.keys())}")
                     logger.info(f"Worker {i} initialized successfully")
                 elif cmd == "error":
                     self._worker_alive[i] = False
@@ -265,9 +258,8 @@ class SharedMemoryEnvManager(EnvManager):
             env = env_factory(worker_id, side_channels)
             logger.info(f"Worker {worker_id} initialized environment")
 
-            # Get behavior specs
-            behavior_specs = env.behavior_specs
-            res_queue.put(("initialized", behavior_specs))
+            # Signal initialization complete (behavior specs retrieved on-demand later)
+            res_queue.put(("initialized", None))
 
             while True:
                 try:
@@ -301,6 +293,11 @@ class SharedMemoryEnvManager(EnvManager):
                             all_step_result[behavior_name] = (decision_steps, terminal_steps)
 
                         res_queue.put(("reset_done", all_step_result))
+
+                    elif cmd == "behavior_specs":
+                        # Return current behavior specs
+                        behavior_specs = env.behavior_specs
+                        res_queue.put(("behavior_specs", behavior_specs))
 
                     elif cmd == "set_params":
                         # Environment parameter updates handled here if needed
@@ -479,11 +476,23 @@ class SharedMemoryEnvManager(EnvManager):
 
     @property
     def training_behaviors(self) -> Dict[str, BehaviorSpec]:
-        """Get training behaviors from first environment"""
-        # BehaviorMapping is a Mapping, convert to dict if needed
-        if hasattr(self._behavior_specs, '_dict'):
-            return self._behavior_specs._dict
-        return dict(self._behavior_specs)
+        """Get training behaviors by querying workers (like SubprocessEnvManager)"""
+        result: Dict[str, BehaviorSpec] = {}
+
+        # Query first alive worker for behavior specs
+        for i, (cmd_queue, res_queue) in enumerate(zip(self.command_queues, self.result_queues)):
+            if self._worker_alive[i]:
+                try:
+                    cmd_queue.put(("behavior_specs", None), timeout=1.0)
+                    cmd, data = res_queue.get(timeout=self.timeout)
+                    if cmd == "behavior_specs":
+                        result.update(data)
+                        break
+                except (queue.Full, queue.Empty) as e:
+                    logger.warning(f"Failed to get behavior specs from worker {i}: {e}")
+                    continue
+
+        return result
 
     def set_actions(self, behavior_name: str, action_info: ActionInfo) -> None:
         """
