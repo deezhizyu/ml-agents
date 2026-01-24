@@ -1,0 +1,59 @@
+graph TB
+    subgraph "Unity Environment"
+        A[Unity Scene] --> B[ML-Agents Academy]
+        B --> C[Agent 1]
+        B --> D[Agent 2]
+        B --> E[Agent N]
+        C --> F[Behavior Parameters]
+        D --> F
+        E --> F
+        F --> G[Sensors]
+        F --> H[Actions]
+        G --> I[Vector Observations]
+        G --> J[Visual Observations]
+        G --> K[Ray Perceptions]
+    end
+    
+    subgraph "Communication Layer"
+        L[gRPC Protocol] 
+        M[Unity Communicator]
+        N[Python Side Channel]
+    end
+    
+    subgraph "Python Training"
+        O[mlagents-learn CLI]
+        O --> P[Environment Manager]
+        P --> Q[UnityEnvironment]
+        Q --> R[Trainer]
+        R --> S[PPO Trainer]
+        R --> T[SAC Trainer]
+        R --> U[MA-POCA Trainer]
+        S --> V[Policy Network]
+        T --> V
+        U --> V
+        V --> W[PyTorch Model]
+        W --> X[ONNX Export]
+    end
+    
+    subgraph "Monitoring & Storage"
+        Y[TensorBoard]
+        Z[Checkpoints]
+        AA[Results Directory]
+        AB[HuggingFace Hub]
+    end
+    
+    A -.observations.-> M
+    M <--> L
+    L <--> Q
+    M -.actions.-> A
+    A -.rewards.-> M
+    
+    R --> Y
+    W --> Z
+    X --> AA
+    X --> AB
+    
+    style A fill:#ffecb3
+    style W fill:#c8e6c9
+    style X fill:#b3e5fc
+    style Y fill:#f8bbd0

@@ -1,0 +1,69 @@
+# ML-Agents Pinned Requirements
+# Generated: 2026-01-23
+# 
+# This file contains exact pinned versions for reproducible installations.
+# Install with: pip install -r requirements-lock.txt
+#
+# To update: 
+#   1. Install packages with ranges from setup.py
+#   2. Run: pip freeze > requirements-lock.txt
+#   3. Clean up to remove unnecessary packages
+
+# Core ML-Agents packages (install in editable mode)
+# -e ./ml-agents-envs
+# -e ./ml-agents
+
+# Core dependencies from ml-agents-envs/setup.py
+cloudpickle==3.0.0
+grpcio==1.53.2
+Pillow==10.3.0
+protobuf==3.20.3
+pyyaml==6.0.1
+gym==0.21.0
+pettingzoo==1.24.3
+numpy==1.23.5
+filelock==3.13.1
+
+# Core dependencies from ml-agents/setup.py
+h5py==3.11.0
+torch==2.1.2
+tensorboard==2.16.2
+six==1.16.0
+cattrs==1.6.0
+attrs==23.2.0
+huggingface_hub==0.22.2
+onnx==1.15.0
+packaging==24.0
+
+# PyTorch with CUDA support (if needed, uncomment and adjust)
+# --extra-index-url https://download.pytorch.org/whl/cu118
+# torch==2.1.2+cu118
+
+# Test dependencies from test_requirements.txt
+pytest==8.3.4
+pytest-cov==4.1.0
+pytest-xdist==3.6.1
+filelock==3.13.1
+
+# Code quality tools
+vulture==2.11
+deptry==0.16.1
+
+# Development tools
+pre-commit==3.7.0
+black==24.4.2
+mypy==1.10.0
+flake8==7.0.0
+
+# Type stubs
+types-PyYAML==6.0.12.20240311
+types-attrs==19.1.0
+types-protobuf==4.25.0.20240417
+types-setuptools==69.5.0.20240423
+types-filelock==3.2.7
+
+# Note: This is a starting point. Run the following to generate actual pinned versions:
+# 1. pip install -e ./ml-agents-envs -e ./ml-agents -r test_requirements.txt
+# 2. pip freeze > requirements-lock-generated.txt
+# 3. Review and clean up the generated file
+# 4. Replace this file with the cleaned version

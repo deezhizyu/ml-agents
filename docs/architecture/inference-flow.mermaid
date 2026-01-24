@@ -1,0 +1,34 @@
+graph LR
+    subgraph "Unity Runtime"
+        A[Agent GameObject]
+        B[Behavior Parameters]
+        C[Model Asset .onnx]
+        D[Inference Engine]
+        E[Sensors]
+        F[Actuators]
+    end
+    
+    subgraph "Inference Process"
+        G[Collect Observations]
+        H[Normalize Inputs]
+        I[Run Inference]
+        J[Sample Actions]
+        K[Apply Actions]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    
+    E --> G
+    G --> H
+    H --> I
+    D --> I
+    I --> J
+    J --> K
+    K --> F
+    F --> A
+    
+    style C fill:#b3e5fc
+    style D fill:#c8e6c9
+    style I fill:#ffecb3

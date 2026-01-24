@@ -1,0 +1,1727 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="231" result="Passed" total="231" passed="231" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:45:08Z" duration="107.5008158">
+  <test-suite type="TestSuite" id="1000" name="UnityEnvironment" fullname="UnityEnvironment" runstate="Runnable" testcasecount="231" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:45:08Z" duration="107.500816" total="231" passed="231" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1294" name="Unity.ML-Agents.Editor.Tests.dll" fullname="C:/Development/Projects/ml-agents/Project/Library/ScriptAssemblies/Unity.ML-Agents.Editor.Tests.dll" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:45:08Z" duration="107.494130" total="229" passed="229" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="125880" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1295" name="Unity" fullname="Unity" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:45:08Z" duration="107.493870" total="229" passed="229" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1296" name="MLAgents" fullname="Unity.MLAgents" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:45:08Z" duration="107.493797" total="229" passed="229" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1297" name="Tests" fullname="Unity.MLAgents.Tests" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:45:08Z" duration="107.493522" total="229" passed="229" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1001" name="AcademyTests" fullname="Unity.MLAgents.Tests.AcademyTests" classname="Unity.MLAgents.Tests.AcademyTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:43:25Z" duration="4.202809" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1002" name="TestPackageVersion" fullname="Unity.MLAgents.Tests.AcademyTests.TestPackageVersion" methodname="TestPackageVersion" classname="Unity.MLAgents.Tests.AcademyTests" runstate="Runnable" seed="287709884" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:43:20Z" duration="0.010459" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="TestRecursiveStepThrows" fullname="Unity.MLAgents.Tests.AcademyTests.TestRecursiveStepThrows" methodname="TestRecursiveStepThrows" classname="Unity.MLAgents.Tests.AcademyTests" runstate="Runnable" seed="1196795934" result="Passed" start-time="2026-01-24 02:43:20Z" end-time="2026-01-24 02:43:25Z" duration="4.182416" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Registered Communicator in Agent.
+Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+Fewer observations (0) made than vector observation size (1). The observations will be padded.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestSuite" id="1304" name="Actuators" fullname="Unity.MLAgents.Tests.Actuators" runstate="Runnable" testcasecount="35" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.028223" total="35" passed="35" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1253" name="ActionSegmentTests" fullname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests" classname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.004511" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1254" name="TestConstruction" fullname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests.TestConstruction" methodname="TestConstruction" classname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests" runstate="Runnable" seed="1921729758" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001943" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1256" name="TestEnumerator" fullname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests.TestEnumerator" methodname="TestEnumerator" classname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests" runstate="Runnable" seed="1093498698" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001216" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1255" name="TestIndexing" fullname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests.TestIndexing" methodname="TestIndexing" classname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests" runstate="Runnable" seed="1899968851" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000266" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1257" name="TestNullConstructor" fullname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests.TestNullConstructor" methodname="TestNullConstructor" classname="Unity.MLAgents.Tests.Actuators.ActionSegmentTests" runstate="Runnable" seed="2117420410" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000343" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1258" name="ActionSpecTests" fullname="Unity.MLAgents.Tests.Actuators.ActionSpecTests" classname="Unity.MLAgents.Tests.Actuators.ActionSpecTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.002239" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1259" name="ActionSpecCombineTest" fullname="Unity.MLAgents.Tests.Actuators.ActionSpecTests.ActionSpecCombineTest" methodname="ActionSpecCombineTest" classname="Unity.MLAgents.Tests.Actuators.ActionSpecTests" runstate="Runnable" seed="1995341016" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001839" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1260" name="ActuatorDiscreteActionMaskTests" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.004585" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1264" name="CanOverwriteMask" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.CanOverwriteMask" methodname="CanOverwriteMask" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="1729386127" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000760" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1261" name="Construction" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.Construction" methodname="Construction" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="1216217702" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001257" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1263" name="FirstBranchMask" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.FirstBranchMask" methodname="FirstBranchMask" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="1829770485" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000264" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1266" name="MaskReset" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.MaskReset" methodname="MaskReset" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="937308114" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000196" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1268" name="MultipleMaskEdit" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.MultipleMaskEdit" methodname="MultipleMaskEdit" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="1124058237" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000179" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1262" name="NullMask" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.NullMask" methodname="NullMask" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="964693556" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000117" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1265" name="SecondBranchMask" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.SecondBranchMask" methodname="SecondBranchMask" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="1903642045" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000309" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1267" name="ThrowsError" fullname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests.ThrowsError" methodname="ThrowsError" classname="Unity.MLAgents.Tests.Actuators.ActuatorDiscreteActionMaskTests" runstate="Runnable" seed="1217490647" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000551" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1269" name="ActuatorManagerTests" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" testcasecount="17" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.012126" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1272" name="TestAllowMixedActions" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestAllowMixedActions" methodname="TestAllowMixedActions" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1183885291" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000454" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1279" name="TestClear" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestClear" methodname="TestClear" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1451465118" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000277" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1271" name="TestEnsureBufferDiscrete" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestEnsureBufferDiscrete" methodname="TestEnsureBufferDiscrete" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1925586605" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000367" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1270" name="TestEnsureBufferSizeContinuous" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestEnsureBufferSizeContinuous" methodname="TestEnsureBufferSizeContinuous" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1031260782" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000324" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1275" name="TestExecuteActionsContinuous" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestExecuteActionsContinuous" methodname="TestExecuteActionsContinuous" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="838561019" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000564" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1274" name="TestExecuteActionsDiscrete" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestExecuteActionsDiscrete" methodname="TestExecuteActionsDiscrete" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="720399510" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000516" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1273" name="TestFailOnSameActuatorName" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestFailOnSameActuatorName" methodname="TestFailOnSameActuatorName" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1334553144" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001419" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Actuator names must be unique.
+]]></output>
+                </test-case>
+                <test-case id="1284" name="TestHeuristic" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestHeuristic" methodname="TestHeuristic" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1909457681" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000326" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1280" name="TestIndexSet" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestIndexSet" methodname="TestIndexSet" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="193614703" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000299" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1281" name="TestInsert" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestInsert" methodname="TestInsert" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1676041171" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000305" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1278" name="TestRemove" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestRemove" methodname="TestRemove" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1324297731" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000293" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1282" name="TestResetData" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestResetData" methodname="TestResetData" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1681541757" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000614" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1287" name="TestSortActuators" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestSortActuators" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.002406" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1285" name="TestSortActuators(&quot;da-DK&quot;)" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestSortActuators(&quot;da-DK&quot;)" methodname="TestSortActuators" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1033098504" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001943" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1286" name="TestSortActuators(&quot;en-US&quot;)" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestSortActuators(&quot;en-US&quot;)" methodname="TestSortActuators" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1073565594" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000098" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="1276" name="TestUpdateActionsContinuous" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestUpdateActionsContinuous" methodname="TestUpdateActionsContinuous" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="741474757" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000230" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1277" name="TestUpdateActionsDiscrete" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestUpdateActionsDiscrete" methodname="TestUpdateActionsDiscrete" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="1622764717" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001337" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Unity.MLAgents.Actuators.ActionSegment`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]
+System.Int32[]
+]]></output>
+                </test-case>
+                <test-case id="1283" name="TestWriteDiscreteActionMask" fullname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests.TestWriteDiscreteActionMask" methodname="TestWriteDiscreteActionMask" classname="Unity.MLAgents.Tests.Actuators.ActuatorManagerTests" runstate="Runnable" seed="906321397" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000827" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1288" name="VectorActuatorTests" fullname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests" classname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.003574" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1289" name="TestConstruct" fullname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests.TestConstruct" methodname="TestConstruct" classname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests" runstate="Runnable" seed="1937156053" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000342" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1293" name="TestHeuristic" fullname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests.TestHeuristic" methodname="TestHeuristic" classname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests" runstate="Runnable" seed="1993145188" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000254" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1290" name="TestOnActionReceived" fullname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests.TestOnActionReceived" methodname="TestOnActionReceived" classname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests" runstate="Runnable" seed="1899950220" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.001737" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1291" name="TestResetData" fullname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests.TestResetData" methodname="TestResetData" classname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests" runstate="Runnable" seed="1673239077" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000175" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1292" name="TestWriteDiscreteActionMask" fullname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests.TestWriteDiscreteActionMask" methodname="TestWriteDiscreteActionMask" classname="Unity.MLAgents.Tests.Actuators.VectorActuatorTests" runstate="Runnable" seed="1171445484" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:25Z" duration="0.000430" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1129" name="AgentRecursionTests" fullname="Unity.MLAgents.Tests.AgentRecursionTests" classname="Unity.MLAgents.Tests.AgentRecursionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:33Z" duration="8.263292" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1130" name="TestRecursiveCollectObsEndEpisodeThrows" fullname="Unity.MLAgents.Tests.AgentRecursionTests.TestRecursiveCollectObsEndEpisodeThrows" methodname="TestRecursiveCollectObsEndEpisodeThrows" classname="Unity.MLAgents.Tests.AgentRecursionTests" runstate="Runnable" seed="502775149" result="Passed" start-time="2026-01-24 02:43:25Z" end-time="2026-01-24 02:43:29Z" duration="4.151869" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1131" name="TestRecursiveOnEpisodeBeginEndEpisodeThrows" fullname="Unity.MLAgents.Tests.AgentRecursionTests.TestRecursiveOnEpisodeBeginEndEpisodeThrows" methodname="TestRecursiveOnEpisodeBeginEndEpisodeThrows" classname="Unity.MLAgents.Tests.AgentRecursionTests" runstate="Runnable" seed="1119643702" result="Passed" start-time="2026-01-24 02:43:29Z" end-time="2026-01-24 02:43:33Z" duration="4.110524" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+Fewer observations (0) made than vector observation size (1). The observations will be padded.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestSuite" id="1303" name="Analytics" fullname="Unity.MLAgents.Tests.Analytics" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-01-24 02:43:33Z" end-time="2026-01-24 02:43:41Z" duration="8.355816" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1238" name="InferenceAnalyticsTests" fullname="Unity.MLAgents.Tests.Analytics.InferenceAnalyticsTests" classname="Unity.MLAgents.Tests.Analytics.InferenceAnalyticsTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:43:33Z" end-time="2026-01-24 02:43:37Z" duration="4.239496" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1239" name="TestModelEvent" fullname="Unity.MLAgents.Tests.Analytics.InferenceAnalyticsTests.TestModelEvent" methodname="TestModelEvent" classname="Unity.MLAgents.Tests.Analytics.InferenceAnalyticsTests" runstate="Runnable" seed="1749697757" result="Passed" start-time="2026-01-24 02:43:33Z" end-time="2026-01-24 02:43:33Z" duration="0.115403" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1240" name="TestSentisPolicy" fullname="Unity.MLAgents.Tests.Analytics.InferenceAnalyticsTests.TestSentisPolicy" methodname="TestSentisPolicy" classname="Unity.MLAgents.Tests.Analytics.InferenceAnalyticsTests" runstate="Runnable" seed="2137726691" result="Passed" start-time="2026-01-24 02:43:33Z" end-time="2026-01-24 02:43:37Z" duration="4.123183" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1241" name="TrainingAnalyticsTests" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-01-24 02:43:37Z" end-time="2026-01-24 02:43:41Z" duration="4.115124" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1252" name="TestEnableAnalytics" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestEnableAnalytics" methodname="TestEnableAnalytics" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="80629637" result="Passed" start-time="2026-01-24 02:43:37Z" end-time="2026-01-24 02:43:37Z" duration="0.000297" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1245" name="TestParseBehaviorName" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestParseBehaviorName" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:43:37Z" end-time="2026-01-24 02:43:37Z" duration="0.000676" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1242" name="TestParseBehaviorName(&quot;foo?team=42&quot;)" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestParseBehaviorName(&quot;foo?team=42&quot;)" methodname="TestParseBehaviorName" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="2091520339" result="Passed" start-time="2026-01-24 02:43:37Z" end-time="2026-01-24 02:43:37Z" duration="0.000271" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1243" name="TestParseBehaviorName(&quot;foo&quot;)" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestParseBehaviorName(&quot;foo&quot;)" methodname="TestParseBehaviorName" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="1617651244" result="Passed" start-time="2026-01-24 02:43:37Z" end-time="2026-01-24 02:43:37Z" duration="0.000064" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1244" name="TestParseBehaviorName(&quot;foo?bar?team=1337&quot;)" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestParseBehaviorName(&quot;foo?bar?team=1337&quot;)" methodname="TestParseBehaviorName" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="572854462" result="Passed" start-time="2026-01-24 02:43:37Z" end-time="2026-01-24 02:43:37Z" duration="0.000038" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-case id="1247" name="TestRemotePolicy" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestRemotePolicy" methodname="TestRemotePolicy" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="471211266" result="Passed" start-time="2026-01-24 02:43:37Z" end-time="2026-01-24 02:43:41Z" duration="4.110640" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+                </test-case>
+                <test-case id="1246" name="TestRemotePolicyEvent" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestRemotePolicyEvent" methodname="TestRemotePolicyEvent" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="96531703" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:41Z" duration="0.000890" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1251" name="TestTrainingBehaviorInitialized" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestTrainingBehaviorInitialized" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:41Z" duration="0.001435" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1248" name="TestTrainingBehaviorInitialized(&quot;a name we expect to hash&quot;)" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestTrainingBehaviorInitialized(&quot;a name we expect to hash&quot;)" methodname="TestTrainingBehaviorInitialized" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="1775315511" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:41Z" duration="0.000271" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1249" name="TestTrainingBehaviorInitialized(&quot;another_name&quot;)" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestTrainingBehaviorInitialized(&quot;another_name&quot;)" methodname="TestTrainingBehaviorInitialized" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="921678750" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:41Z" duration="0.000087" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1250" name="TestTrainingBehaviorInitialized(&quot;0b74613c872e79aba11e06eda3538f2b646eb2b459e75087829ea500bd703d0b&quot;)" fullname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests.TestTrainingBehaviorInitialized(&quot;0b74613c872e79aba11e06eda3538f2b646eb2b459e75087829ea500bd703d0b&quot;)" methodname="TestTrainingBehaviorInitialized" classname="Unity.MLAgents.Tests.Analytics.TrainingAnalyticsTests" runstate="Runnable" seed="159645246" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:41Z" duration="0.000049" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestSuite" id="1302" name="Areas" fullname="Unity.MLAgents.Tests.Areas" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:45Z" duration="4.099200" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1227" name="TrainingAreaReplicatorTests" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:45Z" duration="4.098985" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1236" name="TestAddEnvironments" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestAddEnvironments" methodname="TestAddEnvironments" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="539081776" result="Passed" start-time="2026-01-24 02:43:41Z" end-time="2026-01-24 02:43:45Z" duration="4.094113" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+                </test-case>
+                <test-case id="1237" name="TestAddEnvironmentsBuildOnly" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestAddEnvironmentsBuildOnly" methodname="TestAddEnvironmentsBuildOnly" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="152522610" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000531" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1235" name="TestComputeGridSize" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.003505" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1228" name="TestComputeGridSize(1)" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize(1)" methodname="TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="926633489" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.001428" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1229" name="TestComputeGridSize(2)" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize(2)" methodname="TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="2031121386" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000190" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1230" name="TestComputeGridSize(5)" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize(5)" methodname="TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="360756125" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000183" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1231" name="TestComputeGridSize(7)" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize(7)" methodname="TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="871087985" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000235" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1232" name="TestComputeGridSize(8)" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize(8)" methodname="TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="1418314539" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000157" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1233" name="TestComputeGridSize(64)" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize(64)" methodname="TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="560803561" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000134" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1234" name="TestComputeGridSize(63)" fullname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests.TestComputeGridSize(63)" methodname="TestComputeGridSize" classname="Unity.MLAgents.Tests.Areas.TrainingAreaReplicatorTests" runstate="Runnable" seed="1001910128" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000137" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1008" name="BehaviorIdRegistryTests" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.003853" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1016" name="Clear_RemovesAllEntries" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.Clear_RemovesAllEntries" methodname="Clear_RemovesAllEntries" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="1975889192" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000642" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="Count_ReturnsCorrectCount" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.Count_ReturnsCorrectCount" methodname="Count_ReturnsCorrectCount" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="1463532766" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000166" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1017" name="GetAllNames_ReturnsAllRegisteredNames" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.GetAllNames_ReturnsAllRegisteredNames" methodname="GetAllNames_ReturnsAllRegisteredNames" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="1963786448" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000850" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1012" name="GetId_ReturnsCorrectIdForRegistered" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.GetId_ReturnsCorrectIdForRegistered" methodname="GetId_ReturnsCorrectIdForRegistered" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="586653071" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000158" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1011" name="GetId_ReturnsMinusOneForUnregistered" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.GetId_ReturnsMinusOneForUnregistered" methodname="GetId_ReturnsMinusOneForUnregistered" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="1876703685" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000115" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="GetName_ReturnsCorrectName" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.GetName_ReturnsCorrectName" methodname="GetName_ReturnsCorrectName" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="586912086" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000247" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1014" name="GetName_ReturnsNullForInvalidId" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.GetName_ReturnsNullForInvalidId" methodname="GetName_ReturnsNullForInvalidId" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="1928698961" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000113" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1009" name="GetOrCreateId_AssignsIncrementingIds" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.GetOrCreateId_AssignsIncrementingIds" methodname="GetOrCreateId_AssignsIncrementingIds" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="1210652418" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000116" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1010" name="GetOrCreateId_ReturnsSameIdForSameName" fullname="Unity.MLAgents.Tests.BehaviorIdRegistryTests.GetOrCreateId_ReturnsSameIdForSameName" methodname="GetOrCreateId_ReturnsSameIdForSameName" classname="Unity.MLAgents.Tests.BehaviorIdRegistryTests" runstate="Runnable" seed="1477519261" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000095" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1004" name="BehaviorParameterTests" fullname="Unity.MLAgents.Tests.BehaviorParameterTests" classname="Unity.MLAgents.Tests.BehaviorParameterTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.007292" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1006" name="TestIsInHeuristicMode" fullname="Unity.MLAgents.Tests.BehaviorParameterTests.TestIsInHeuristicMode" methodname="TestIsInHeuristicMode" classname="Unity.MLAgents.Tests.BehaviorParameterTests" runstate="Runnable" seed="1941005614" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000572" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1005" name="TestNoModelInferenceOnlyThrows" fullname="Unity.MLAgents.Tests.BehaviorParameterTests.TestNoModelInferenceOnlyThrows" methodname="TestNoModelInferenceOnlyThrows" classname="Unity.MLAgents.Tests.BehaviorParameterTests" runstate="Runnable" seed="445304009" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000665" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1007" name="TestPolicyUpdateEventFired" fullname="Unity.MLAgents.Tests.BehaviorParameterTests.TestPolicyUpdateEventFired" methodname="TestPolicyUpdateEventFired" classname="Unity.MLAgents.Tests.BehaviorParameterTests" runstate="Runnable" seed="761256664" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.005559" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[OnPolicyChanged:True
+OnPolicyChanged:True
+OnPolicyChanged:False
+OnPolicyChanged:True
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestSuite" id="1301" name="Communicator" fullname="Unity.MLAgents.Tests.Communicator" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.002519" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1223" name="RpcCommunicatorTests" fullname="Unity.MLAgents.Tests.Communicator.RpcCommunicatorTests" classname="Unity.MLAgents.Tests.Communicator.RpcCommunicatorTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000834" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1224" name="TestCheckCommunicationVersionsAreCompatible" fullname="Unity.MLAgents.Tests.Communicator.RpcCommunicatorTests.TestCheckCommunicationVersionsAreCompatible" methodname="TestCheckCommunicationVersionsAreCompatible" classname="Unity.MLAgents.Tests.Communicator.RpcCommunicatorTests" runstate="Runnable" seed="530840880" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000515" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1225" name="UnityRLCapabilitiesTests" fullname="Unity.MLAgents.Tests.Communicator.UnityRLCapabilitiesTests" classname="Unity.MLAgents.Tests.Communicator.UnityRLCapabilitiesTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.001233" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1226" name="TestWarnOnPythonMissingBaseRLCapabilities" fullname="Unity.MLAgents.Tests.Communicator.UnityRLCapabilitiesTests.TestWarnOnPythonMissingBaseRLCapabilities" methodname="TestWarnOnPythonMissingBaseRLCapabilities" classname="Unity.MLAgents.Tests.Communicator.UnityRLCapabilitiesTests" runstate="Runnable" seed="1241074591" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:45Z" duration="0.000950" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Unity has connected to a Training process that does not supportBase Reinforcement Learning Capabilities.  Please make sure you have the latest training codebase installed for this version of the ML-Agents package.
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1026" name="DemonstrationTests" fullname="Unity.MLAgents.Tests.DemonstrationTests" classname="Unity.MLAgents.Tests.DemonstrationTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:50Z" duration="4.113875" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1029" name="TestAgentWrite" fullname="Unity.MLAgents.Tests.DemonstrationTests.TestAgentWrite" methodname="TestAgentWrite" classname="Unity.MLAgents.Tests.DemonstrationTests" runstate="Runnable" seed="1286014654" result="Passed" start-time="2026-01-24 02:43:45Z" end-time="2026-01-24 02:43:50Z" duration="4.107692" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1027" name="TestSanitization" fullname="Unity.MLAgents.Tests.DemonstrationTests.TestSanitization" methodname="TestSanitization" classname="Unity.MLAgents.Tests.DemonstrationTests" runstate="Runnable" seed="1522365156" result="Passed" start-time="2026-01-24 02:43:50Z" end-time="2026-01-24 02:43:50Z" duration="0.003051" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1028" name="TestStoreInitialize" fullname="Unity.MLAgents.Tests.DemonstrationTests.TestStoreInitialize" methodname="TestStoreInitialize" classname="Unity.MLAgents.Tests.DemonstrationTests" runstate="Runnable" seed="653930863" result="Passed" start-time="2026-01-24 02:43:50Z" end-time="2026-01-24 02:43:50Z" duration="0.002158" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1030" name="DiscreteActionOutputApplierTest" fullname="Unity.MLAgents.Tests.DiscreteActionOutputApplierTest" classname="Unity.MLAgents.Tests.DiscreteActionOutputApplierTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:43:50Z" end-time="2026-01-24 02:43:50Z" duration="0.003742" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1031" name="TestDiscreteApply" fullname="Unity.MLAgents.Tests.DiscreteActionOutputApplierTest.TestDiscreteApply" methodname="TestDiscreteApply" classname="Unity.MLAgents.Tests.DiscreteActionOutputApplierTest" runstate="Runnable" seed="245204212" result="Passed" start-time="2026-01-24 02:43:50Z" end-time="2026-01-24 02:43:50Z" duration="0.002079" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1105" name="EditModeTestGeneration" fullname="Unity.MLAgents.Tests.EditModeTestGeneration" classname="Unity.MLAgents.Tests.EditModeTestGeneration" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:43:50Z" end-time="2026-01-24 02:43:54Z" duration="4.125440" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1106" name="TestAcademy" fullname="Unity.MLAgents.Tests.EditModeTestGeneration.TestAcademy" methodname="TestAcademy" classname="Unity.MLAgents.Tests.EditModeTestGeneration" runstate="Runnable" seed="298717457" result="Passed" start-time="2026-01-24 02:43:50Z" end-time="2026-01-24 02:43:54Z" duration="4.122750" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1107" name="TestAgent" fullname="Unity.MLAgents.Tests.EditModeTestGeneration.TestAgent" methodname="TestAgent" classname="Unity.MLAgents.Tests.EditModeTestGeneration" runstate="Runnable" seed="1466101064" result="Passed" start-time="2026-01-24 02:43:54Z" end-time="2026-01-24 02:43:54Z" duration="0.002178" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1108" name="EditModeTestInitialization" fullname="Unity.MLAgents.Tests.EditModeTestInitialization" classname="Unity.MLAgents.Tests.EditModeTestInitialization" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:43:54Z" end-time="2026-01-24 02:44:10Z" duration="16.445944" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1109" name="TestAcademy" fullname="Unity.MLAgents.Tests.EditModeTestInitialization.TestAcademy" methodname="TestAcademy" classname="Unity.MLAgents.Tests.EditModeTestInitialization" runstate="Runnable" seed="1145724214" result="Passed" start-time="2026-01-24 02:43:54Z" end-time="2026-01-24 02:43:58Z" duration="4.099777" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1110" name="TestAcademyDispose" fullname="Unity.MLAgents.Tests.EditModeTestInitialization.TestAcademyDispose" methodname="TestAcademyDispose" classname="Unity.MLAgents.Tests.EditModeTestInitialization" runstate="Runnable" seed="2023131205" result="Passed" start-time="2026-01-24 02:43:58Z" end-time="2026-01-24 02:44:06Z" duration="8.230087" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1111" name="TestAgent" fullname="Unity.MLAgents.Tests.EditModeTestInitialization.TestAgent" methodname="TestAgent" classname="Unity.MLAgents.Tests.EditModeTestInitialization" runstate="Runnable" seed="127339381" result="Passed" start-time="2026-01-24 02:44:06Z" end-time="2026-01-24 02:44:10Z" duration="4.114691" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1034" name="EditModeTestInternalBrainTensorApplier" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.006427" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1036" name="ApplyContinuousActionOutput" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier.ApplyContinuousActionOutput" methodname="ApplyContinuousActionOutput" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" runstate="Runnable" seed="1791164609" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.001864" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1038" name="ApplyDiscreteActionOutput" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier.ApplyDiscreteActionOutput" methodname="ApplyDiscreteActionOutput" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" runstate="Runnable" seed="860240113" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.000379" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1037" name="ApplyDiscreteActionOutputLegacy" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier.ApplyDiscreteActionOutputLegacy" methodname="ApplyDiscreteActionOutputLegacy" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" runstate="Runnable" seed="1605704186" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.001059" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1040" name="ApplyHybridActionOutput" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier.ApplyHybridActionOutput" methodname="ApplyHybridActionOutput" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" runstate="Runnable" seed="555176904" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.000599" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1039" name="ApplyHybridActionOutputLegacy" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier.ApplyHybridActionOutputLegacy" methodname="ApplyHybridActionOutputLegacy" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" runstate="Runnable" seed="850493571" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.000515" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1035" name="Construction" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier.Construction" methodname="Construction" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorApplier" runstate="Runnable" seed="1815450799" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.000153" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1041" name="EditModeTestInternalBrainTensorGenerator" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:22Z" duration="12.261409" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1042" name="Construction" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator.Construction" methodname="Construction" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" runstate="Runnable" seed="884312563" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:10Z" duration="0.002761" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="GenerateActionMaskInput" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator.GenerateActionMaskInput" methodname="GenerateActionMaskInput" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" runstate="Runnable" seed="1436787885" result="Passed" start-time="2026-01-24 02:44:10Z" end-time="2026-01-24 02:44:14Z" duration="4.090934" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1043" name="GenerateBatchSize" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator.GenerateBatchSize" methodname="GenerateBatchSize" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" runstate="Runnable" seed="1037930108" result="Passed" start-time="2026-01-24 02:44:14Z" end-time="2026-01-24 02:44:14Z" duration="0.002026" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1046" name="GeneratePreviousActionInput" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator.GeneratePreviousActionInput" methodname="GeneratePreviousActionInput" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" runstate="Runnable" seed="1228680889" result="Passed" start-time="2026-01-24 02:44:14Z" end-time="2026-01-24 02:44:18Z" duration="4.091283" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1044" name="GenerateSequenceLength" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator.GenerateSequenceLength" methodname="GenerateSequenceLength" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" runstate="Runnable" seed="1604214194" result="Passed" start-time="2026-01-24 02:44:18Z" end-time="2026-01-24 02:44:18Z" duration="0.001631" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1045" name="GenerateVectorObservation" fullname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator.GenerateVectorObservation" methodname="GenerateVectorObservation" classname="Unity.MLAgents.Tests.EditModeTestInternalBrainTensorGenerator" runstate="Runnable" seed="1440077376" result="Passed" start-time="2026-01-24 02:44:18Z" end-time="2026-01-24 02:44:22Z" duration="4.071447" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1119" name="EditModeTestMiscellaneous" fullname="Unity.MLAgents.Tests.EditModeTestMiscellaneous" classname="Unity.MLAgents.Tests.EditModeTestMiscellaneous" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:44:22Z" end-time="2026-01-24 02:44:35Z" duration="12.481042" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1120" name="TestCumulativeReward" fullname="Unity.MLAgents.Tests.EditModeTestMiscellaneous.TestCumulativeReward" methodname="TestCumulativeReward" classname="Unity.MLAgents.Tests.EditModeTestMiscellaneous" runstate="Runnable" seed="1188938978" result="Passed" start-time="2026-01-24 02:44:23Z" end-time="2026-01-24 02:44:27Z" duration="4.091940" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1122" name="TestHeuristicPolicyStepsSensors" fullname="Unity.MLAgents.Tests.EditModeTestMiscellaneous.TestHeuristicPolicyStepsSensors" methodname="TestHeuristicPolicyStepsSensors" classname="Unity.MLAgents.Tests.EditModeTestMiscellaneous" runstate="Runnable" seed="1554621637" result="Passed" start-time="2026-01-24 02:44:27Z" end-time="2026-01-24 02:44:31Z" duration="4.096553" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1121" name="TestMaxStepsReset" fullname="Unity.MLAgents.Tests.EditModeTestMiscellaneous.TestMaxStepsReset" methodname="TestMaxStepsReset" classname="Unity.MLAgents.Tests.EditModeTestMiscellaneous" runstate="Runnable" seed="1850390920" result="Passed" start-time="2026-01-24 02:44:31Z" end-time="2026-01-24 02:44:35Z" duration="4.131517" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1123" name="TestNullList" fullname="Unity.MLAgents.Tests.EditModeTestMiscellaneous.TestNullList" methodname="TestNullList" classname="Unity.MLAgents.Tests.EditModeTestMiscellaneous" runstate="Runnable" seed="735975630" result="Passed" start-time="2026-01-24 02:44:35Z" end-time="2026-01-24 02:44:35Z" duration="0.002237" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1116" name="EditModeTestReset" fullname="Unity.MLAgents.Tests.EditModeTestReset" classname="Unity.MLAgents.Tests.EditModeTestReset" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:44:35Z" end-time="2026-01-24 02:44:43Z" duration="8.234149" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1117" name="TestAcademy" fullname="Unity.MLAgents.Tests.EditModeTestReset.TestAcademy" methodname="TestAcademy" classname="Unity.MLAgents.Tests.EditModeTestReset" runstate="Runnable" seed="1878131633" result="Passed" start-time="2026-01-24 02:44:35Z" end-time="2026-01-24 02:44:39Z" duration="4.091303" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1118" name="TestAgent" fullname="Unity.MLAgents.Tests.EditModeTestReset.TestAgent" methodname="TestAgent" classname="Unity.MLAgents.Tests.EditModeTestReset" runstate="Runnable" seed="1307391130" result="Passed" start-time="2026-01-24 02:44:39Z" end-time="2026-01-24 02:44:43Z" duration="4.141531" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1112" name="EditModeTestStep" fullname="Unity.MLAgents.Tests.EditModeTestStep" classname="Unity.MLAgents.Tests.EditModeTestStep" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:44:43Z" end-time="2026-01-24 02:44:55Z" duration="12.340598" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1113" name="TestAcademy" fullname="Unity.MLAgents.Tests.EditModeTestStep.TestAcademy" methodname="TestAcademy" classname="Unity.MLAgents.Tests.EditModeTestStep" runstate="Runnable" seed="1205488081" result="Passed" start-time="2026-01-24 02:44:43Z" end-time="2026-01-24 02:44:47Z" duration="4.073541" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1114" name="TestAcademyAutostep" fullname="Unity.MLAgents.Tests.EditModeTestStep.TestAcademyAutostep" methodname="TestAcademyAutostep" classname="Unity.MLAgents.Tests.EditModeTestStep" runstate="Runnable" seed="332425023" result="Passed" start-time="2026-01-24 02:44:47Z" end-time="2026-01-24 02:44:51Z" duration="4.118820" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+              <test-case id="1115" name="TestAgent" fullname="Unity.MLAgents.Tests.EditModeTestStep.TestAgent" methodname="TestAgent" classname="Unity.MLAgents.Tests.EditModeTestStep" runstate="Runnable" seed="635935846" result="Passed" start-time="2026-01-24 02:44:51Z" end-time="2026-01-24 02:44:55Z" duration="4.146858" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1161" name="EngineConfigurationChannelTests" fullname="Unity.MLAgents.Tests.EngineConfigurationChannelTests" classname="Unity.MLAgents.Tests.EngineConfigurationChannelTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.002991" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1162" name="TestTimeScaleClamping" fullname="Unity.MLAgents.Tests.EngineConfigurationChannelTests.TestTimeScaleClamping" methodname="TestTimeScaleClamping" classname="Unity.MLAgents.Tests.EngineConfigurationChannelTests" runstate="Runnable" seed="225422031" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.001720" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1018" name="GrpcExtensionsTests" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.006778" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1020" name="TestDefaultActionSpecToProto" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests.TestDefaultActionSpecToProto" methodname="TestDefaultActionSpecToProto" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" seed="2041121415" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000569" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1022" name="TestDefaultAgentInfoToProto" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests.TestDefaultAgentInfoToProto" methodname="TestDefaultAgentInfoToProto" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" seed="2022604080" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.001689" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Attached trainer doesn't support Multi Agent Groups; group rewards will be ignored.Please find the versions that work best together from our release page: https://github.com/Unity-Technologies/ml-agents/releases
+]]></output>
+              </test-case>
+              <test-case id="1019" name="TestDefaultBrainParametersToProto" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests.TestDefaultBrainParametersToProto" methodname="TestDefaultBrainParametersToProto" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" seed="1903199140" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000161" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1023" name="TestDefaultDemonstrationMetaDataToProto" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests.TestDefaultDemonstrationMetaDataToProto" methodname="TestDefaultDemonstrationMetaDataToProto" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" seed="697781282" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000105" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1025" name="TestDefaultTrainingEvents" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests.TestDefaultTrainingEvents" methodname="TestDefaultTrainingEvents" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" seed="1217238513" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000982" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1024" name="TestGetObservationProtoCapabilities" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests.TestGetObservationProtoCapabilities" methodname="TestGetObservationProtoCapabilities" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" seed="1529373967" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.001765" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Attached trainer doesn't support multiple PNGs. Switching to uncompressed observations for sensor Dummy. Please find the versions that work best together from our release page: https://github.com/Unity-Technologies/ml-agents/releases
+]]></output>
+              </test-case>
+              <test-case id="1021" name="ToBrainParameters" fullname="Unity.MLAgents.Tests.GrpcExtensionsTests.ToBrainParameters" methodname="ToBrainParameters" classname="Unity.MLAgents.Tests.GrpcExtensionsTests" runstate="Runnable" seed="553932681" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000534" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1081" name="InplaceArrayTests" fullname="Unity.MLAgents.Tests.InplaceArrayTests" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.005747" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="ParameterizedMethod" id="1104" name="TestFromList" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestFromList" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.001201" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1100" name="TestFromList(1)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestFromList(1)" methodname="TestFromList" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="714924339" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000617" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1101" name="TestFromList(2)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestFromList(2)" methodname="TestFromList" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="126478835" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000145" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1102" name="TestFromList(3)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestFromList(3)" methodname="TestFromList" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="390361811" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1103" name="TestFromList(4)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestFromList(4)" methodname="TestFromList" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="136325530" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000077" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1082" name="TestInplaceArrayCtor" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInplaceArrayCtor" methodname="TestInplaceArrayCtor" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="302889018" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000254" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1087" name="TestInplaceGetSet" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInplaceGetSet" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000647" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1083" name="TestInplaceGetSet(1)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInplaceGetSet(1)" methodname="TestInplaceGetSet" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="135399577" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000221" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1084" name="TestInplaceGetSet(2)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInplaceGetSet(2)" methodname="TestInplaceGetSet" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="1391666615" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000049" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1085" name="TestInplaceGetSet(3)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInplaceGetSet(3)" methodname="TestInplaceGetSet" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="1513556511" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000038" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1086" name="TestInplaceGetSet(4)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInplaceGetSet(4)" methodname="TestInplaceGetSet" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="557895608" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000039" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="ParameterizedMethod" id="1092" name="TestInvalidAccess" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInvalidAccess" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.001118" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1088" name="TestInvalidAccess(1)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInvalidAccess(1)" methodname="TestInvalidAccess" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="1873960085" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000427" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1089" name="TestInvalidAccess(2)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInvalidAccess(2)" methodname="TestInvalidAccess" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="797855441" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000270" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1090" name="TestInvalidAccess(3)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInvalidAccess(3)" methodname="TestInvalidAccess" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="353161523" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000062" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1091" name="TestInvalidAccess(4)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestInvalidAccess(4)" methodname="TestInvalidAccess" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="1930575454" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="ParameterizedMethod" id="1098" name="TestOperatorEquals" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestOperatorEquals" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.001178" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1094" name="TestOperatorEquals(1)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestOperatorEquals(1)" methodname="TestOperatorEquals" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="401606951" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000464" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1095" name="TestOperatorEquals(2)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestOperatorEquals(2)" methodname="TestOperatorEquals" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="1129176744" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000131" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1096" name="TestOperatorEquals(3)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestOperatorEquals(3)" methodname="TestOperatorEquals" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="713667290" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000115" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1097" name="TestOperatorEquals(4)" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestOperatorEquals(4)" methodname="TestOperatorEquals" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="452410310" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000087" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1093" name="TestOperatorEqualsDifferentLengths" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestOperatorEqualsDifferentLengths" methodname="TestOperatorEqualsDifferentLengths" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="1294495838" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000333" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1099" name="TestToString" fullname="Unity.MLAgents.Tests.InplaceArrayTests.TestToString" methodname="TestToString" classname="Unity.MLAgents.Tests.InplaceArrayTests" runstate="Runnable" seed="63850970" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000288" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestSuite" id="1299" name="Integrations" fullname="Unity.MLAgents.Tests.Integrations" runstate="Runnable" testcasecount="31" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:45:04Z" duration="8.193351" total="31" passed="31" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestSuite" id="1300" name="Match3" fullname="Unity.MLAgents.Tests.Integrations.Match3" runstate="Runnable" testcasecount="31" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:45:04Z" duration="8.193196" total="31" passed="31" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-suite type="TestFixture" id="1181" name="AbstractBoardTests" fullname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests" classname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.005379" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1182" name="TestBoardInit" fullname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests.TestBoardInit" methodname="TestBoardInit" classname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests" runstate="Runnable" seed="2040137087" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000957" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-suite type="ParameterizedMethod" id="1185" name="TestCheckValidMoves" fullname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests.TestCheckValidMoves" classname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.004109" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                    <properties />
+                    <test-case id="1183" name="Full Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests.Full Board" methodname="TestCheckValidMoves" classname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests" runstate="Runnable" seed="366123921" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.003368" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1184" name="Small Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests.Small Board" methodname="TestCheckValidMoves" classname="Unity.MLAgents.Tests.Integrations.Match3.AbstractBoardTests" runstate="Runnable" seed="1815519367" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000216" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                  </test-suite>
+                </test-suite>
+                <test-suite type="TestFixture" id="1186" name="Match3ActuatorTests" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:45:04Z" duration="8.166391" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1190" name="TestActionSpec" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.TestActionSpec" methodname="TestActionSpec" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" seed="337801891" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.002122" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1191" name="TestActionSpecNullBoard" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.TestActionSpecNullBoard" methodname="TestActionSpecNullBoard" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" seed="549549167" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000276" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-suite type="ParameterizedMethod" id="1194" name="TestMasking" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.TestMasking" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.002096" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                    <properties />
+                    <test-case id="1192" name="Full Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.Full Board" methodname="TestMasking" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" seed="111116214" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.001419" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1193" name="Small Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.Small Board" methodname="TestMasking" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" seed="326122945" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000165" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                  </test-suite>
+                  <test-case id="1195" name="TestNoBoardReturnsEmptyActuators" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.TestNoBoardReturnsEmptyActuators" methodname="TestNoBoardReturnsEmptyActuators" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" seed="69682824" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:44:55Z" duration="0.000192" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-suite type="ParameterizedMethod" id="1189" name="TestValidMoves" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.TestValidMoves" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:45:04Z" duration="8.160943" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                    <properties />
+                    <test-case id="1187" name="TestValidMoves(True)" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.TestValidMoves(True)" methodname="TestValidMoves" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" seed="1613389334" result="Passed" start-time="2026-01-24 02:44:55Z" end-time="2026-01-24 02:45:00Z" duration="4.081315" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                      <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+Fewer observations (0) made than vector observation size (1). The observations will be padded.
+]]></output>
+                    </test-case>
+                    <test-case id="1188" name="TestValidMoves(False)" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests.TestValidMoves(False)" methodname="TestValidMoves" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3ActuatorTests" runstate="Runnable" seed="529313530" result="Passed" start-time="2026-01-24 02:45:00Z" end-time="2026-01-24 02:45:04Z" duration="4.079088" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                      <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+Fewer observations (0) made than vector observation size (1). The observations will be padded.
+]]></output>
+                    </test-case>
+                  </test-suite>
+                </test-suite>
+                <test-suite type="TestFixture" id="1196" name="Match3SensorTests" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.017854" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-suite type="ParameterizedMethod" id="1209" name="TestCompressedVisualObservationsSpecial" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.TestCompressedVisualObservationsSpecial" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.011536" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                    <properties />
+                    <test-case id="1205" name="Full Board, No Special" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Full Board, No Special" methodname="TestCompressedVisualObservationsSpecial" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="1728124345" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.006855" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1206" name="Small Board, No Special" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Small Board, No Special" methodname="TestCompressedVisualObservationsSpecial" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="1429055357" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000869" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1207" name="Full Board, Special" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Full Board, Special" methodname="TestCompressedVisualObservationsSpecial" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="275142476" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.002135" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1208" name="Small Board, Special" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Small Board, Special" methodname="TestCompressedVisualObservationsSpecial" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="1036577749" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001165" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                  </test-suite>
+                  <test-case id="1210" name="TestNoBoardReturnsEmptySensors" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.TestNoBoardReturnsEmptySensors" methodname="TestNoBoardReturnsEmptySensors" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="38347654" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000283" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-suite type="ParameterizedMethod" id="1199" name="TestVectorObservations" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.TestVectorObservations" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001838" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                    <properties />
+                    <test-case id="1197" name="Full Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Full Board" methodname="TestVectorObservations" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="195121504" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001064" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1198" name="Small Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Small Board" methodname="TestVectorObservations" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="1837092779" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000220" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                  </test-suite>
+                  <test-case id="1200" name="TestVectorObservationsSpecial" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.TestVectorObservationsSpecial" methodname="TestVectorObservationsSpecial" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="1769471959" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000353" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-suite type="ParameterizedMethod" id="1203" name="TestVisualObservations" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.TestVisualObservations" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001911" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                    <properties />
+                    <test-case id="1201" name="Full Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Full Board" methodname="TestVisualObservations" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="806772227" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001132" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1202" name="Small Board" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.Small Board" methodname="TestVisualObservations" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="1809822935" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000130" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                  </test-suite>
+                  <test-case id="1204" name="TestVisualObservationsSpecial" fullname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests.TestVisualObservationsSpecial" methodname="TestVisualObservationsSpecial" classname="Unity.MLAgents.Tests.Integrations.Match3.Match3SensorTests" runstate="Runnable" seed="385330259" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000546" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+                <test-suite type="TestFixture" id="1211" name="MoveTests" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.003281" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-suite type="ParameterizedMethod" id="1222" name="TestInvalidMove" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001701" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+                    <properties />
+                    <test-case id="1214" name="TestInvalidMove(-1,5,Up)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(-1,5,Up)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="583245563" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000571" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1215" name="TestInvalidMove(10,5,Up)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(10,5,Up)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="1975254697" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000115" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1216" name="TestInvalidMove(5,-1,Up)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(5,-1,Up)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="2138931229" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000082" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1217" name="TestInvalidMove(5,10,Up)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(5,10,Up)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="1730597963" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000068" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1218" name="TestInvalidMove(0,5,Down)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(0,5,Down)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="1538022134" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000075" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1219" name="TestInvalidMove(9,5,Up)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(9,5,Up)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="514390496" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000065" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1220" name="TestInvalidMove(5,0,Left)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(5,0,Left)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="1403512921" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000078" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                    <test-case id="1221" name="TestInvalidMove(5,9,Right)" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestInvalidMove(5,9,Right)" methodname="TestInvalidMove" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="2121758518" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000071" asserts="0">
+                      <properties>
+                        <property name="retryIteration" value="0" />
+                        <property name="repeatIteration" value="0" />
+                      </properties>
+                    </test-case>
+                  </test-suite>
+                  <test-case id="1212" name="TestMoveEquivalence" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestMoveEquivalence" methodname="TestMoveEquivalence" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="108255600" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000148" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                  <test-case id="1213" name="TestNext" fullname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests.TestNext" methodname="TestNext" classname="Unity.MLAgents.Tests.Integrations.Match3.MoveTests" runstate="Runnable" seed="627007219" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000715" asserts="0">
+                    <properties>
+                      <property name="retryIteration" value="0" />
+                      <property name="repeatIteration" value="0" />
+                    </properties>
+                  </test-case>
+                </test-suite>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1032" name="LegacyDiscreteActionOutputApplierTest" fullname="Unity.MLAgents.Tests.LegacyDiscreteActionOutputApplierTest" classname="Unity.MLAgents.Tests.LegacyDiscreteActionOutputApplierTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000768" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1033" name="TestDiscreteApply" fullname="Unity.MLAgents.Tests.LegacyDiscreteActionOutputApplierTest.TestDiscreteApply" methodname="TestDiscreteApply" classname="Unity.MLAgents.Tests.LegacyDiscreteActionOutputApplierTest" runstate="Runnable" seed="728683813" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000449" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1048" name="ModelRunnerTest" fullname="Unity.MLAgents.Tests.ModelRunnerTest" classname="Unity.MLAgents.Tests.ModelRunnerTest" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.060467" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1050" name="TestCreation" fullname="Unity.MLAgents.Tests.ModelRunnerTest.TestCreation" methodname="TestCreation" classname="Unity.MLAgents.Tests.ModelRunnerTest" runstate="Runnable" seed="490257410" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.038958" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1051" name="TestHasModel" fullname="Unity.MLAgents.Tests.ModelRunnerTest.TestHasModel" methodname="TestHasModel" classname="Unity.MLAgents.Tests.ModelRunnerTest" runstate="Runnable" seed="1680697865" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.003840" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1049" name="TestModelExist" fullname="Unity.MLAgents.Tests.ModelRunnerTest.TestModelExist" methodname="TestModelExist" classname="Unity.MLAgents.Tests.ModelRunnerTest" runstate="Runnable" seed="75273839" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000341" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1052" name="TestRunModel" fullname="Unity.MLAgents.Tests.ModelRunnerTest.TestRunModel" methodname="TestRunModel" classname="Unity.MLAgents.Tests.ModelRunnerTest" runstate="Runnable" seed="897163013" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.008566" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Fewer observations (0) made than vector observation size (8). The observations will be padded.
+]]></output>
+              </test-case>
+              <test-case id="1054" name="TestRunModel_deterministic" fullname="Unity.MLAgents.Tests.ModelRunnerTest.TestRunModel_deterministic" methodname="TestRunModel_deterministic" classname="Unity.MLAgents.Tests.ModelRunnerTest" runstate="Runnable" seed="1300421126" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.004862" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Fewer observations (0) made than vector observation size (8). The observations will be padded.
+]]></output>
+              </test-case>
+              <test-case id="1053" name="TestRunModel_stochastic" fullname="Unity.MLAgents.Tests.ModelRunnerTest.TestRunModel_stochastic" methodname="TestRunModel_stochastic" classname="Unity.MLAgents.Tests.ModelRunnerTest" runstate="Runnable" seed="834745112" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.003074" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Fewer observations (0) made than vector observation size (8). The observations will be padded.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1132" name="MultiAgentGroupTests" fullname="Unity.MLAgents.Tests.MultiAgentGroupTests" classname="Unity.MLAgents.Tests.MultiAgentGroupTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.003324" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1135" name="TestGroupIdCounter" fullname="Unity.MLAgents.Tests.MultiAgentGroupTests.TestGroupIdCounter" methodname="TestGroupIdCounter" classname="Unity.MLAgents.Tests.MultiAgentGroupTests" runstate="Runnable" seed="585355703" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000317" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1133" name="TestRegisteredAgentGroupId" fullname="Unity.MLAgents.Tests.MultiAgentGroupTests.TestRegisteredAgentGroupId" methodname="TestRegisteredAgentGroupId" classname="Unity.MLAgents.Tests.MultiAgentGroupTests" runstate="Runnable" seed="1459408766" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001252" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1134" name="TestRegisterMultipleAgent" fullname="Unity.MLAgents.Tests.MultiAgentGroupTests.TestRegisterMultipleAgent" methodname="TestRegisterMultipleAgent" classname="Unity.MLAgents.Tests.MultiAgentGroupTests" runstate="Runnable" seed="1567203532" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000919" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1136" name="MultinomialTest" fullname="Unity.MLAgents.Tests.MultinomialTest" classname="Unity.MLAgents.Tests.MultinomialTest" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001318" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1137" name="TestDim1" fullname="Unity.MLAgents.Tests.MultinomialTest.TestDim1" methodname="TestDim1" classname="Unity.MLAgents.Tests.MultinomialTest" runstate="Runnable" seed="598215225" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000175" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1138" name="TestDim1Unscaled" fullname="Unity.MLAgents.Tests.MultinomialTest.TestDim1Unscaled" methodname="TestDim1Unscaled" classname="Unity.MLAgents.Tests.MultinomialTest" runstate="Runnable" seed="20155221" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000125" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1139" name="TestDim3" fullname="Unity.MLAgents.Tests.MultinomialTest.TestDim3" methodname="TestDim3" classname="Unity.MLAgents.Tests.MultinomialTest" runstate="Runnable" seed="1509832064" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000136" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1140" name="TestDim3Unscaled" fullname="Unity.MLAgents.Tests.MultinomialTest.TestDim3Unscaled" methodname="TestDim3Unscaled" classname="Unity.MLAgents.Tests.MultinomialTest" runstate="Runnable" seed="205238797" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000134" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1127" name="ObservableAttributeBehaviorTests" fullname="Unity.MLAgents.Tests.ObservableAttributeBehaviorTests" classname="Unity.MLAgents.Tests.ObservableAttributeBehaviorTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001687" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1128" name="TestObservableAttributeBehaviorIgnore" fullname="Unity.MLAgents.Tests.ObservableAttributeBehaviorTests.TestObservableAttributeBehaviorIgnore" methodname="TestObservableAttributeBehaviorIgnore" classname="Unity.MLAgents.Tests.ObservableAttributeBehaviorTests" runstate="Runnable" seed="981017947" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001376" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1141" name="ObservationSpecTests" fullname="Unity.MLAgents.Tests.ObservationSpecTests" classname="Unity.MLAgents.Tests.ObservationSpecTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001702" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1145" name="TestMismatchShapeDimensionPropThrows" fullname="Unity.MLAgents.Tests.ObservationSpecTests.TestMismatchShapeDimensionPropThrows" methodname="TestMismatchShapeDimensionPropThrows" classname="Unity.MLAgents.Tests.ObservationSpecTests" runstate="Runnable" seed="757998399" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000247" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1143" name="TestVariableLengthObsSpec" fullname="Unity.MLAgents.Tests.ObservationSpecTests.TestVariableLengthObsSpec" methodname="TestVariableLengthObsSpec" classname="Unity.MLAgents.Tests.ObservationSpecTests" runstate="Runnable" seed="2074437308" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000325" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1142" name="TestVectorObsSpec" fullname="Unity.MLAgents.Tests.ObservationSpecTests.TestVectorObsSpec" methodname="TestVectorObsSpec" classname="Unity.MLAgents.Tests.ObservationSpecTests" runstate="Runnable" seed="1040379726" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000204" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1144" name="TestVisualObsSpec" fullname="Unity.MLAgents.Tests.ObservationSpecTests.TestVisualObsSpec" methodname="TestVisualObsSpec" classname="Unity.MLAgents.Tests.ObservationSpecTests" runstate="Runnable" seed="722309865" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000220" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1055" name="ParameterLoaderTest" fullname="Unity.MLAgents.Tests.ParameterLoaderTest" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.114430" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1062" name="TestCheckModelRank2" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelRank2" methodname="TestCheckModelRank2" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1237250106" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.042138" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1070" name="TestCheckModelThrowsActionContinuous" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelThrowsActionContinuous" methodname="TestCheckModelThrowsActionContinuous" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1966463718" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.010164" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1071" name="TestCheckModelThrowsActionDiscrete" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelThrowsActionDiscrete" methodname="TestCheckModelThrowsActionDiscrete" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1913010505" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.007581" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1072" name="TestCheckModelThrowsActionHybrid" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelThrowsActionHybrid" methodname="TestCheckModelThrowsActionHybrid" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1269506070" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.005260" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1073" name="TestCheckModelThrowsNoModel" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelThrowsNoModel" methodname="TestCheckModelThrowsNoModel" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="921902834" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000330" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1067" name="TestCheckModelThrowsVectorObservationContinuous" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelThrowsVectorObservationContinuous" methodname="TestCheckModelThrowsVectorObservationContinuous" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1016278914" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.007982" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1068" name="TestCheckModelThrowsVectorObservationDiscrete" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelThrowsVectorObservationDiscrete" methodname="TestCheckModelThrowsVectorObservationDiscrete" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1980130680" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.004218" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1069" name="TestCheckModelThrowsVectorObservationHybrid" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelThrowsVectorObservationHybrid" methodname="TestCheckModelThrowsVectorObservationHybrid" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1196143189" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.005129" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1063" name="TestCheckModelValidContinuous" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelValidContinuous" methodname="TestCheckModelValidContinuous" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="955341378" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.004217" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1064" name="TestCheckModelValidDiscrete" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelValidDiscrete" methodname="TestCheckModelValidDiscrete" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="373656530" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.005119" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Models from com.unity.ml-agents 1.x that use recurrent neural networks are not supported in newer versions. Either retrain with an newer trainer, or use an older version of com.unity.ml-agents.
+
+The model does not contain a Recurrent Input Node but has memory_size.
+]]></output>
+              </test-case>
+              <test-case id="1066" name="TestCheckModelValidHybrid" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelValidHybrid" methodname="TestCheckModelValidHybrid" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1243178847" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.002820" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1065" name="TestCheckModelValidRecurrent" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestCheckModelValidRecurrent" methodname="TestCheckModelValidRecurrent" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1087195510" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.011129" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1057" name="TestGetInputTensorsContinuous" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestGetInputTensorsContinuous" methodname="TestGetInputTensorsContinuous" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="486622132" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001455" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1058" name="TestGetInputTensorsHybrid" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestGetInputTensorsHybrid" methodname="TestGetInputTensorsHybrid" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1980488155" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001012" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1059" name="TestGetOutputTensorsContinuous" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestGetOutputTensorsContinuous" methodname="TestGetOutputTensorsContinuous" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="53430728" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001392" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1060" name="TestGetOutputTensorsDiscrete" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestGetOutputTensorsDiscrete" methodname="TestGetOutputTensorsDiscrete" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1429226132" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001374" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1061" name="TestGetOutputTensorsHybrid" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestGetOutputTensorsHybrid" methodname="TestGetOutputTensorsHybrid" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="1110447235" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.001016" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1056" name="TestModelExist" fullname="Unity.MLAgents.Tests.ParameterLoaderTest.TestModelExist" methodname="TestModelExist" classname="Unity.MLAgents.Tests.ParameterLoaderTest" runstate="Runnable" seed="886091561" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:04Z" duration="0.000261" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestSuite" id="1298" name="Policies" fullname="Unity.MLAgents.Tests.Policies" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:08Z" duration="4.070712" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1179" name="HeuristicPolicyTest" fullname="Unity.MLAgents.Tests.Policies.HeuristicPolicyTest" classname="Unity.MLAgents.Tests.Policies.HeuristicPolicyTest" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:08Z" duration="4.069906" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1180" name="TestActionsCleared" fullname="Unity.MLAgents.Tests.Policies.HeuristicPolicyTest.TestActionsCleared" methodname="TestActionsCleared" classname="Unity.MLAgents.Tests.Policies.HeuristicPolicyTest" runstate="Runnable" seed="343545687" result="Passed" start-time="2026-01-24 02:45:04Z" end-time="2026-01-24 02:45:08Z" duration="4.069520" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Couldn't connect to trainer on port 5004 using API version 1.5.0. Will perform inference instead.
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1146" name="RandomNormalTest" fullname="Unity.MLAgents.Tests.RandomNormalTest" classname="Unity.MLAgents.Tests.RandomNormalTest" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.005747" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1151" name="RandomNormalTestDistribution" fullname="Unity.MLAgents.Tests.RandomNormalTest.RandomNormalTestDistribution" methodname="RandomNormalTestDistribution" classname="Unity.MLAgents.Tests.RandomNormalTest" runstate="Runnable" seed="1350745575" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.003910" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1147" name="RandomNormalTestTwoDouble" fullname="Unity.MLAgents.Tests.RandomNormalTest.RandomNormalTestTwoDouble" methodname="RandomNormalTestTwoDouble" classname="Unity.MLAgents.Tests.RandomNormalTest" runstate="Runnable" seed="139189142" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000188" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1148" name="RandomNormalTestWithMean" fullname="Unity.MLAgents.Tests.RandomNormalTest.RandomNormalTestWithMean" methodname="RandomNormalTestWithMean" classname="Unity.MLAgents.Tests.RandomNormalTest" runstate="Runnable" seed="658058811" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000122" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1150" name="RandomNormalTestWithMeanStddev" fullname="Unity.MLAgents.Tests.RandomNormalTest.RandomNormalTestWithMeanStddev" methodname="RandomNormalTestWithMeanStddev" classname="Unity.MLAgents.Tests.RandomNormalTest" runstate="Runnable" seed="2065913821" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000118" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1149" name="RandomNormalTestWithStddev" fullname="Unity.MLAgents.Tests.RandomNormalTest.RandomNormalTestWithStddev" methodname="RandomNormalTestWithStddev" classname="Unity.MLAgents.Tests.RandomNormalTest" runstate="Runnable" seed="269112386" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000105" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1152" name="RecursionCheckerTests" fullname="Unity.MLAgents.Tests.RecursionCheckerTests" classname="Unity.MLAgents.Tests.RecursionCheckerTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.001057" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1153" name="TestRecursionCheck" fullname="Unity.MLAgents.Tests.RecursionCheckerTests.TestRecursionCheck" methodname="TestRecursionCheck" classname="Unity.MLAgents.Tests.RecursionCheckerTests" runstate="Runnable" seed="989963852" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000302" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1154" name="TestThrowResetsFlag" fullname="Unity.MLAgents.Tests.RecursionCheckerTests.TestThrowResetsFlag" methodname="TestThrowResetsFlag" classname="Unity.MLAgents.Tests.RecursionCheckerTests" runstate="Runnable" seed="258787590" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000311" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1155" name="SamplerTests" fullname="Unity.MLAgents.Tests.SamplerTests" classname="Unity.MLAgents.Tests.SamplerTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.003652" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1157" name="GaussianSamplerTest" fullname="Unity.MLAgents.Tests.SamplerTests.GaussianSamplerTest" methodname="GaussianSamplerTest" classname="Unity.MLAgents.Tests.SamplerTests" runstate="Runnable" seed="2038792567" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.002106" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1158" name="MultiRangeUniformSamplerTest" fullname="Unity.MLAgents.Tests.SamplerTests.MultiRangeUniformSamplerTest" methodname="MultiRangeUniformSamplerTest" classname="Unity.MLAgents.Tests.SamplerTests" runstate="Runnable" seed="1843720573" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000772" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1156" name="UniformSamplerTest" fullname="Unity.MLAgents.Tests.SamplerTests.UniformSamplerTest" methodname="UniformSamplerTest" classname="Unity.MLAgents.Tests.SamplerTests" runstate="Runnable" seed="967214318" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000268" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1163" name="SideChannelTests" fullname="Unity.MLAgents.Tests.SideChannelTests" classname="Unity.MLAgents.Tests.SideChannelTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.004927" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1166" name="TestFloatPropertiesSideChannel" fullname="Unity.MLAgents.Tests.SideChannelTests.TestFloatPropertiesSideChannel" methodname="TestFloatPropertiesSideChannel" classname="Unity.MLAgents.Tests.SideChannelTests" runstate="Runnable" seed="291794826" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.002227" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1164" name="TestIntegerSideChannel" fullname="Unity.MLAgents.Tests.SideChannelTests.TestIntegerSideChannel" methodname="TestIntegerSideChannel" classname="Unity.MLAgents.Tests.SideChannelTests" runstate="Runnable" seed="1584862601" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000437" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1169" name="TestMessageReadDefaults" fullname="Unity.MLAgents.Tests.SideChannelTests.TestMessageReadDefaults" methodname="TestMessageReadDefaults" classname="Unity.MLAgents.Tests.SideChannelTests" runstate="Runnable" seed="1095859742" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000340" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1168" name="TestMessageReadWrites" fullname="Unity.MLAgents.Tests.SideChannelTests.TestMessageReadWrites" methodname="TestMessageReadWrites" classname="Unity.MLAgents.Tests.SideChannelTests" runstate="Runnable" seed="535568834" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000322" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1167" name="TestOutgoingMessageRawBytes" fullname="Unity.MLAgents.Tests.SideChannelTests.TestOutgoingMessageRawBytes" methodname="TestOutgoingMessageRawBytes" classname="Unity.MLAgents.Tests.SideChannelTests" runstate="Runnable" seed="884586954" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000321" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1165" name="TestRawBytesSideChannel" fullname="Unity.MLAgents.Tests.SideChannelTests.TestRawBytesSideChannel" methodname="TestRawBytesSideChannel" classname="Unity.MLAgents.Tests.SideChannelTests" runstate="Runnable" seed="778198712" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000603" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1074" name="TensorUtilsTest" fullname="Unity.MLAgents.Tests.TensorUtilsTest" classname="Unity.MLAgents.Tests.TensorUtilsTest" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.003206" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1079" name="RandomNormalTestDataNull" fullname="Unity.MLAgents.Tests.TensorUtilsTest.RandomNormalTestDataNull" methodname="RandomNormalTestDataNull" classname="Unity.MLAgents.Tests.TensorUtilsTest" runstate="Runnable" seed="823472335" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000753" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1080" name="RandomNormalTestTensor" fullname="Unity.MLAgents.Tests.TensorUtilsTest.RandomNormalTestTensor" methodname="RandomNormalTestTensor" classname="Unity.MLAgents.Tests.TensorUtilsTest" runstate="Runnable" seed="1758031497" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000281" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1078" name="RandomNormalTestTensorInt" fullname="Unity.MLAgents.Tests.TensorUtilsTest.RandomNormalTestTensorInt" methodname="RandomNormalTestTensorInt" classname="Unity.MLAgents.Tests.TensorUtilsTest" runstate="Runnable" seed="1681040574" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000218" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1077" name="TestResizeTensor" fullname="Unity.MLAgents.Tests.TensorUtilsTest.TestResizeTensor" classname="Unity.MLAgents.Tests.TensorUtilsTest" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.001419" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1075" name="TestResizeTensor_4D" fullname="Unity.MLAgents.Tests.TensorUtilsTest.TestResizeTensor_4D" methodname="TestResizeTensor" classname="Unity.MLAgents.Tests.TensorUtilsTest" runstate="Runnable" seed="124899324" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000723" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1076" name="TestResizeTensor_8D" fullname="Unity.MLAgents.Tests.TensorUtilsTest.TestResizeTensor_8D" methodname="TestResizeTensor" classname="Unity.MLAgents.Tests.TensorUtilsTest" runstate="Runnable" seed="206648137" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000433" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1124" name="TestOnEnableOverride" fullname="Unity.MLAgents.Tests.TestOnEnableOverride" classname="Unity.MLAgents.Tests.TestOnEnableOverride" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.002694" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1125" name="TestAgentCallBaseOnEnable" fullname="Unity.MLAgents.Tests.TestOnEnableOverride.TestAgentCallBaseOnEnable" methodname="TestAgentCallBaseOnEnable" classname="Unity.MLAgents.Tests.TestOnEnableOverride" runstate="Runnable" seed="1148116156" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.001810" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Fewer observations (0) made than vector observation size (1). The observations will be padded.
+]]></output>
+              </test-case>
+              <test-case id="1126" name="TestAgentDontCallBaseOnEnable" fullname="Unity.MLAgents.Tests.TestOnEnableOverride.TestAgentDontCallBaseOnEnable" methodname="TestAgentDontCallBaseOnEnable" classname="Unity.MLAgents.Tests.TestOnEnableOverride" runstate="Runnable" seed="580895656" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000419" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1159" name="TestSerialization" fullname="Unity.MLAgents.Tests.TestSerialization" classname="Unity.MLAgents.Tests.TestSerialization" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.002243" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1160" name="TestDeserialization" fullname="Unity.MLAgents.Tests.TestSerialization.TestDeserialization" methodname="TestDeserialization" classname="Unity.MLAgents.Tests.TestSerialization" runstate="Runnable" seed="1894532350" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.001613" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1170" name="TimerTests" fullname="Unity.MLAgents.Tests.TimerTests" classname="Unity.MLAgents.Tests.TimerTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.002275" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1172" name="TestGauges" fullname="Unity.MLAgents.Tests.TimerTests.TestGauges" methodname="TestGauges" classname="Unity.MLAgents.Tests.TimerTests" runstate="Runnable" seed="1814985039" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000476" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1171" name="TestNested" fullname="Unity.MLAgents.Tests.TimerTests.TestNested" methodname="TestNested" classname="Unity.MLAgents.Tests.TimerTests" runstate="Runnable" seed="2077689920" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.001283" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1173" name="TrainingAnalyticsSideChannelTests" fullname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests" classname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.024946" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1176" name="TestInvalidProtobufMessage" fullname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests.TestInvalidProtobufMessage" methodname="TestInvalidProtobufMessage" classname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests" runstate="Runnable" seed="6295733" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.022739" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1175" name="TestTrainingBehaviorReceived" fullname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests.TestTrainingBehaviorReceived" methodname="TestTrainingBehaviorReceived" classname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests" runstate="Runnable" seed="631533589" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.001216" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1174" name="TestTrainingEnvironmentReceived" fullname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests.TestTrainingEnvironmentReceived" methodname="TestTrainingEnvironmentReceived" classname="Unity.MLAgents.Tests.TrainingAnalyticsSideChannelTests" runstate="Runnable" seed="456034767" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000521" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1177" name="UtilitiesTests" fullname="Unity.MLAgents.Tests.UtilitiesTests" classname="Unity.MLAgents.Tests.UtilitiesTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000772" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1178" name="TestCumSum" fullname="Unity.MLAgents.Tests.UtilitiesTests.TestCumSum" methodname="TestCumSum" classname="Unity.MLAgents.Tests.UtilitiesTests" runstate="Runnable" seed="673260186" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000335" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1308" name="Unity.ML-Agents.Editor.Tests.PublicAPI.dll" fullname="C:/Development/Projects/ml-agents/Project/Library/ScriptAssemblies/Unity.ML-Agents.Editor.Tests.PublicAPI.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.003245" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="125880" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1309" name="Unity" fullname="Unity" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.003137" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1310" name="MLAgentsExamples" fullname="Unity.MLAgentsExamples" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.003062" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1305" name="PublicApiValidation" fullname="Unity.MLAgentsExamples.PublicApiValidation" classname="Unity.MLAgentsExamples.PublicApiValidation" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.002974" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1306" name="CheckSetupCameraSensorComponent" fullname="Unity.MLAgentsExamples.PublicApiValidation.CheckSetupCameraSensorComponent" methodname="CheckSetupCameraSensorComponent" classname="Unity.MLAgentsExamples.PublicApiValidation" runstate="Runnable" seed="1409581207" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.000636" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1307" name="CheckSetupRenderTextureSensorComponent" fullname="Unity.MLAgentsExamples.PublicApiValidation.CheckSetupRenderTextureSensorComponent" methodname="CheckSetupRenderTextureSensorComponent" classname="Unity.MLAgentsExamples.PublicApiValidation" runstate="Runnable" seed="3844769" result="Passed" start-time="2026-01-24 02:45:08Z" end-time="2026-01-24 02:45:08Z" duration="0.001931" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: C:/Users/rbsmi/AppData/LocalLow/Unity Technologies/UnityEnvironment\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

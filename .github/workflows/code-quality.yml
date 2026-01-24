@@ -1,0 +1,165 @@
+name: Code Quality Checks
+
+on:
+  pull_request:
+    paths:
+      - 'ml-agents/**'
+      - 'ml-agents-envs/**'
+      - '.github/workflows/code-quality.yml'
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  tech-debt-tracking:
+    name: Track Technical Debt (TODOs/FIXMEs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Scan for TODO/FIXME comments
+        run: |
+          echo "## Technical Debt Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Count TODOs and FIXMEs
+          TODO_COUNT=$(grep -r "# TODO" ml-agents ml-agents-envs --include="*.py" | wc -l || echo "0")
+          FIXME_COUNT=$(grep -r "# FIXME" ml-agents ml-agents-envs --include="*.py" | wc -l || echo "0")
+          
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **TODO comments**: $TODO_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **FIXME comments**: $FIXME_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # List all TODOs
+          echo "### TODO Items" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          grep -rn "# TODO" ml-agents ml-agents-envs --include="*.py" || echo "No TODOs found"
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # List all FIXMEs
+          echo "### FIXME Items" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          grep -rn "# FIXME" ml-agents ml-agents-envs --include="*.py" || echo "No FIXMEs found"
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Check for linked issues
+        run: |
+          echo "## Issue Linking Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check for TODOs with issue links (e.g., TODO(#123))
+          LINKED=$(grep -r "# TODO(#[0-9]" ml-agents ml-agents-envs --include="*.py" | wc -l || echo "0")
+          UNLINKED=$(grep -r "# TODO[^(#]" ml-agents ml-agents-envs --include="*.py" | wc -l || echo "0")
+          
+          echo "- **TODOs with issue links**: $LINKED" >> $GITHUB_STEP_SUMMARY
+          echo "- **TODOs without issue links**: $UNLINKED" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Recommendation**: Link TODOs to GitHub issues using format: \`# TODO(#issue_number): description\`" >> $GITHUB_STEP_SUMMARY
+
+  dead-code-check:
+    name: Dead Code Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10.12
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install vulture
+      
+      - name: Run vulture on ml-agents
+        continue-on-error: true
+        run: |
+          echo "## Dead Code Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ml-agents package" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          vulture ml-agents/mlagents --min-confidence 80 || echo "No dead code detected with 80% confidence"
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Run vulture on ml-agents-envs
+        continue-on-error: true
+        run: |
+          echo "### ml-agents-envs package" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          vulture ml-agents-envs/mlagents_envs --min-confidence 80 || echo "No dead code detected with 80% confidence"
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  unused-deps-check:
+    name: Unused Dependencies Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10.12
+      
+      - name: Install deptry
+        run: pip install deptry
+      
+      - name: Check ml-agents
+        continue-on-error: true
+        run: |
+          echo "## Unused Dependencies Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ml-agents package" >> $GITHUB_STEP_SUMMARY
+          cd ml-agents
+          deptry . --ignore-notebooks || echo "Analysis complete"
+      
+      - name: Check ml-agents-envs
+        continue-on-error: true
+        run: |
+          echo "### ml-agents-envs package" >> $GITHUB_STEP_SUMMARY
+          cd ml-agents-envs
+          deptry . --ignore-notebooks || echo "Analysis complete"
+
+  large-file-check:
+    name: Large File Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for large files
+        run: |
+          echo "## Large File Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Find files larger than 1MB
+          LARGE_FILES=$(find . -type f -size +1M \
+            -not -path "./.git/*" \
+            -not -path "./venv/*" \
+            -not -path "./results/*" \
+            -not -path "./models/*" \
+            -not -path "./Library/*" \
+            -not -path "./Builds/*" || echo "")
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "### Files larger than 1MB:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$LARGE_FILES" | xargs ls -lh
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> **Warning**: Large files detected. Consider using Git LFS or excluding from repository." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No large files detected" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Check for very long files
+        run: |
+          echo "### Files with >1000 lines:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          find ml-agents ml-agents-envs -name "*.py" -exec wc -l {} \; | \
+            awk '$1 > 1000 {print}' | \
+            sort -rn || echo "No files exceed 1000 lines"
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

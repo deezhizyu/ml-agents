@@ -43,15 +43,20 @@ def register_trainer_plugins() -> Tuple[Dict[str, Any], Dict[str, Any]]:
     Registers all Trainer plugins (including the default one),
     and evaluates them, and returns the list of all the Trainer implementations.
     """
-    if ML_AGENTS_TRAINER_TYPE not in importlib_metadata.entry_points():
+    # Use .select() method instead of dict interface (deprecated in importlib_metadata)
+    try:
+        entry_points = importlib_metadata.entry_points().select(group=ML_AGENTS_TRAINER_TYPE)
+    except AttributeError:
+        # Fallback for older importlib_metadata versions
+        entry_points = importlib_metadata.entry_points().get(ML_AGENTS_TRAINER_TYPE, [])
+    
+    if not entry_points:
         logger.warning(
             f"Unable to find any entry points for {ML_AGENTS_TRAINER_TYPE}, even the default ones. "
             "Uninstalling and reinstalling ml-agents via pip should resolve. "
             "Using default plugins for now."
         )
         return get_default_trainer_types()
-
-    entry_points = importlib_metadata.entry_points()[ML_AGENTS_TRAINER_TYPE]
 
     for entry_point in entry_points:
 

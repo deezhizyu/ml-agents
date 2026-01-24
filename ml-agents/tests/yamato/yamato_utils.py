@@ -147,10 +147,12 @@ def init_venv(
 
     for cmd in pip_commands:
         pip_index_url = "--index-url https://artifactory.prd.it.unity3d.com/artifactory/api/pypi/pypi/simple"
+        # Split cmd if it contains spaces (e.g., "package==version")
+        cmd_parts = cmd.split() if isinstance(cmd, str) else [cmd]
+        install_args = ["python3", "-m", "pip", "install", "-q"] + cmd_parts + pip_index_url.split()
         print(f'Running "python3 -m pip install -q {cmd} {pip_index_url}"')
-        subprocess.check_call(
-            f"python3 -m pip install -q {cmd} {pip_index_url}", shell=True
-        )
+        # SECURITY FIX: Use list args instead of shell=True to prevent command injection
+        subprocess.check_call(install_args)
 
 
 def checkout_csharp_version(csharp_version):
@@ -166,19 +168,21 @@ def checkout_csharp_version(csharp_version):
     csharp_tag = f"com.unity.ml-agents_{csharp_version}"
     csharp_dirs = ["com.unity.ml-agents", "Project"]
     for csharp_dir in csharp_dirs:
-        subprocess.check_call(f"rm -rf {csharp_dir}", shell=True)
+        # SECURITY FIX: Use list args instead of shell=True to prevent command injection
+        subprocess.check_call(["rm", "-rf", csharp_dir])
         # Allow the checkout to fail, since the extensions folder isn't availabe in 1.0.0
-        subprocess.call(f"git checkout {csharp_tag} -- {csharp_dir}", shell=True)
+        subprocess.call(["git", "checkout", csharp_tag, "--", csharp_dir])
 
 
 def undo_git_checkout():
     """
     Clean up the git working directory.
     """
-    subprocess.check_call("git reset HEAD .", shell=True)
-    subprocess.check_call("git checkout -- .", shell=True)
+    # SECURITY FIX: Use list args instead of shell=True to prevent command injection
+    subprocess.check_call(["git", "reset", "HEAD", "."])
+    subprocess.check_call(["git", "checkout", "--", "."])
     # Ensure the cache isn't polluted with old compiled assemblies.
-    subprocess.check_call("rm -rf Project/Library", shell=True)
+    subprocess.check_call(["rm", "-rf", "Project/Library"])
 
 
 def override_config_file(src_path, dest_path, overrides):
@@ -215,7 +219,8 @@ def override_legacy_config_file(python_version, src_path, dest_path, **kwargs):
     """
     # Sync the old version of the file
     python_tag = f"python-packages_{python_version}"
-    subprocess.check_call(f"git checkout {python_tag} -- {src_path}", shell=True)
+    # SECURITY FIX: Use list args instead of shell=True to prevent command injection
+    subprocess.check_call(["git", "checkout", python_tag, "--", src_path])
 
     with open(src_path) as f:
         configs = yaml.safe_load(f)

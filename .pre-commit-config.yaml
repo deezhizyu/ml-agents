@@ -89,6 +89,19 @@ repos:
 #    args: [--folder, --include]
 
 # "Local" hooks, see https://pre-commit.com/#repository-local-hooks
+# Complexity checking
+- repo: https://github.com/PyCQA/mccabe
+  rev: 0.7.0
+  hooks:
+  - id: mccabe
+    args: ['--max-complexity=15']
+    exclude: >
+        (?x)^(
+            .*_pb2.py|
+            .*_pb2_grpc.py|
+            .*/tests/.*
+        )$
+
 -   repo: local
     hooks:
     -   id: dotnet-format
@@ -136,3 +149,16 @@ repos:
         entry: ./utils/generate_markdown_docs.py --package_dirs ml-agents-envs ml-agents
         pass_filenames: false
         additional_dependencies: [pyyaml==5.3, pydoc-markdown==3.10.1]
+    -   id: check-dead-code
+        name: check for dead code
+        language: system
+        entry: vulture ml-agents/mlagents ml-agents-envs/mlagents_envs --min-confidence 80
+        types: [python]
+        pass_filenames: false
+        stages: [manual]
+    -   id: check-unused-deps
+        name: check for unused dependencies
+        language: system
+        entry: bash -c 'cd ml-agents && deptry . || cd ../ml-agents-envs && deptry .'
+        pass_filenames: false
+        stages: [manual]

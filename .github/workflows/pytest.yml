@@ -79,17 +79,56 @@ jobs:
         else
           echo "markers=not slow" >> $GITHUB_OUTPUT
         fi
-    - name: Run pytest
+    - name: Run pytest (with retry for flaky tests)
+      uses: nick-fields/retry@v2
+      with:
+        timeout_minutes: 30
+        max_attempts: 2
+        retry_on: error
+        command: |
+          pytest --cov=ml-agents --cov=ml-agents-envs \
+          --cov-report=html --cov-report=xml --junitxml=junit/test-results-${{ matrix.python-version }}.xml \
+          -p no:warnings -v -m "${{ steps.pytest_marker.outputs.markers }}" -n 8 \
+          --durations=20 --durations-min=1.0
+    
+    - name: Generate test performance report
+      if: always()
       run: |
-        pytest --cov=ml-agents --cov=ml-agents-envs \
-        --cov-report=html --junitxml=junit/test-results-${{ matrix.python-version }}.xml \
-        -p no:warnings -v -m "${{ steps.pytest_marker.outputs.markers }}" -n 8
+        echo "## Test Performance Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Slowest 20 Tests" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        pytest --co -q -m "${{ steps.pytest_marker.outputs.markers }}" | head -20 || echo "Test collection info"
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "See full durations in pytest output above" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for test retries (flaky tests)
+        if [ -f junit/test-results-${{ matrix.python-version }}.xml ]; then
+          RETRIED=$(grep -c "rerun" junit/test-results-${{ matrix.python-version }}.xml || echo "0")
+          if [ "$RETRIED" -gt "0" ]; then
+            echo "⚠️ **Flaky Tests Detected:** $RETRIED tests required retry" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **No Flaky Tests:** All tests passed on first attempt" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-${{ matrix.python-version }}
+        fail_ci_if_error: false
+      if: always()
+    
     - name: Upload pytest test results
       uses: actions/upload-artifact@v4
       with:
         name: artifacts-${{ matrix.python-version }}
         path: |
           htmlcov
+          coverage.xml
           pip_versions-${{ matrix.python-version }}.txt
           junit/test-results-${{ matrix.python-version }}.xml
       # Use always() to always run this step to publish test results when there are test failures

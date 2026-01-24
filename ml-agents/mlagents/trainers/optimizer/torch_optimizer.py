@@ -137,6 +137,17 @@ class TorchOptimizer(Optimizer):
         for reward_provider in self.reward_signals.values():
             update_stats.update(reward_provider.update(batch))
         return update_stats
+    
+    def get_modules(self) -> Dict[str, any]:
+        """
+        Get all modules for this optimizer including reward provider modules.
+        Subclasses should override to include optimizer and critic modules.
+        :return: Dictionary mapping module names to modules
+        """
+        modules = {}
+        for reward_provider in self.reward_signals.values():
+            modules.update(reward_provider.get_modules())
+        return modules
 
     def get_trajectory_value_estimates(
         self,

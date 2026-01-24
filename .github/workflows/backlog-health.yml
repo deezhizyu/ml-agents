@@ -1,0 +1,133 @@
+name: Backlog Health Check
+
+on:
+  schedule:
+    # Run weekly on Monday at 9 AM
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+  issues:
+    types: [opened, labeled, unlabeled]
+
+jobs:
+  check-backlog:
+    name: Analyze Issue Backlog Health
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check backlog health with gh CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "## Backlog Health Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get all open issues
+          gh issue list --state open --limit 100 --json title,createdAt,labels,updatedAt > issues.json
+          
+          # Count total issues
+          TOTAL=$(jq '. | length' issues.json)
+          echo "**Total Open Issues:** $TOTAL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Count issues with labels
+          LABELED=$(jq '[.[] | select(.labels | length > 0)] | length' issues.json)
+          
+          # Count issues with descriptive titles (>10 chars)
+          DESCRIPTIVE=$(jq '[.[] | select(.title | length > 10)] | length' issues.json)
+          
+          # Count stale issues (>365 days old with no recent update)
+          STALE=$(jq --arg cutoff "$(date -d '365 days ago' -I)" '[.[] | select(.updatedAt < $cutoff)] | length' issues.json)
+          
+          # Calculate percentages
+          if [ $TOTAL -gt 0 ]; then
+            LABELED_PCT=$((LABELED * 100 / TOTAL))
+            DESCRIPTIVE_PCT=$((DESCRIPTIVE * 100 / TOTAL))
+            STALE_PCT=$((STALE * 100 / TOTAL))
+          else
+            LABELED_PCT=100
+            DESCRIPTIVE_PCT=100
+            STALE_PCT=0
+          fi
+          
+          echo "| Metric | Count | Percentage |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Issues with labels | $LABELED / $TOTAL | ${LABELED_PCT}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Descriptive titles (>10 chars) | $DESCRIPTIVE / $TOTAL | ${DESCRIPTIVE_PCT}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stale issues (>365 days) | $STALE / $TOTAL | ${STALE_PCT}% |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Quality assessment
+          QUALITY=$((LABELED_PCT + DESCRIPTIVE_PCT - STALE_PCT))
+          QUALITY=$((QUALITY / 2))
+          
+          echo "### Health Score: ${QUALITY}%" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $QUALITY -ge 90 ]; then
+            echo "✅ **Excellent:** Backlog is well-maintained" >> $GITHUB_STEP_SUMMARY
+          elif [ $QUALITY -ge 70 ]; then
+            echo "✅ **Good:** Backlog health is acceptable" >> $GITHUB_STEP_SUMMARY
+          elif [ $QUALITY -ge 50 ]; then
+            echo "⚠️ **Fair:** Some issues need attention" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Poor:** Backlog needs cleanup" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Recommendations
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $LABELED_PCT -lt 70 ]; then
+            echo "- ⚠️ Label more issues (currently ${LABELED_PCT}%)" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ $STALE_PCT -gt 50 ]; then
+            echo "- ⚠️ Review and close stale issues (currently ${STALE_PCT}%)" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ $QUALITY -ge 90 ]; then
+            echo "- ✅ No action needed - backlog is healthy!" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: List stale issues
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Stale Issues (>365 days)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          STALE_ISSUES=$(gh issue list --state open --json number,title,createdAt,updatedAt \
+            --jq --arg cutoff "$(date -d '365 days ago' -I)" \
+            '[.[] | select(.updatedAt < $cutoff)] | .[] | "#\(.number): \(.title) (updated: \(.updatedAt[:10]))"')
+          
+          if [ -n "$STALE_ISSUES" ]; then
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$STALE_ISSUES" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No stale issues found" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: List unlabeled issues
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Unlabeled Issues" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          UNLABELED=$(gh issue list --state open --json number,title,labels \
+            --jq '[.[] | select(.labels | length == 0)] | .[] | "#\(.number): \(.title)"')
+          
+          if [ -n "$UNLABELED" ]; then
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$UNLABELED" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ All issues are labeled" >> $GITHUB_STEP_SUMMARY
+          fi

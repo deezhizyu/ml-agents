@@ -1,0 +1,133 @@
+name: Build Performance Tracking
+
+on:
+  pull_request:
+    paths:
+      - 'ml-agents/**'
+      - 'ml-agents-envs/**'
+      - 'setup.py'
+      - 'setup.cfg'
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build-timing:
+    name: Track Build Performance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.12'
+      
+      - name: Record start time
+        id: start
+        run: echo "time=$(date +%s)" >> $GITHUB_OUTPUT
+      
+      - name: Upgrade pip
+        run: |
+          START=$(date +%s)
+          python -m pip install --upgrade pip setuptools wheel
+          END=$(date +%s)
+          DURATION=$((END - START))
+          echo "pip_upgrade_time=$DURATION" >> $GITHUB_ENV
+          echo "✓ Pip upgrade: ${DURATION}s"
+      
+      - name: Build ml-agents-envs
+        run: |
+          START=$(date +%s)
+          cd ml-agents-envs
+          python setup.py sdist bdist_wheel
+          END=$(date +%s)
+          DURATION=$((END - START))
+          echo "envs_build_time=$DURATION" >> $GITHUB_ENV
+          echo "✓ ml-agents-envs build: ${DURATION}s"
+      
+      - name: Build ml-agents
+        run: |
+          START=$(date +%s)
+          cd ml-agents
+          python setup.py sdist bdist_wheel
+          END=$(date +%s)
+          DURATION=$((END - START))
+          echo "agents_build_time=$DURATION" >> $GITHUB_ENV
+          echo "✓ ml-agents build: ${DURATION}s"
+      
+      - name: Install ml-agents-envs
+        run: |
+          START=$(date +%s)
+          pip install -e ./ml-agents-envs
+          END=$(date +%s)
+          DURATION=$((END - START))
+          echo "envs_install_time=$DURATION" >> $GITHUB_ENV
+          echo "✓ ml-agents-envs install: ${DURATION}s"
+      
+      - name: Install ml-agents
+        run: |
+          START=$(date +%s)
+          pip install -e ./ml-agents
+          END=$(date +%s)
+          DURATION=$((END - START))
+          echo "agents_install_time=$DURATION" >> $GITHUB_ENV
+          echo "✓ ml-agents install: ${DURATION}s"
+      
+      - name: Install test dependencies
+        run: |
+          START=$(date +%s)
+          pip install -r test_requirements.txt
+          END=$(date +%s)
+          DURATION=$((END - START))
+          echo "test_deps_time=$DURATION" >> $GITHUB_ENV
+          echo "✓ Test dependencies install: ${DURATION}s"
+      
+      - name: Calculate total time
+        id: total
+        run: |
+          END=$(date +%s)
+          START=${{ steps.start.outputs.time }}
+          TOTAL=$((END - START))
+          echo "total_time=$TOTAL" >> $GITHUB_OUTPUT
+          echo "⏱️ Total build time: ${TOTAL}s"
+      
+      - name: Generate build performance report
+        run: |
+          echo "## Build Performance Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Step | Duration |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Pip upgrade | ${pip_upgrade_time}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| ml-agents-envs build | ${envs_build_time}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| ml-agents build | ${agents_build_time}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| ml-agents-envs install | ${envs_install_time}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| ml-agents install | ${agents_install_time}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test dependencies | ${test_deps_time}s |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Total** | **${{ steps.total.outputs.total_time }}s** |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add performance analysis
+          TOTAL=${{ steps.total.outputs.total_time }}
+          if [ $TOTAL -lt 60 ]; then
+            echo "✅ **Performance: Excellent** (< 1 minute)" >> $GITHUB_STEP_SUMMARY
+          elif [ $TOTAL -lt 120 ]; then
+            echo "✅ **Performance: Good** (< 2 minutes)" >> $GITHUB_STEP_SUMMARY
+          elif [ $TOTAL -lt 300 ]; then
+            echo "⚠️ **Performance: Acceptable** (< 5 minutes)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Performance: Slow** (> 5 minutes)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Consider optimizing build dependencies or build process." >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            ml-agents/dist/
+            ml-agents-envs/dist/
+          retention-days: 7

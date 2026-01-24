@@ -1,0 +1,53 @@
+codecov:
+  require_ci_to_pass: yes
+  notify:
+    wait_for_ci: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "60...100"
+  
+  status:
+    project:
+      default:
+        target: 60%
+        threshold: 1%
+        if_ci_failed: error
+    
+    patch:
+      default:
+        target: 60%
+        threshold: 5%
+        if_ci_failed: error
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+comment:
+  layout: "header, diff, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+ignore:
+  - "**/*_pb2.py"
+  - "**/*_pb2_grpc.py"
+  - "**/tests/**"
+  - "**/test_*.py"
+  - "**/__pycache__/**"
+  - "setup.py"
+  - "conftest.py"
+
+flags:
+  unittests:
+    paths:
+      - ml-agents/
+      - ml-agents-envs/
+    carryforward: true

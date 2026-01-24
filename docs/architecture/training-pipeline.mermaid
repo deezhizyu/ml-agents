@@ -1,0 +1,43 @@
+sequenceDiagram
+    participant User
+    participant CLI as mlagents-learn CLI
+    participant EnvMgr as Environment Manager
+    participant Unity as Unity Environment
+    participant Trainer as Trainer (PPO/SAC/POCA)
+    participant Model as Neural Network
+    participant TB as TensorBoard
+    
+    User->>CLI: mlagents-learn config.yaml --run-id=MyRun
+    CLI->>CLI: Load configuration
+    CLI->>EnvMgr: Initialize environments
+    EnvMgr->>Unity: Launch Unity process(es)
+    Unity-->>EnvMgr: Connection established
+    
+    loop Training Loop
+        EnvMgr->>Unity: Request observations
+        Unity-->>EnvMgr: Return observations + rewards
+        EnvMgr->>Trainer: Pass experience tuples
+        Trainer->>Model: Forward pass (get actions)
+        Model-->>Trainer: Return action probabilities
+        Trainer->>Model: Backward pass (update weights)
+        Model-->>Trainer: Updated parameters
+        Trainer->>EnvMgr: Send actions
+        EnvMgr->>Unity: Apply actions
+        
+        alt Every summary_freq steps
+            Trainer->>TB: Log metrics
+        end
+        
+        alt Every checkpoint_interval steps
+            Trainer->>Trainer: Save checkpoint
+            Model->>Model: Export to ONNX
+        end
+    end
+    
+    User->>CLI: Ctrl+C or max_steps reached
+    CLI->>Trainer: Graceful shutdown
+    Trainer->>Model: Final ONNX export
+    Model-->>User: results/<run-id>/Model.onnx
+    CLI->>Unity: Close environment
+    Unity-->>CLI: Shutdown complete
+    CLI-->>User: Training complete

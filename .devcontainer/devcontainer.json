@@ -1,0 +1,81 @@
+{
+  "name": "ML-Agents Development",
+  "image": "mcr.microsoft.com/devcontainers/python:3.10-bullseye",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.mypy-type-checker",
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml",
+        "eamodio.gitlens",
+        "github.copilot"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.flake8Enabled": true,
+        "python.linting.mypyEnabled": true,
+        "python.formatting.provider": "black",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        },
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true,
+          "**/.pytest_cache": true,
+          "**/.mypy_cache": true,
+          "**/results": true,
+          "**/models": true,
+          "**/summaries": true
+        },
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.rulers": [88, 120],
+          "editor.tabSize": 4
+        }
+      }
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "forwardPorts": [
+    5005,
+    6006
+  ],
+
+  "portsAttributes": {
+    "5005": {
+      "label": "Unity ML-Agents",
+      "onAutoForward": "notify"
+    },
+    "6006": {
+      "label": "TensorBoard",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/results,target=/workspaces/ml-agents/results,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/models,target=/workspaces/ml-agents/models,type=bind,consistency=cached"
+  ],
+
+  "remoteEnv": {
+    "TEST_ENFORCE_BUFFER_KEY_TYPES": "1"
+  },
+
+  "remoteUser": "vscode"
+}
