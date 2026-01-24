@@ -136,7 +136,26 @@ def _handle_step_command(
     step_queue: Queue,
     stats_channel: StatsSideChannel,
 ) -> None:
-    """Handle STEP command by executing environment step and returning results."""
+    """
+    Handle STEP command by executing environment step and returning results.
+
+    Processes a single step in the Unity environment by:
+    1. Setting actions for all agents from the request payload
+    2. Executing the environment step
+    3. Collecting observations and rewards for all behaviors
+    4. Gathering timing statistics and environment metrics
+    5. Sending results back via the step queue
+
+    Args:
+        env: Unity environment instance to step
+        req: Environment request containing action information
+        worker_id: Unique identifier for this worker subprocess
+        step_queue: Queue for sending step results to main process
+        stats_channel: Channel for collecting environment statistics
+
+    Returns:
+        None. Results are sent asynchronously via step_queue.
+    """
     all_action_info = req.payload
     for brain_name, action_info in all_action_info.items():
         if len(action_info.agent_ids) > 0:
@@ -162,7 +181,21 @@ def _handle_reset_command(
     parent_conn: Connection,
     worker_id: int,
 ) -> None:
-    """Handle RESET command by resetting environment and returning initial state."""
+    """
+    Handle RESET command by resetting environment and returning initial state.
+
+    Resets the Unity environment to its initial state and collects the first
+    observations for all behaviors. This is typically called at the start of
+    training or when beginning a new episode.
+
+    Args:
+        env: Unity environment instance to reset
+        parent_conn: Connection for sending response to main process
+        worker_id: Unique identifier for this worker subprocess
+
+    Returns:
+        None. Results are sent synchronously via parent_conn.
+    """
     env.reset()
     all_step_result: AllStepResult = {}
     for brain_name in env.behavior_specs:
@@ -174,7 +207,20 @@ def _handle_environment_parameters(
     req: EnvironmentRequest,
     env_parameters: EnvironmentParametersChannel,
 ) -> None:
-    """Handle ENVIRONMENT_PARAMETERS command by applying parameter randomization."""
+    """
+    Handle ENVIRONMENT_PARAMETERS command by applying parameter randomization.
+
+    Applies dynamic parameter randomization to the environment during training.
+    This enables curriculum learning and domain randomization by adjusting
+    environment parameters on-the-fly.
+
+    Args:
+        req: Environment request containing parameter randomization settings
+        env_parameters: Channel for communicating parameters to Unity environment
+
+    Returns:
+        None. Parameters are applied directly to the environment channel.
+    """
     for k, v in req.payload.items():
         if isinstance(v, ParameterRandomizationSettings):
             v.apply(k, env_parameters)
@@ -184,7 +230,19 @@ def _handle_training_started(
     req: EnvironmentRequest,
     training_analytics_channel: Optional[TrainingAnalyticsSideChannel],
 ) -> None:
-    """Handle TRAINING_STARTED command by notifying analytics channel."""
+    """
+    Handle TRAINING_STARTED command by notifying analytics channel.
+
+    Sends training configuration to Unity for analytics tracking. This is only
+    active for worker 0 to avoid duplicate analytics events.
+
+    Args:
+        req: Environment request containing behavior name and trainer config
+        training_analytics_channel: Optional analytics channel (None if not worker 0)
+
+    Returns:
+        None. Analytics are sent to Unity if channel is available.
+    """
     if training_analytics_channel:
         behavior_name, trainer_config = req.payload
         training_analytics_channel.training_started(behavior_name, trainer_config)
