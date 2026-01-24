@@ -4,123 +4,77 @@
 [![license badge](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE.md)
 [![Python 3.10-3.12](https://img.shields.io/badge/python-3.10--3.12-blue.svg)](https://www.python.org/)
 [![Unity 6](https://img.shields.io/badge/Unity-6000.0+-black.svg)](https://unity.com/)
-[![Code Quality](https://img.shields.io/badge/code%20quality-production--ready-brightgreen.svg)]()
 
-This is an enhanced fork of [Unity ML-Agents Toolkit](https://github.com/Unity-Technologies/ml-agents) with performance optimizations, security hardening, Python 3.12 support, and Unity 6 compatibility.
+Enhanced fork of [Unity ML-Agents Toolkit](https://github.com/Unity-Technologies/ml-agents) with performance optimizations, security fixes, and Python 3.12 support.
 
-**Based on:** Release 23 / Unity Package 4.0.0  
-**Status:** Production-ready with comprehensive testing and documentation
+**Based on:** Release 23 / Unity Package 4.0.0
 
-## Fork Improvements
+## Improvements
 
-### Performance Optimizations
+### Performance
 
-**GPU Training Enhancements:**
-- TorchScript compilation for 2-3x faster inference
-- Automatic Mixed Precision (AMP) training support
-- Fused optimizers for better GPU utilization
-- Thread-safe compilation statistics tracking
-- GPU batch processing optimizations
+**GPU Training:**
+- TorchScript compilation (2.50x faster inference)
+- Automatic Mixed Precision (AMP) support
+- Fused optimizers
+- Verified 1.89% profiling overhead
 
-**Unity Inference Pipeline:**
-- Pre-allocated collections with 512 capacity in `ModelRunner.cs` (reduces GC pressure)
-- Array-based batch storage for faster action lookups (avoids dictionary overhead)
-- Changed `ContainsKey` to `TryGetValue` throughout (single lookup instead of two)
-- Cached tensor references outside loops to avoid repeated casts
-- New `BatchedObservationManager` for object pooling
+**Unity Inference:**
+- Pre-allocated collections (512 capacity)
+- Array-based batch storage
+- Tensor reference caching
+- Object pooling
 
-**Profiler Integration:**
-- Added `Profiler.BeginSample`/`EndSample` markers throughout the inference pipeline
-- Enables precise measurement of bottlenecks in Unity Profiler
-- Automated benchmarking tools for performance tracking
+**Profiling:**
+- Profiler.BeginSample markers throughout pipeline
+- Benchmark tools included
 
-**Measured Results:**
-- 2.50x TorchScript inference speedup
-- 1.89% profiling overhead (negligible)
-- Verified across Walker and 3DBall environments
+### Python 3.12 Support
 
-### Python 3.10-3.12 Support
+- Updated deprecated APIs (pkg_resources, distutils.version)
+- Fixed pytest hooks for pytest-xdist
+- Black formatting applied
 
-- Full Python 3.12 compatibility verified and tested
-- Updated deprecated `pkg_resources` to `importlib.metadata`
-- Fixed `distutils.version.LooseVersion` to `packaging.version.Version`
-- Fixed pytest hooks for modern pytest/pytest-xdist compatibility
-- Applied black formatting throughout codebase
+**Supported:** 3.10.1 - 3.12.8
 
-**Supported Python versions:** 3.10.1 - 3.12.8
+### Unity 6
 
-### Unity 6 Compatibility
-
-- **Input System Migration:** All 17+ example environments migrated from legacy `Input.GetKey()` to new Input System (`Keyboard.current`)
-- **Auto Time Scale Controller:** New convenience script for training (press 1-9 to change speed)
-- Fixed package manifest for Unity 6 (removed non-existent modules)
+- All examples migrated to new Input System
+- Auto time scale controller (press 1-9 during training)
+- Fixed package manifest
 - Tested with Unity 6000.0.40f1
 
-**Example Scripts Updated:**
-- `Ball3DAgent.cs`, `BasicActuatorComponent.cs`, `PushAgentEscape.cs`
-- `FoodCollectorAgent.cs`, `GridAgent.cs`, `HallwayAgent.cs`
-- `PushAgentBasic.cs`, `PushAgentCollab.cs`, `PyramidAgent.cs`
-- `AgentSoccer.cs`, `SorterAgent.cs`, `WallJumpAgent.cs`
-- `AdjustTrainingTimescale.cs`, `FlyCamera.cs`
-- `AutoTimeScaleController.cs` (new - automatic training speed control)
+### Security
 
-### Security Hardening
+- Fixed MD5 hash usage (usedforsecurity=False)
+- Secured file permissions (0o700)
+- URL scheme validation
+- Safe PyTorch load (weights_only=True)
+- HuggingFace revision pinning
+- Bandit scan: 0 critical vulnerabilities
 
-**Comprehensive Security Audit:**
-- Fixed MD5 hash usage (added `usedforsecurity=False` for non-cryptographic use)
-- Secured file permissions (changed from 0o40755 to 0o700 for downloaded binaries)
-- Added URL scheme validation (prevents file:// and custom scheme attacks)
-- Fixed unsafe PyTorch load operations (added `weights_only=True`)
-- Added HuggingFace revision pinning (prevents downloading compromised models)
+### Code Quality
 
-**Security Scan Results:**
-- 31,285 lines scanned with Bandit
-- 0 critical vulnerabilities
-- All high/medium severity issues resolved
-- Overall risk level: LOW
+- Fixed 47 silent failures
+- Removed debug statements
+- Extracted magic numbers
+- Thread-safe global state
 
-**Impact:**
-- Production-ready security posture
-- All identified issues resolved or documented
+**Tools:**
+- upgrade_config.py - config migration
+- optimizer_utils.py - shared optimizer helpers
+- Benchmark and doctor CLI tools
 
-### Code Quality Improvements
-
-**Technical Debt Remediation:**
-- Fixed 47 silent failures (100% resolved)
-- Removed all debug print statements
-- Extracted magic numbers to named constants
-- Eliminated code duplication (DRY principle applied)
-- Thread-safe global state encapsulation
-
-**New Tools Created:**
-- Configuration migration tool (`upgrade_config.py`) for deprecated fields
-- Optimizer helper utilities for PPO, SAC, POCA
-- Automated benchmark suite for performance testing
-- CLI doctor tool for environment validation
-
-**Architecture Improvements:**
-- Comprehensive architecture analysis with refactoring roadmap
-- Optimizer pattern extraction (reduces duplication by 90 lines)
-- God object analysis with clear remediation plans
-- Module boundary improvements documented
-
-**Documentation:**
-- Complete API documentation for new utilities
-- Clear development guide in AGENTS.md
-- Comprehensive README with all improvements documented
-
-**Test Coverage:**
-- 120+ Phase 3 tests (100% passing)
-- Extensive test suite for new functionality
-- Zero regressions from improvements
+**Tests:**
+- 120+ tests passing
+- 75%+ coverage
 
 ### Bug Fixes
 
-- Fixed CPUTensorData resource leak in `TensorProxy.cs`
-- Fixed unused variable warnings causing compilation errors
-- Fixed pytest `pytest_testnodeready` hook compatibility
-- Fixed all deprecation warnings (103 warnings reduced to 0)
-- Fixed thread safety issues in compilation stats tracking
+- CPUTensorData resource leak
+- Unused variable warnings
+- pytest hook compatibility
+- Thread safety in compilation stats
 
 ---
 
@@ -131,77 +85,28 @@ This is an enhanced fork of [Unity ML-Agents Toolkit](https://github.com/Unity-T
 - **Unity:** 6000.0 or later
 - **OS:** Windows, macOS, or Linux
 
-### One-Command Setup (Recommended)
+### Installation
 
 ```bash
-# Linux/macOS
-./setup-dev.sh
-
-# Windows PowerShell
-.\setup-dev.ps1
-```
-
-The setup script will:
-- Create and activate a virtual environment
-- Install ml-agents and ml-agents-envs packages
-- Install test dependencies
-- Set up pre-commit hooks
-- Create .env file from template
-- Verify installation
-
-### Manual Installation
-
-```bash
-# Clone this fork
 git clone https://github.com/quanticsoul4772/ml-agents.git
 cd ml-agents
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# One-command setup
+./setup-dev.sh  # or setup-dev.ps1 on Windows
 
-# Install packages
+# Or manual
+python -m venv venv
+source venv/bin/activate
 pip install -e ./ml-agents-envs
 pip install -e ./ml-agents
-
-# Install test dependencies (optional but recommended)
-pip install -r test_requirements.txt
-
-# Verify installation
-python -c "import mlagents; print('ML-Agents version:', mlagents.trainers.__version__)"
 ```
 
-### WSL Setup (Windows)
+### Training
 
 ```bash
-# From Windows
-wsl -d Ubuntu
-cd /mnt/c/path/to/ml-agents
-source wsl-setup.sh
-```
-
-### Basic Training
-
-```bash
-# Train an agent
 mlagents-learn config/ppo/3DBall.yaml --run-id=3DBall_01
-
-# Train with GPU optimizations (TorchScript + AMP)
-mlagents-learn config/ppo/3DBall_MaxGPU.yaml --run-id=3DBall_GPU
-
-# Monitor with TensorBoard
+mlagents-learn config/ppo/3DBall_MaxGPU.yaml --run-id=3DBall_GPU  # with optimizations
 tensorboard --logdir=results
-```
-
-### Configuration Management
-
-```bash
-# Upgrade deprecated config fields
-python -m mlagents.trainers.upgrade_config old_config.yaml --dry-run
-python -m mlagents.trainers.upgrade_config old_config.yaml  # applies changes
-
-# Load model from HuggingFace with revision pinning (security best practice)
-mlagents-load-from-hf --repo-id username/model --revision main --local-dir ./models
 ```
 
 ---
@@ -310,45 +215,14 @@ pre-commit run --all-files
 
 ---
 
-## Fork Highlights
+## Key Differences from Upstream
 
-### What Makes This Fork Different
-
-**Production Ready:**
-- 0 critical vulnerabilities (comprehensive security audit)
-- 120+ tests passing (100% success rate)
-- 75%+ code coverage
-- Zero breaking changes from upstream
-
-**Performance:**
-- 2.50x faster inference with TorchScript
-- GPU training optimizations (AMP, fused optimizers)
-- Minimal profiling overhead (1.89%)
-
-**Code Quality:**
-- 47 silent failures resolved
-- Technical debt reduced by 56%
-- 2200+ lines of documentation
-- Clear architecture roadmap
-
-**Developer Experience:**
-- One-command setup scripts
 - Python 3.12 support
-- Configuration migration tools
-- Automated benchmarking
-- Unity auto time scale control
-
-### Comparison to Upstream
-
-| Feature | Upstream | This Fork |
-|---------|----------|-----------|
-| Python Support | 3.10-3.11 | 3.10-3.12 |
-| Unity Support | 6000.0+ | 6000.0+ (Input System) |
-| TorchScript | Basic | Optimized (2.50x) |
-| Security Audit | No | Yes (0 critical) |
-| Tech Debt | Unknown | Tracked & Reduced |
-| Documentation | Standard | Comprehensive (2200+ lines) |
-| Tools | Standard | Enhanced (migration, benchmark) |
+- TorchScript optimization (2.50x speedup)
+- Security fixes (0 critical vulnerabilities)
+- Unity 6 Input System migration
+- Configuration migration tool
+- 120+ tests, 75%+ coverage
 
 ## Upstream Project
 
@@ -417,52 +291,7 @@ pre-commit run --all-files
 
 ---
 
-## Release History
 
-### Recent Improvements (2026-01)
-
-**Phase 1: Quick Wins**
-- Removed debug print statements
-- Extracted magic number constants
-- Eliminated code duplication
-
-**Phase 2: Security & Dependencies**
-- Comprehensive security audit (Bandit scan)
-- Python 3.12 compatibility verified
-- Security hardening (14 issues resolved)
-
-**Phase 3: Technical Improvements**
-- Configuration migration tool created
-- Incomplete features documented
-- Enhanced documentation (2200+ lines)
-
-**Phase 4: Architecture**
-- Optimizer pattern analysis
-- Helper utilities extracted
-- God object analysis complete
-
-**Security Fixes**
-- MD5 hash usage fixed
-- File permissions secured
-- URL validation added
-- PyTorch load operations hardened
-- HuggingFace revision pinning
-
----
-
-## Roadmap
-
-### v4.1 (Short-term - 1-2 months)
-- Import path simplification
-- Split settings.py into module
-- Extract optimizer helper classes
-- Additional type hints for public APIs
-
-### v5.0 (Long-term - 6-12 months)
-- Dependency updates (PyTorch 2.2+, Protobuf 3.21+)
-- TrainerController refactoring
-- Optimizer inheritance refactoring
-- Remove deprecated configuration fields
 
 ---
 
