@@ -109,12 +109,9 @@ def run_training(run_seed: int, options: RunOptions, num_areas: int) -> None:
             os.path.abspath(run_logs_dir),  # Unity environment requires absolute path
         )
 
-        # Use SharedMemoryEnvManager for faster training (5-10x speedup)
-        env_manager = SharedMemoryEnvManager(
-            env_factory=env_factory,
-            num_envs=env_settings.num_envs,
-            timeout_wait=env_settings.timeout_wait
-        )
+        # Use SubprocessEnvManager (proven to work)
+        # SharedMemoryEnvManager needs more debugging for proper step collection
+        env_manager = SubprocessEnvManager(env_factory, options, env_settings.num_envs)
         env_parameter_manager = EnvironmentParameterManager(
             options.environment_parameters, run_seed, restore=checkpoint_settings.resume
         )
