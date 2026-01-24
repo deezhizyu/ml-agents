@@ -33,7 +33,7 @@ namespace MLAgentsExamples
         
         [Header("Auto-Detection")]
         [Tooltip("Keywords to search for in GameObject names to find training areas")]
-        public string[] areaKeywords = { "Area", "Training", "Agent" };
+        public string[] areaKeywords = { "Area", "Training", "Walker", "Crawler", "3DBall", "Hallway", "Agent" };
         
         [Header("Debug")]
         [Tooltip("Show debug messages in console")]
@@ -57,8 +57,11 @@ namespace MLAgentsExamples
             _defaultSpacing = spacing;
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void AutoCreate()
+        // DISABLED: Runtime instantiation causes observation count mismatch with ML-Agents
+        // The cloned agents have duplicated sensors, causing "More observations made than vector observation size" errors
+        // Instead, duplicate training areas manually in the Unity Editor (Ctrl+D) and position them
+        // [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void AutoCreate_DISABLED()
         {
             // Only auto-create if no instance exists
             if (_instance != null) return;
