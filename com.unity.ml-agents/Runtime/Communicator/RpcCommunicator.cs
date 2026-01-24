@@ -337,11 +337,12 @@ namespace Unity.MLAgents
         public void PutObservations(string behaviorName, AgentInfo info, List<ISensor> sensors)
         {
 #if DEBUG
-            if (!m_SensorShapeValidators.ContainsKey(behaviorName))
+            if (!m_SensorShapeValidators.TryGetValue(behaviorName, out var validator))
             {
-                m_SensorShapeValidators[behaviorName] = new SensorShapeValidator();
+                validator = new SensorShapeValidator();
+                m_SensorShapeValidators[behaviorName] = validator;
             }
-            m_SensorShapeValidators[behaviorName].ValidateSensors(sensors);
+            validator.ValidateSensors(sensors);
 #endif
 
             using (TimerStack.Instance.Scoped("AgentInfo.ToProto"))
@@ -360,22 +361,24 @@ namespace Unity.MLAgents
             }
 
             m_NeedCommunicateThisStep = true;
-            if (!m_OrderedAgentsRequestingDecisions.ContainsKey(behaviorName))
+            if (!m_OrderedAgentsRequestingDecisions.TryGetValue(behaviorName, out var orderedAgents))
             {
-                m_OrderedAgentsRequestingDecisions[behaviorName] = new List<int>();
+                orderedAgents = new List<int>();
+                m_OrderedAgentsRequestingDecisions[behaviorName] = orderedAgents;
             }
             if (!info.done)
             {
-                m_OrderedAgentsRequestingDecisions[behaviorName].Add(info.episodeId);
+                orderedAgents.Add(info.episodeId);
             }
-            if (!m_LastActionsReceived.ContainsKey(behaviorName))
+            if (!m_LastActionsReceived.TryGetValue(behaviorName, out var behaviorActions))
             {
-                m_LastActionsReceived[behaviorName] = new Dictionary<int, ActionBuffers>();
+                behaviorActions = new Dictionary<int, ActionBuffers>();
+                m_LastActionsReceived[behaviorName] = behaviorActions;
             }
-            m_LastActionsReceived[behaviorName][info.episodeId] = ActionBuffers.Empty;
+            behaviorActions[info.episodeId] = ActionBuffers.Empty;
             if (info.done)
             {
-                m_LastActionsReceived[behaviorName].Remove(info.episodeId);
+                behaviorActions.Remove(info.episodeId);
             }
         }
 
@@ -433,9 +436,9 @@ namespace Unity.MLAgents
                 {
                     var agentAction = agentActions[i];
                     var agentId = m_OrderedAgentsRequestingDecisions[brainName][i];
-                    if (m_LastActionsReceived[brainName].ContainsKey(agentId))
+                    if (m_LastActionsReceived.TryGetValue(brainName, out var brainActions) && brainActions.ContainsKey(agentId))
                     {
-                        m_LastActionsReceived[brainName][agentId] = agentAction;
+                        brainActions[agentId] = agentAction;
                     }
                 }
             }
@@ -447,11 +450,11 @@ namespace Unity.MLAgents
 
         public ActionBuffers GetActions(string behaviorName, int agentId)
         {
-            if (m_LastActionsReceived.ContainsKey(behaviorName))
+            if (m_LastActionsReceived.TryGetValue(behaviorName, out var agentActions))
             {
-                if (m_LastActionsReceived[behaviorName].ContainsKey(agentId))
+                if (agentActions.TryGetValue(agentId, out var action))
                 {
-                    return m_LastActionsReceived[behaviorName][agentId];
+                    return action;
                 }
             }
             return ActionBuffers.Empty;
@@ -549,9 +552,9 @@ namespace Unity.MLAgents
             UnityRLInitializationOutputProto output = null;
             foreach (var behaviorName in m_UnsentBrainKeys.Keys)
             {
-                if (m_CurrentUnityRlOutput.AgentInfos.ContainsKey(behaviorName))
+                if (m_CurrentUnityRlOutput.AgentInfos.TryGetValue(behaviorName, out var agentInfoList))
                 {
-                    if (m_CurrentUnityRlOutput.AgentInfos[behaviorName].CalculateSize() > 0)
+                    if (agentInfoList.CalculateSize() > 0)
                     {
                         // Only send the actionSpec if there is a non empty list of
                         // AgentInfos ready to be sent.

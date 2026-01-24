@@ -304,9 +304,9 @@ namespace Unity.MLAgents.Inference
 
         public ActionBuffers GetAction(int agentId)
         {
-            if (m_LastActionsReceived.ContainsKey(agentId))
+            if (m_LastActionsReceived.TryGetValue(agentId, out var action))
             {
-                return m_LastActionsReceived[agentId];
+                return action;
             }
             return ActionBuffers.Empty;
         }

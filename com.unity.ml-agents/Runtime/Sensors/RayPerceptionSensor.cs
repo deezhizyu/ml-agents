@@ -243,7 +243,7 @@ namespace Unity.MLAgents.Sensors
     /// <summary>
     /// A sensor implementation that supports ray cast-based observations.
     /// </summary>
-    public class RayPerceptionSensor : ISensor, IBuiltInSensor
+    public class RayPerceptionSensor : ISensor, IBuiltInSensor, IDisposable
     {
         float[] m_Observations;
         ObservationSpec m_ObservationSpec;
@@ -253,6 +253,14 @@ namespace Unity.MLAgents.Sensors
         RayPerceptionOutput m_RayPerceptionOutput;
 
         bool m_UseBatchedRaycasts;
+
+        // Cached NativeArrays for batched raycasts to avoid per-frame allocations
+        NativeArray<RaycastHit> m_CachedResults;
+        NativeArray<RaycastCommand> m_CachedRaycastCommands;
+        NativeArray<SpherecastCommand> m_CachedSpherecastCommands;
+        int m_CachedRayCount = -1;
+        bool m_CachedUseSpherecast;
+        bool m_Disposed;
 
         /// <summary>
         /// Time.frameCount at the last time Update() was called. This is only used for display in gizmos.
@@ -279,6 +287,54 @@ namespace Unity.MLAgents.Sensors
 
             m_DebugLastFrameCount = Time.frameCount;
             m_RayPerceptionOutput = new RayPerceptionOutput();
+            m_Disposed = false;
+        }
+
+        /// <summary>
+        /// Disposes the cached NativeArrays.
+        /// </summary>
+        public void Dispose()
+        {
+            if (m_Disposed)
+                return;
+            m_Disposed = true;
+            DisposeCachedArrays();
+            GC.SuppressFinalize(this);
+        }
+
+        void DisposeCachedArrays()
+        {
+            if (m_CachedResults.IsCreated)
+                m_CachedResults.Dispose();
+            if (m_CachedRaycastCommands.IsCreated)
+                m_CachedRaycastCommands.Dispose();
+            if (m_CachedSpherecastCommands.IsCreated)
+                m_CachedSpherecastCommands.Dispose();
+            m_CachedRayCount = -1;
+        }
+
+        void EnsureCachedArrayCapacity(int numRays, bool useSpherecast)
+        {
+            // Check if we need to reallocate
+            if (m_CachedRayCount == numRays && m_CachedUseSpherecast == useSpherecast)
+                return;
+
+            // Dispose old arrays
+            DisposeCachedArrays();
+
+            // Allocate new arrays with Persistent allocator for reuse
+            m_CachedResults = new NativeArray<RaycastHit>(numRays, Allocator.Persistent);
+            if (useSpherecast)
+            {
+                m_CachedSpherecastCommands = new NativeArray<SpherecastCommand>(numRays, Allocator.Persistent);
+            }
+            else
+            {
+                m_CachedRaycastCommands = new NativeArray<RaycastCommand>(numRays, Allocator.Persistent);
+            }
+
+            m_CachedRayCount = numRays;
+            m_CachedUseSpherecast = useSpherecast;
         }
 
         /// <summary>
@@ -351,7 +407,7 @@ namespace Unity.MLAgents.Sensors
 
             if (m_UseBatchedRaycasts && m_RayPerceptionInput.CastType == RayPerceptionCastType.Cast3D)
             {
-                PerceiveBatchedRays(ref m_RayPerceptionOutput.RayOutputs, m_RayPerceptionInput);
+                PerceiveBatchedRaysPooled(ref m_RayPerceptionOutput.RayOutputs, m_RayPerceptionInput);
             }
             else
             {
@@ -423,21 +479,69 @@ namespace Unity.MLAgents.Sensors
         }
 
         /// <summary>
-        /// Evaluate the raycast results of all the rays from the RayPerceptionInput as a batch.
+        /// Evaluate the raycast results using pooled NativeArrays (instance method).
         /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="rayIndex">Ray index</param>
+        void PerceiveBatchedRaysPooled(ref RayPerceptionOutput.RayOutput[] batchedRaycastOutputs, RayPerceptionInput input)
+        {
+            var numRays = input.Angles.Count;
+            var unscaledCastRadius = input.CastRadius;
+            var useSpherecast = unscaledCastRadius > 0f;
+
+            // Ensure cached arrays are properly sized
+            EnsureCachedArrayCapacity(numRays, useSpherecast);
+
+            // Use the pooled arrays
+            PerceiveBatchedRaysInternal(
+                ref batchedRaycastOutputs,
+                input,
+                m_CachedResults,
+                useSpherecast ? default : m_CachedRaycastCommands,
+                useSpherecast ? m_CachedSpherecastCommands : default
+            );
+        }
+
+        /// <summary>
+        /// Evaluate the raycast results of all the rays from the RayPerceptionInput as a batch.
+        /// This static method allocates temporary arrays - use instance method for better performance.
+        /// </summary>
+        /// <param name="batchedRaycastOutputs">Output array</param>
+        /// <param name="input">Input configuration</param>
         internal static void PerceiveBatchedRays(ref RayPerceptionOutput.RayOutput[] batchedRaycastOutputs, RayPerceptionInput input)
         {
             var numRays = input.Angles.Count;
-            var results = new NativeArray<RaycastHit>(numRays, Allocator.TempJob);
-            var unscaledRayLength = input.RayLength;
             var unscaledCastRadius = input.CastRadius;
 
+            // Allocate temporary arrays for static method (external callers)
+            var results = new NativeArray<RaycastHit>(numRays, Allocator.TempJob);
             var raycastCommands = new NativeArray<RaycastCommand>(unscaledCastRadius <= 0f ? numRays : 0, Allocator.TempJob);
             var spherecastCommands = new NativeArray<SpherecastCommand>(unscaledCastRadius > 0f ? numRays : 0, Allocator.TempJob);
 
-            // this is looped
+            try
+            {
+                PerceiveBatchedRaysInternal(ref batchedRaycastOutputs, input, results, raycastCommands, spherecastCommands);
+            }
+            finally
+            {
+                results.Dispose();
+                raycastCommands.Dispose();
+                spherecastCommands.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Internal implementation that works with provided NativeArrays.
+        /// </summary>
+        static void PerceiveBatchedRaysInternal(
+            ref RayPerceptionOutput.RayOutput[] batchedRaycastOutputs,
+            RayPerceptionInput input,
+            NativeArray<RaycastHit> results,
+            NativeArray<RaycastCommand> raycastCommands,
+            NativeArray<SpherecastCommand> spherecastCommands)
+        {
+            var numRays = input.Angles.Count;
+            var unscaledRayLength = input.RayLength;
+            var unscaledCastRadius = input.CastRadius;
+            var useSpherecast = unscaledCastRadius > 0f;
 
             for (int i = 0; i < numRays; i++)
             {
@@ -446,11 +550,7 @@ namespace Unity.MLAgents.Sensors
                 var endPositionWorld = extents.EndPositionWorld;
 
                 var rayDirection = endPositionWorld - startPositionWorld;
-                // If there is non-unity scale, |rayDirection| will be different from rayLength.
-                // We want to use this transformed ray length for determining cast length, hit fraction etc.
-                // We also it to scale up or down the sphere or circle radii
                 var scaledRayLength = rayDirection.magnitude;
-                // Avoid 0/0 if unscaledRayLength is 0
                 var scaledCastRadius = unscaledRayLength > 0 ?
                     unscaledCastRadius * scaledRayLength / unscaledRayLength :
                     unscaledCastRadius;
@@ -460,7 +560,7 @@ namespace Unity.MLAgents.Sensors
 
                 var rayDirectionNormalized = rayDirection.normalized;
 
-                if (scaledCastRadius > 0f)
+                if (useSpherecast)
                 {
                     spherecastCommands[i] = new SpherecastCommand(startPositionWorld, scaledCastRadius, rayDirectionNormalized, queryParameters, scaledRayLength);
                 }
@@ -479,7 +579,7 @@ namespace Unity.MLAgents.Sensors
                 };
             }
 
-            if (unscaledCastRadius > 0f)
+            if (useSpherecast)
             {
                 JobHandle handle = SpherecastCommand.ScheduleBatch(spherecastCommands, results, 1, 1, default(JobHandle));
                 handle.Complete();
@@ -493,11 +593,9 @@ namespace Unity.MLAgents.Sensors
             for (int i = 0; i < results.Length; i++)
             {
                 var castHit = results[i].collider != null;
-                var hitFraction = 1.0f;
-                GameObject hitObject = null;
                 float scaledRayLength;
                 float scaledCastRadius = batchedRaycastOutputs[i].ScaledCastRadius;
-                if (scaledCastRadius > 0f)
+                if (useSpherecast)
                 {
                     scaledRayLength = spherecastCommands[i].distance;
                 }
@@ -506,10 +604,8 @@ namespace Unity.MLAgents.Sensors
                     scaledRayLength = raycastCommands[i].distance;
                 }
 
-                // hitFraction = castHit ? (scaledRayLength > 0 ? results[i].distance / scaledRayLength : 0.0f) : 1.0f;
-                // Debug.Log(results[i].distance);
-                hitFraction = castHit ? (scaledRayLength > 0 ? results[i].distance / scaledRayLength : 0.0f) : 1.0f;
-                hitObject = castHit ? results[i].collider.gameObject : null;
+                var hitFraction = castHit ? (scaledRayLength > 0 ? results[i].distance / scaledRayLength : 0.0f) : 1.0f;
+                var hitObject = castHit ? results[i].collider.gameObject : null;
 
                 if (castHit)
                 {
@@ -542,10 +638,6 @@ namespace Unity.MLAgents.Sensors
                 batchedRaycastOutputs[i].HitFraction = hitFraction;
                 batchedRaycastOutputs[i].HitGameObject = hitObject;
             }
-
-            results.Dispose();
-            raycastCommands.Dispose();
-            spherecastCommands.Dispose();
         }
 
         /// <summary>

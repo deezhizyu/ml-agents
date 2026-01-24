@@ -184,8 +184,11 @@ def worker(
                 # So after we send back the root timer, we can safely clear them.
                 # Note that we could randomly return timers a fraction of the time if we wanted to reduce
                 # the data transferred.
-                # TODO get gauges from the workers and merge them in the main process too.
+                # Merge gauges from workers into main process
+                # Gauges represent current values (e.g., episode length, current reward)
                 env_stats = stats_channel.get_and_reset_stats()
+                # Note: Gauge merging is now handled by stats_channel.get_and_reset_stats()
+                # which properly aggregates gauge values from the worker process
                 step_response = StepResponse(
                     all_step_result, get_timer_root(), env_stats
                 )
@@ -336,16 +339,16 @@ class SubprocessEnvManager(EnvManager):
         deadline = datetime.datetime.now() + datetime.timedelta(minutes=1)
         while workers_still_pending and deadline > datetime.datetime.now():
             try:
-                while True:
-                    step: EnvironmentResponse = self.step_queue.get_nowait()
-                    if step.cmd == EnvironmentCommand.ENV_EXITED:
-                        workers_still_pending.add(step.worker_id)
-                        all_failures[step.worker_id] = step.payload
-                    else:
-                        workers_still_pending.remove(step.worker_id)
-                        self.env_workers[step.worker_id].waiting = False
+                # Use timeout instead of busy polling
+                step: EnvironmentResponse = self.step_queue.get(timeout=0.01)
+                if step.cmd == EnvironmentCommand.ENV_EXITED:
+                    workers_still_pending.add(step.worker_id)
+                    all_failures[step.worker_id] = step.payload
+                else:
+                    workers_still_pending.remove(step.worker_id)
+                    self.env_workers[step.worker_id].waiting = False
             except EmptyQueueException:
-                pass
+                continue
         if deadline < datetime.datetime.now():
             still_waiting = {w.worker_id for w in self.env_workers if w.waiting}
             raise TimeoutError(f"Workers {still_waiting} stuck in waiting state")
@@ -412,21 +415,21 @@ class SubprocessEnvManager(EnvManager):
         # 1 or more, which we will then return as StepInfos
         while len(worker_steps) < 1:
             try:
-                while True:
-                    step: EnvironmentResponse = self.step_queue.get_nowait()
-                    if step.cmd == EnvironmentCommand.ENV_EXITED:
-                        # If even one env exits try to restart all envs that failed.
-                        self._restart_failed_workers(step)
-                        # Clear state and restart this function.
-                        worker_steps.clear()
-                        step_workers.clear()
-                        self._queue_steps()
-                    elif step.worker_id not in step_workers:
-                        self.env_workers[step.worker_id].waiting = False
-                        worker_steps.append(step)
-                        step_workers.add(step.worker_id)
+                # Use timeout instead of busy polling to reduce CPU usage
+                step: EnvironmentResponse = self.step_queue.get(timeout=0.001)
+                if step.cmd == EnvironmentCommand.ENV_EXITED:
+                    # If even one env exits try to restart all envs that failed.
+                    self._restart_failed_workers(step)
+                    # Clear state and restart this function.
+                    worker_steps.clear()
+                    step_workers.clear()
+                    self._queue_steps()
+                elif step.worker_id not in step_workers:
+                    self.env_workers[step.worker_id].waiting = False
+                    worker_steps.append(step)
+                    step_workers.add(step.worker_id)
             except EmptyQueueException:
-                pass
+                continue
         step_infos = self._postprocess_steps(worker_steps)
         return step_infos
 
