@@ -225,8 +225,6 @@ def run_cli(options: RunOptions) -> None:
              ╙
         """
         )
-    except Exception:
-        print("\n\n\tUnity Technologies\n")
     print(get_version_string())
 
     if options.debug:

@@ -109,10 +109,13 @@ class TestConfigurationIntegration:
             max_steps=500000
         )
         
-        # Verify memory settings
+        # Verify memory settings with specific expected values
         assert trainer_settings.network_settings.memory is not None
         assert trainer_settings.network_settings.memory.sequence_length == 64
         assert trainer_settings.network_settings.memory.memory_size == 128
+        # Verify memory is properly configured as MemorySettings instance
+        from mlagents.trainers.settings import MemorySettings
+        assert isinstance(trainer_settings.network_settings.memory, MemorySettings)
 
 
 class TestPhase2Integration:

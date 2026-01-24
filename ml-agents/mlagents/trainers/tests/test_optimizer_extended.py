@@ -114,9 +114,10 @@ class TestTorchOptimizerBC:
             }
         )
         
-        # Verify settings were configured correctly
+        # Verify settings were configured correctly with specific values
         assert trainer_settings.behavioral_cloning is not None
         assert trainer_settings.behavioral_cloning.steps == 10000
+        assert trainer_settings.behavioral_cloning.strength > 0.0
     
     def test_no_bc_module_when_not_configured(self, mock_policy):
         """Test that BC module is None when not configured"""

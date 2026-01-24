@@ -105,8 +105,7 @@ class EncoderType(Enum):
 class ScheduleType(Enum):
     CONSTANT = "constant"
     LINEAR = "linear"
-    # TODO add support for lesson based scheduling
-    # LESSON = "lesson"
+    # Note: Lesson-based scheduling is implemented in curriculum_scheduler.py (Phase 3)
 
 
 class ConditioningType(Enum):

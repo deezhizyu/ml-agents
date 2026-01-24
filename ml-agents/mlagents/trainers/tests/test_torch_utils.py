@@ -33,8 +33,6 @@ def test_set_torch_device(
         else:
             assert default_device().index == expected_index
         mock_set_default_tensor_type.assert_called_once_with(expected_tensor_type)
-    except Exception:
-        raise
     finally:
         # restore the defaults
         torch_settings = TorchSettings(device=None)
