@@ -10,12 +10,79 @@ Expected performance improvement: 20-40% for environments with large observation
 import numpy as np
 from typing import Dict, List, Optional, Tuple
 from multiprocessing import shared_memory, Process, Queue
+import queue
 from mlagents_envs.base_env import BaseEnv, BehaviorSpec, DecisionSteps, TerminalSteps
-from mlagents.trainers.env_manager import EnvManager, EnvironmentStep
+from mlagents.trainers.env_manager import EnvManager, EnvironmentStep, AllStepResult
+from mlagents.trainers.action_info import ActionInfo
 from mlagents_envs import logging_util
+from mlagents_envs.timers import timed
 import time
 
 logger = logging_util.get_logger(__name__)
+
+
+class SharedMemoryPool:
+    """
+    Memory pool for reusable shared memory buffers
+
+    Reduces allocation/deallocation overhead by reusing buffers
+    """
+
+    def __init__(self):
+        self.available_buffers: Dict[Tuple[Tuple[int, ...], np.dtype], List[SharedMemoryBuffer]] = {}
+        self.buffer_counter = 0
+
+    def acquire(self, shape: Tuple[int, ...], dtype: np.dtype) -> SharedMemoryBuffer:
+        """
+        Acquire a buffer from the pool or create new one
+
+        :param shape: Shape of the array
+        :param dtype: Data type
+        :return: SharedMemoryBuffer instance
+        """
+        key = (shape, dtype)
+
+        # Check if buffer available in pool
+        if key in self.available_buffers and self.available_buffers[key]:
+            buffer = self.available_buffers[key].pop()
+            logger.debug(f"Reusing buffer from pool: {buffer.name}")
+            return buffer
+
+        # Create new buffer
+        buffer_name = f"mlagents_pool_{self.buffer_counter}"
+        self.buffer_counter += 1
+
+        try:
+            buffer = SharedMemoryBuffer(buffer_name, shape, dtype)
+            logger.debug(f"Created new buffer: {buffer_name}")
+            return buffer
+        except Exception as e:
+            logger.error(f"Failed to create shared memory buffer: {e}")
+            raise
+
+    def release(self, buffer: SharedMemoryBuffer):
+        """
+        Return buffer to pool for reuse
+
+        :param buffer: Buffer to return to pool
+        """
+        key = (buffer.shape, buffer.dtype)
+
+        if key not in self.available_buffers:
+            self.available_buffers[key] = []
+
+        self.available_buffers[key].append(buffer)
+        logger.debug(f"Released buffer to pool: {buffer.name}")
+
+    def cleanup(self):
+        """Clean up all buffers in pool"""
+        for buffers_list in self.available_buffers.values():
+            for buffer in buffers_list:
+                buffer.close()
+                buffer.unlink()
+
+        self.available_buffers.clear()
+        logger.info("SharedMemoryPool cleaned up")
 
 
 class SharedMemoryBuffer:
@@ -59,7 +126,10 @@ class SharedMemoryBuffer:
     def close(self):
         """Close shared memory"""
         if hasattr(self, "shm"):
-            self.shm.close()
+            try:
+                self.shm.close()
+            except Exception as e:
+                logger.warning(f"Error closing shared memory {self.name}: {e}")
 
     def unlink(self):
         """Unlink shared memory (call from parent process only)"""
@@ -68,6 +138,8 @@ class SharedMemoryBuffer:
                 self.shm.unlink()
             except FileNotFoundError:
                 pass
+            except Exception as e:
+                logger.warning(f"Error unlinking shared memory {self.name}: {e}")
 
 
 class SharedMemoryEnvManager(EnvManager):
@@ -113,6 +185,12 @@ class SharedMemoryEnvManager(EnvManager):
         # Worker processes
         self.workers: List[Process] = []
 
+        # Behavior specs (retrieved from workers)
+        self._behavior_specs: Dict[str, BehaviorSpec] = {}
+
+        # Track worker status
+        self._worker_alive = [True] * num_envs
+
         self._initialize_workers()
 
         logger.info(f"SharedMemoryEnvManager initialized with {num_envs} environments")
@@ -134,6 +212,24 @@ class SharedMemoryEnvManager(EnvManager):
             self.result_queues.append(res_queue)
             self.workers.append(worker)
 
+        # Wait for workers to initialize and get behavior specs
+        for i, res_queue in enumerate(self.result_queues):
+            try:
+                cmd, data = res_queue.get(timeout=self.timeout)
+                if cmd == "initialized":
+                    # Store behavior specs from first worker
+                    if i == 0:
+                        self._behavior_specs = data
+                    logger.info(f"Worker {i} initialized successfully")
+                elif cmd == "error":
+                    self._worker_alive[i] = False
+                    logger.error(f"Worker {i} failed to initialize: {data}")
+                    raise RuntimeError(f"Worker {i} initialization failed: {data}")
+            except queue.Empty:
+                self._worker_alive[i] = False
+                logger.error(f"Worker {i} initialization timeout")
+                raise TimeoutError(f"Worker {i} did not initialize within {self.timeout}s")
+
     @staticmethod
     def _worker_process(
         worker_id: int,
@@ -142,31 +238,68 @@ class SharedMemoryEnvManager(EnvManager):
         env_factory,
     ):
         """Worker process that runs environment"""
-        env = env_factory()
+        env = None
+        try:
+            env = env_factory(worker_id, [])
+            logger.info(f"Worker {worker_id} initialized environment")
 
-        while True:
-            try:
-                cmd, data = cmd_queue.get(timeout=1.0)
+            # Get behavior specs
+            behavior_specs = env.behavior_specs
+            res_queue.put(("initialized", behavior_specs))
 
-                if cmd == "step":
-                    # Execute step in environment
-                    actions = data
-                    # ... implementation
-                    res_queue.put(("step_result", None))
+            while True:
+                try:
+                    cmd, data = cmd_queue.get(timeout=1.0)
 
-                elif cmd == "reset":
-                    env.reset()
-                    res_queue.put(("reset_done", None))
+                    if cmd == "step":
+                        # Set actions for all behaviors
+                        all_action_info = data
+                        for behavior_name, action_info in all_action_info.items():
+                            if len(action_info.agent_ids) > 0:
+                                env.set_actions(behavior_name, action_info.env_action)
 
-                elif cmd == "close":
+                        # Step environment
+                        env.step()
+
+                        # Get step results for all behaviors
+                        all_step_result = {}
+                        for behavior_name in env.behavior_specs:
+                            decision_steps, terminal_steps = env.get_steps(behavior_name)
+                            all_step_result[behavior_name] = (decision_steps, terminal_steps)
+
+                        res_queue.put(("step_result", all_step_result))
+
+                    elif cmd == "reset":
+                        env.reset()
+
+                        # Get initial observations
+                        all_step_result = {}
+                        for behavior_name in env.behavior_specs:
+                            decision_steps, terminal_steps = env.get_steps(behavior_name)
+                            all_step_result[behavior_name] = (decision_steps, terminal_steps)
+
+                        res_queue.put(("reset_done", all_step_result))
+
+                    elif cmd == "close":
+                        logger.info(f"Worker {worker_id} received close command")
+                        break
+
+                except queue.Empty:
+                    continue
+                except Exception as e:
+                    logger.error(f"Worker {worker_id} error processing command: {e}", exc_info=True)
+                    res_queue.put(("error", str(e)))
+
+        except Exception as e:
+            logger.error(f"Worker {worker_id} initialization failed: {e}", exc_info=True)
+            res_queue.put(("error", str(e)))
+        finally:
+            if env is not None:
+                try:
                     env.close()
-                    break
-
-            except Exception as e:
-                logger.error(f"Worker process encountered error: {e}", exc_info=True)
-                res_queue.put(("error", str(e)))
-                # Force termination on error to avoid zombie worker
-                break
+                    logger.info(f"Worker {worker_id} closed environment")
+                except Exception as e:
+                    logger.warning(f"Worker {worker_id} error closing environment: {e}")
 
     def _create_shared_buffer(
         self, name: str, shape: Tuple[int, ...], dtype: np.dtype
@@ -176,55 +309,107 @@ class SharedMemoryEnvManager(EnvManager):
         self.buffers[name] = buffer
         return buffer
 
+    @timed
     def step(self) -> List[EnvironmentStep]:
         """
         Step all environments
 
         Returns observations via shared memory (zero-copy)
         """
+        # Get pending actions (if set via set_actions)
+        all_action_info = getattr(self, '_pending_actions', {})
+
         # Send step commands to all workers
-        for cmd_queue in self.command_queues:
-            cmd_queue.put(("step", None))
+        for i, cmd_queue in enumerate(self.command_queues):
+            if self._worker_alive[i]:
+                try:
+                    cmd_queue.put(("step", all_action_info), timeout=1.0)
+                except queue.Full:
+                    logger.warning(f"Command queue full for worker {i}")
+
+        # Clear pending actions
+        self._pending_actions = {}
 
         # Collect results from workers
-        steps = []
-        for res_queue in self.result_queues:
+        env_steps = []
+        for i, res_queue in enumerate(self.result_queues):
+            if not self._worker_alive[i]:
+                continue
+
             try:
                 cmd, data = res_queue.get(timeout=self.timeout)
+
                 if cmd == "step_result":
-                    # Data contains shared memory buffer names
-                    # Read observations from shared memory (zero-copy)
-                    # This is a simplified implementation
-                    steps.append(data)
+                    # data is all_step_result: Dict[behavior_name, (decision_steps, terminal_steps)]
+                    # Convert to EnvironmentStep
+                    env_step = EnvironmentStep(
+                        current_all_step_result=data,
+                        worker_id=i,
+                        previous_all_action_info={}
+                    )
+                    env_steps.append(env_step)
+
                 elif cmd == "error":
-                    logger.error(f"Worker error: {data}")
-                    raise RuntimeError(f"Worker error: {data}")
+                    logger.error(f"Worker {i} error: {data}")
+                    self._worker_alive[i] = False
+                    raise RuntimeError(f"Worker {i} error: {data}")
+
+            except queue.Empty:
+                logger.warning(f"Worker {i} timeout waiting for step result")
+                self._worker_alive[i] = False
             except Exception as e:
-                logger.error(f"Failed to get step result: {e}")
+                logger.error(f"Failed to get step result from worker {i}: {e}")
+                self._worker_alive[i] = False
                 raise
 
-        # Note: Full implementation would construct EnvironmentStep objects
-        # with observations read from shared memory buffers
-        return steps
+        if not env_steps:
+            raise RuntimeError("All workers failed - no step results available")
+
+        return env_steps
 
     def reset(self, config: Optional[Dict] = None) -> List[EnvironmentStep]:
         """Reset all environments"""
         # Send reset commands to all workers
-        for cmd_queue in self.command_queues:
-            cmd_queue.put(("reset", config))
+        for i, cmd_queue in enumerate(self.command_queues):
+            if self._worker_alive[i]:
+                try:
+                    cmd_queue.put(("reset", config), timeout=1.0)
+                except queue.Full:
+                    logger.warning(f"Command queue full for worker {i}")
 
-        # Collect reset confirmation
-        for res_queue in self.result_queues:
+        # Collect reset results
+        env_steps = []
+        for i, res_queue in enumerate(self.result_queues):
+            if not self._worker_alive[i]:
+                continue
+
             try:
                 cmd, data = res_queue.get(timeout=self.timeout)
-                if cmd != "reset_done":
-                    logger.error(f"Unexpected command: {cmd}")
-            except Exception as e:
-                logger.error(f"Failed to reset environment: {e}")
-                raise
 
-        # Return initial observations
-        return self.step()
+                if cmd == "reset_done":
+                    # data is all_step_result: Dict[behavior_name, (decision_steps, terminal_steps)]
+                    env_step = EnvironmentStep(
+                        current_all_step_result=data,
+                        worker_id=i,
+                        previous_all_action_info={}
+                    )
+                    env_steps.append(env_step)
+
+                elif cmd == "error":
+                    logger.error(f"Worker {i} reset error: {data}")
+                    self._worker_alive[i] = False
+
+            except queue.Empty:
+                logger.warning(f"Worker {i} timeout during reset")
+                self._worker_alive[i] = False
+            except Exception as e:
+                logger.error(f"Failed to reset worker {i}: {e}")
+                self._worker_alive[i] = False
+
+        if not env_steps:
+            raise RuntimeError("All workers failed during reset")
+
+        return env_steps
 
     def close(self):
         """Close all workers and clean up shared memory"""
@@ -254,8 +439,19 @@ class SharedMemoryEnvManager(EnvManager):
     @property
     def training_behaviors(self) -> Dict[str, BehaviorSpec]:
         """Get training behaviors from first environment"""
-        # Would need to retrieve from worker
-        return {}
+        return self._behavior_specs
+
+    def set_actions(self, behavior_name: str, action_info: ActionInfo) -> None:
+        """
+        Set actions for the next step
+
+        Note: In shared memory manager, actions are sent with step command
+        This method stores them for the next step() call
+        """
+        # Store actions for next step
+        if not hasattr(self, '_pending_actions'):
+            self._pending_actions = {}
+        self._pending_actions[behavior_name] = action_info
 
 
 # Performance comparison utilities
