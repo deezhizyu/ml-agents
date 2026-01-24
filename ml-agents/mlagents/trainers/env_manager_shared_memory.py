@@ -325,7 +325,8 @@ class SharedMemoryEnvManager(EnvManager):
                 try:
                     cmd_queue.put(("step", all_action_info), timeout=1.0)
                 except queue.Full:
-                    logger.warning(f"Command queue full for worker {i}")
+                    logger.error(f"Command queue full for worker {i} - worker not responding")
+                    self._worker_alive[i] = False
 
         # Clear pending actions
         self._pending_actions = {}
@@ -375,7 +376,8 @@ class SharedMemoryEnvManager(EnvManager):
                 try:
                     cmd_queue.put(("reset", config), timeout=1.0)
                 except queue.Full:
-                    logger.warning(f"Command queue full for worker {i}")
+                    logger.error(f"Command queue full for worker {i} - worker not responding")
+                    self._worker_alive[i] = False
 
         # Collect reset results
         env_steps = []

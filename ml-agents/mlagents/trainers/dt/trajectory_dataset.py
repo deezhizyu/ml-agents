@@ -232,15 +232,58 @@ def load_trajectories_from_buffer(buffer_file: str) -> TrajectoryDataset:
     :return: TrajectoryDataset instance
     """
     import pickle
+    from mlagents.trainers.buffer import BufferKey, ObservationKeyPrefix
 
     with open(buffer_file, 'rb') as f:
         buffer = pickle.load(f)
 
-    # Extract trajectories from buffer
-    # This is a simplified implementation - actual implementation
-    # would need to handle buffer structure properly
+    # Extract observations (use first observation index)
+    obs_key = (ObservationKeyPrefix.OBSERVATION, 0)
+    if obs_key not in buffer:
+        raise ValueError(f"Buffer does not contain observation key: {obs_key}")
 
-    logger.info(f"Loaded trajectories from buffer: {buffer_file}")
+    states = np.array(buffer[obs_key])
 
-    # TODO: Implement proper buffer parsing
-    raise NotImplementedError("Buffer loading not yet implemented")
+    # Extract continuous and discrete actions
+    continuous_actions = np.array(buffer.get(BufferKey.CONTINUOUS_ACTION, []))
+    discrete_actions = np.array(buffer.get(BufferKey.DISCRETE_ACTION, []))
+
+    # Combine actions (concatenate if both present)
+    if len(continuous_actions) > 0 and len(discrete_actions) > 0:
+        actions = np.concatenate([continuous_actions, discrete_actions], axis=-1)
+    elif len(continuous_actions) > 0:
+        actions = continuous_actions
+    elif len(discrete_actions) > 0:
+        actions = discrete_actions
+    else:
+        raise ValueError("Buffer contains no actions")
+
+    # Extract rewards
+    rewards = np.array(buffer[BufferKey.ENVIRONMENT_REWARDS])
+
+    # Extract done flags
+    dones = np.array(buffer[BufferKey.DONE])
+
+    # Split into episodes based on done flags
+    episode_boundaries = np.where(dones)[0] + 1
+    episode_starts = np.concatenate([[0], episode_boundaries[:-1]])
+
+    trajectories_states = []
+    trajectories_actions = []
+    trajectories_rewards = []
+    trajectories_terminals = []
+
+    for start, end in zip(episode_starts, episode_boundaries):
+        trajectories_states.append(states[start:end])
+        trajectories_actions.append(actions[start:end])
+        trajectories_rewards.append(rewards[start:end])
+        trajectories_terminals.append(dones[start:end])
+
+    logger.info(f"Loaded {len(trajectories_states)} trajectories from buffer: {buffer_file}")
+
+    return TrajectoryDataset(
+        trajectories_states,
+        trajectories_actions,
+        trajectories_rewards,
+        trajectories_terminals
+    )
