@@ -9,14 +9,11 @@ Usage:
         scheduler.advance_lesson()
 """
 
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Tuple
 from dataclasses import dataclass
 import numpy as np
 from mlagents_envs import logging_util
-from mlagents.trainers.settings import (
-    Lesson,
-    CompletionCriteriaSettings,
-)
+from mlagents.trainers.settings import Lesson
 
 logger = logging_util.get_logger(__name__)
 
@@ -89,7 +86,7 @@ class CurriculumScheduler:
 
     def should_progress(
         self, reward_buffer: List[float], training_progress: float
-    ) -> Tuple[bool, str]:
+    ) -> Tuple[bool, str]:  # noqa: C901
         """
         Check if should advance to next lesson
 

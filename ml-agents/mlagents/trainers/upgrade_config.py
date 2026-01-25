@@ -163,7 +163,7 @@ class ConfigUpgrader:
         """
         # Load config
         try:
-            with open(input_path, "r", encoding="utf-8") as f:
+            with open(input_path, encoding="utf-8") as f:
                 config = yaml.safe_load(f)
         except Exception as e:
             logger.error(f"Failed to load configuration file {input_path}: {e}")

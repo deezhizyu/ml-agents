@@ -25,8 +25,6 @@ import copy
 from mlagents.trainers.cli_utils import StoreConfigFile, DetectDefault, parser
 from mlagents.trainers.cli_utils import load_config
 from mlagents.trainers.exception import TrainerConfigError, TrainerConfigWarning
-from mlagents.plugins import all_trainer_settings, all_trainer_types
-
 from mlagents_envs import logging_util
 from mlagents_envs.side_channel.environment_parameters_channel import (
     EnvironmentParametersChannel,
@@ -59,7 +57,7 @@ def check_hyperparam_schedules(val: Dict, trainer_type: str) -> Dict:
     return val
 
 
-def strict_to_cls(d: Mapping, t: type) -> Any:
+def strict_to_cls(d: Mapping, t: type) -> Any:  # type: ignore[type-arg]
     if not isinstance(d, Mapping):
         raise TrainerConfigError(f"Unsupported config {d} for {t.__name__}.")
     d_copy: Dict[str, Any] = {}
@@ -183,10 +181,10 @@ class OffPolicyHyperparamSettings(HyperparamSettings):
 
 # INTRINSIC REWARD SIGNALS #############################################################
 class RewardSignalType(Enum):
-    EXTRINSIC: str = "extrinsic"
-    GAIL: str = "gail"
-    CURIOSITY: str = "curiosity"
-    RND: str = "rnd"
+    EXTRINSIC = "extrinsic"
+    GAIL = "gail"
+    CURIOSITY = "curiosity"
+    RND = "rnd"
 
     def to_settings(self) -> type:
         _mapping = {
@@ -257,10 +255,10 @@ class RNDSettings(RewardSignalSettings):
 
 # SAMPLERS #############################################################################
 class ParameterRandomizationType(Enum):
-    UNIFORM: str = "uniform"
-    GAUSSIAN: str = "gaussian"
-    MULTIRANGEUNIFORM: str = "multirangeuniform"
-    CONSTANT: str = "constant"
+    UNIFORM = "uniform"
+    GAUSSIAN = "gaussian"
+    MULTIRANGEUNIFORM = "multirangeuniform"
+    CONSTANT = "constant"
 
     def to_settings(self) -> type:
         _mapping = {
@@ -465,8 +463,8 @@ class CompletionCriteriaSettings:
     """
 
     class MeasureType(Enum):
-        PROGRESS: str = "progress"
-        REWARD: str = "reward"
+        PROGRESS = "progress"
+        REWARD = "reward"
 
     behavior: str
     measure: MeasureType = attr.ib(default=MeasureType.REWARD)
@@ -914,7 +912,9 @@ class RunOptions(ExportableSettings):
 
     cattr.register_unstructure_hook_func(
         lambda t: isinstance(t, type) and issubclass(t, HyperparamSettings),
-        lambda obj: attr.asdict(obj, value_serializer=RunOptions._hyperparam_value_serializer)
+        lambda obj: attr.asdict(
+            obj, value_serializer=RunOptions._hyperparam_value_serializer  # type: ignore[call-arg]
+        ),
     )
 
     @staticmethod

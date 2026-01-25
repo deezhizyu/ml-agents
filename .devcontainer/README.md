@@ -58,10 +58,10 @@ The `post-create.sh` script automatically:
    ```bash
    # Check Python
    python --version
-   
+
    # Check packages
    pip list | grep mlagents
-   
+
    # Check tools
    pre-commit --version
    pytest --version
@@ -71,10 +71,10 @@ The `post-create.sh` script automatically:
    ```bash
    # Run tests
    pytest --cov=ml-agents --cov=ml-agents-envs -m "not slow"
-   
+
    # Train agent
    mlagents-learn config/ppo/3DBall.yaml --run-id=test
-   
+
    # View TensorBoard
    tensorboard --logdir=results
    ```

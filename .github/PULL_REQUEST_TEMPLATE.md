@@ -26,23 +26,23 @@ Fixes #(issue)
 
 <!-- List the specific changes made in this PR -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Testing Done
 
 <!-- Describe the testing you've performed to verify your changes -->
 
 ### Test Environment
-- **Python Version**: 
-- **Unity Version**: 
-- **Operating System**: 
+- **Python Version**:
+- **Unity Version**:
+- **Operating System**:
 
 ### Test Steps
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ### Test Results
 - [ ] All existing tests pass

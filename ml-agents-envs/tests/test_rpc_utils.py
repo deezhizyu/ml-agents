@@ -63,7 +63,7 @@ def generate_list_agent_proto(
 
 def generate_compressed_data(in_array: np.ndarray) -> bytes:
     image_arr = (in_array * 255).astype(np.uint8)
-    bytes_out = bytes()
+    bytes_out = b""
 
     num_channels = in_array.shape[0]
     num_images = (num_channels + 2) // 3

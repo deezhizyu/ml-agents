@@ -65,7 +65,7 @@ class POCATrainer(OnPolicyTrainer):
         self.seed = seed
         self.policy: TorchPolicy = None  # type: ignore
         self.optimizer: TorchPOCAOptimizer = None  # type: ignore
-        self.collected_group_rewards: Dict[str, int] = defaultdict(lambda: 0)
+        self.collected_group_rewards: Dict[str, int] = defaultdict(int)
 
     def _process_trajectory(self, trajectory: Trajectory) -> None:
         """

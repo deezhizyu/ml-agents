@@ -35,7 +35,7 @@ def register_stats_writer_plugins(run_options: RunOptions) -> List[StatsWriter]:
     and evaluates them, and returns the list of all the StatsWriter implementations.
     """
     all_stats_writers: List[StatsWriter] = []
-    
+
     # Use .select() method instead of dict interface (deprecated in importlib_metadata 3.6+/Python 3.12+)
     try:
         entry_points = importlib_metadata.entry_points().select(
@@ -43,8 +43,12 @@ def register_stats_writer_plugins(run_options: RunOptions) -> List[StatsWriter]:
         )
     except AttributeError:
         # Fallback for older importlib_metadata versions
-        entry_points = importlib_metadata.entry_points().get(ML_AGENTS_STATS_WRITER, [])
-    
+        all_eps = importlib_metadata.entry_points()
+        if hasattr(all_eps, "get"):
+            entry_points = all_eps.get(ML_AGENTS_STATS_WRITER, [])  # type: ignore[union-attr]
+        else:
+            entry_points = []
+
     if not entry_points:
         logger.warning(
             f"Unable to find any entry points for {ML_AGENTS_STATS_WRITER}, even the default ones. "
@@ -63,7 +67,7 @@ def register_stats_writer_plugins(run_options: RunOptions) -> List[StatsWriter]:
                 f"Found {len(plugin_stats_writers)} StatsWriters for plugin {entry_point.name}"
             )
             all_stats_writers += plugin_stats_writers
-        except BaseException:
+        except BaseException:  # noqa: B036
             # Catch all exceptions from setting up the plugin, so that bad user code doesn't break things.
             logger.exception(
                 f"Error initializing StatsWriter plugins for {entry_point.name}. This plugin will not be used."

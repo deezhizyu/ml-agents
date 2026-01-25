@@ -7,8 +7,7 @@ Usage:
 """
 
 import sys
-import subprocess
-from typing import List, Tuple
+from typing import List, Tuple, Callable, Any, Optional
 from mlagents_envs import logging_util
 
 logger = logging_util.get_logger(__name__)
@@ -17,11 +16,16 @@ logger = logging_util.get_logger(__name__)
 class DiagnosticCheck:
     """Represents a single diagnostic check"""
 
-    def __init__(self, name: str, check_func, fix_suggestion: str = ""):
+    def __init__(
+        self,
+        name: str,
+        check_func: Callable[[], Tuple[bool, str]],
+        fix_suggestion: str = "",
+    ):
         self.name = name
         self.check_func = check_func
         self.fix_suggestion = fix_suggestion
-        self.result = None
+        self.result: Optional[Tuple[bool, str]] = None
         self.message = ""
 
     def run(self) -> bool:

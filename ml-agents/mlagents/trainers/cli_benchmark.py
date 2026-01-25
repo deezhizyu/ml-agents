@@ -6,10 +6,9 @@ Usage:
     python -m mlagents.trainers.cli_benchmark --config config.yaml
 """
 
-import sys
 import time
 import argparse
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 import numpy as np
 from mlagents_envs import logging_util
 
@@ -40,17 +39,17 @@ class BenchmarkResult:
     @property
     def mean_timing(self) -> float:
         """Get mean timing"""
-        return float(np.mean(self.timings)) if self.timings else 0.0
+        return float(np.mean(self.timings)) if self.timings else 0.0  # type: ignore[arg-type]
 
     @property
     def std_timing(self) -> float:
         """Get timing standard deviation"""
-        return float(np.std(self.timings)) if self.timings else 0.0
+        return float(np.std(self.timings)) if self.timings else 0.0  # type: ignore[arg-type]
 
     @property
     def mean_throughput(self) -> float:
         """Get mean throughput"""
-        return float(np.mean(self.throughput)) if self.throughput else 0.0
+        return float(np.mean(self.throughput)) if self.throughput else 0.0  # type: ignore[arg-type]
 
 
 class MLAgentsBenchmark:
@@ -60,7 +59,7 @@ class MLAgentsBenchmark:
         self.results: Dict[str, BenchmarkResult] = {}
 
     def benchmark_policy_inference(
-        self, policy, num_iterations: int = 1000, batch_size: int = 32
+        self, policy: Any, num_iterations: int = 1000, batch_size: int = 32
     ) -> BenchmarkResult:
         """
         Benchmark policy inference speed
@@ -101,7 +100,7 @@ class MLAgentsBenchmark:
         time.sleep(0.001)  # Simulate work
 
     def benchmark_optimizer_update(
-        self, optimizer, num_iterations: int = 100
+        self, optimizer: Any, num_iterations: int = 100
     ) -> BenchmarkResult:
         """
         Benchmark optimizer update speed
@@ -150,7 +149,7 @@ class MLAgentsBenchmark:
             start = time.perf_counter()
 
             # Add data
-            for j in range(buffer_size):
+            for _ in range(buffer_size):
                 buffer[BufferKey.CONTINUOUS_ACTION].append(np.random.randn(3))
 
             # Sample
@@ -187,7 +186,7 @@ class MLAgentsBenchmark:
         print("=" * 70)
         print()
 
-        for name, result in self.results.items():
+        for _name, result in self.results.items():
             print(f"{result.name}:")
             print(f"  Mean time: {result.mean_timing*1000:.3f} ms")
             print(f"  Std dev:   {result.std_timing*1000:.3f} ms")

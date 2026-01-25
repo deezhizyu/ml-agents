@@ -61,10 +61,10 @@ behaviors:
       # Larger batches = better GPU utilization
       batch_size: 2048      # Up from 1024
       buffer_size: 20480    # 10x batch_size
-      
+
       # Reduce epochs for faster updates
       num_epoch: 3          # Down from 5
-      
+
       # Larger learning rate = faster convergence (if stable)
       learning_rate: 5.0e-4  # Up from 3.0e-4
 ```
@@ -76,7 +76,7 @@ network_settings:
   # Smaller networks train faster
   hidden_units: 64       # Down from 128 or 256
   num_layers: 2          # Down from 3
-  
+
   # But may reduce learning capacity
   # Balance speed vs performance
 ```
@@ -111,7 +111,7 @@ num_envs: 2  # Down from 4 or 8
 behaviors:
   MyBehavior:
     max_steps: 1000000
-    
+
     # Smaller buffer = less memory
     hyperparameters:
       buffer_size: 2048  # Minimum: batch_size * 2

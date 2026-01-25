@@ -27,7 +27,7 @@ That's it! TorchScript compilation will automatically happen after the first for
 network_settings:
   hidden_units: 128
   num_layers: 2
-  
+
   # TorchScript settings
   enable_torchscript: true  # Enable compilation (default: false)
   torchscript_optimize_for_inference: true  # Apply optimizations (default: true)
@@ -39,7 +39,7 @@ network_settings:
 behaviors:
   3DBall:
     trainer_type: ppo
-    
+
     hyperparameters:
       batch_size: 128
       buffer_size: 25600
@@ -48,22 +48,22 @@ behaviors:
       epsilon: 0.2
       lambd: 0.99
       num_epoch: 3
-    
+
     network_settings:
       normalize: false
       hidden_units: 256
       num_layers: 3
       vis_encode_type: simple
-      
+
       # Performance optimization
       enable_torchscript: true
       torchscript_optimize_for_inference: true
-    
+
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
-    
+
     max_steps: 1000000
     time_horizon: 1000
     summary_freq: 50000
@@ -168,7 +168,7 @@ Training will continue normally, just without the speedup.
 
 **Problem:**
 ```
-WARNING: Failed to compile actor with TorchScript: 
+WARNING: Failed to compile actor with TorchScript:
   'NoneType' object has no attribute 'forward'
 ```
 
@@ -329,25 +329,25 @@ Then file an issue with:
 
 ## 📝 FAQ
 
-**Q: Does TorchScript work with visual observations?**  
+**Q: Does TorchScript work with visual observations?**
 A: Yes! CNN encoders compile well with TorchScript.
 
-**Q: Can I use TorchScript with curriculum learning?**  
+**Q: Can I use TorchScript with curriculum learning?**
 A: Yes, TorchScript is independent of training curriculum.
 
-**Q: Does TorchScript affect training results?**  
+**Q: Does TorchScript affect training results?**
 A: No, it only affects speed. Results should be identical.
 
-**Q: Can I export TorchScript models to ONNX?**  
+**Q: Can I export TorchScript models to ONNX?**
 A: Yes! See `TorchScriptOptimizer.save_scripted_model()`.
 
-**Q: Does TorchScript work on Mac M1/M2?**  
+**Q: Does TorchScript work on Mac M1/M2?**
 A: Yes, but CPU benefits are smaller than GPU.
 
-**Q: What PyTorch version is required?**  
+**Q: What PyTorch version is required?**
 A: PyTorch 1.8.0+ recommended, 1.10.0+ for best results.
 
 ---
 
-**Last Updated:** 2026-01-23  
+**Last Updated:** 2026-01-23
 **ML-Agents Version:** 1.2.0+

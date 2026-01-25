@@ -165,7 +165,7 @@ class OffPolicyTrainer(RLTrainer):
         self.policies[parsed_behavior_id.behavior_id] = policy
         self.optimizer = self.create_optimizer()
         for _reward_signal in self.optimizer.reward_signals.keys():
-            self.collected_rewards[_reward_signal] = defaultdict(lambda: 0)
+            self.collected_rewards[_reward_signal] = defaultdict(int)
 
         self.model_saver.register(self.policy)
         self.model_saver.register(self.optimizer)

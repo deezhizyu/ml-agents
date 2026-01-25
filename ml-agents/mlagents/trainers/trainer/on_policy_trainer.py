@@ -134,7 +134,7 @@ class OnPolicyTrainer(RLTrainer):
 
         self.optimizer = self.create_optimizer()
         for _reward_signal in self.optimizer.reward_signals.keys():
-            self.collected_rewards[_reward_signal] = defaultdict(lambda: 0)
+            self.collected_rewards[_reward_signal] = defaultdict(int)
 
         self.model_saver.register(self.policy)
         self.model_saver.register(self.optimizer)

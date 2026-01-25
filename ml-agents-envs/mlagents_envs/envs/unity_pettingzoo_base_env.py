@@ -34,8 +34,12 @@ class UnityPettingzooBaseEnv:
         self._agent_id_to_index: Dict[str, int] = {}  # agent_id: index in decision step
         self._observations: Dict[str, np.ndarray] = {}  # agent_id: obs
         self._dones: Dict[str, bool] = {}  # agent_id: done
-        self._terminations: Dict[str, bool] = {}  # agent_id: terminated (PettingZoo 1.24+)
-        self._truncations: Dict[str, bool] = {}  # agent_id: truncated (PettingZoo 1.24+)
+        self._terminations: Dict[str, bool] = (
+            {}
+        )  # agent_id: terminated (PettingZoo 1.24+)
+        self._truncations: Dict[str, bool] = (
+            {}
+        )  # agent_id: truncated (PettingZoo 1.24+)
         self._rewards: Dict[str, float] = {}  # agent_id: reward
         self._cumm_rewards: Dict[str, float] = {}  # agent_id: reward
         self._infos: Dict[str, Dict] = {}  # agent_id: info

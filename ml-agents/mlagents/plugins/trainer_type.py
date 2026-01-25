@@ -71,7 +71,7 @@ def register_trainer_plugins() -> Tuple[Dict[str, Any], Dict[str, Any]]:
             )
             mla_plugins.all_trainer_types.update(plugin_trainer_types)
             mla_plugins.all_trainer_settings.update(plugin_trainer_settings)
-        except BaseException:
+        except BaseException:  # noqa: B036
             # Catch all exceptions from setting up the plugin, so that bad user code doesn't break things.
             logger.exception(
                 f"Error initializing Trainer plugins for {entry_point.name}. This plugin will not be used."

@@ -2,7 +2,7 @@
 
 from mlagents.trainers.inference.async_batch_inference import (
     AsyncBatchInference,
-    MultiModelAsyncInference
+    MultiModelAsyncInference,
 )
 
 __all__ = ["AsyncBatchInference", "MultiModelAsyncInference"]

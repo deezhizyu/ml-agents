@@ -3,6 +3,7 @@
 * [mlagents.trainers.optimizer.torch\_optimizer](#mlagents.trainers.optimizer.torch_optimizer)
   * [TorchOptimizer](#mlagents.trainers.optimizer.torch_optimizer.TorchOptimizer)
     * [create\_reward\_signals](#mlagents.trainers.optimizer.torch_optimizer.TorchOptimizer.create_reward_signals)
+    * [get\_modules](#mlagents.trainers.optimizer.torch_optimizer.TorchOptimizer.get_modules)
     * [get\_trajectory\_value\_estimates](#mlagents.trainers.optimizer.torch_optimizer.TorchOptimizer.get_trajectory_value_estimates)
 * [mlagents.trainers.optimizer.optimizer](#mlagents.trainers.optimizer.optimizer)
   * [Optimizer](#mlagents.trainers.optimizer.optimizer.Optimizer)
@@ -30,6 +31,20 @@ Create reward signals
 **Arguments**:
 
 - `reward_signal_configs`: Reward signal config.
+
+<a name="mlagents.trainers.optimizer.torch_optimizer.TorchOptimizer.get_modules"></a>
+#### get\_modules
+
+```python
+ | get_modules() -> Dict[str, any]
+```
+
+Get all modules for this optimizer including reward provider modules.
+Subclasses should override to include optimizer and critic modules.
+
+**Returns**:
+
+Dictionary mapping module names to modules
 
 <a name="mlagents.trainers.optimizer.torch_optimizer.TorchOptimizer.get_trajectory_value_estimates"></a>
 #### get\_trajectory\_value\_estimates

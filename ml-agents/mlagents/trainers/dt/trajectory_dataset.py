@@ -26,7 +26,7 @@ class TrajectoryDataset:
         rewards: List[np.ndarray],
         terminals: List[np.ndarray],
         max_len: int = 20,
-        discount: float = 0.99
+        discount: float = 0.99,
     ):
         """
         Initialize trajectory dataset
@@ -110,29 +110,33 @@ class TrajectoryDataset:
             # Pad with zeros
             pad_len = self.max_len - seg_len
 
-            seg_states = np.concatenate([
-                seg_states,
-                np.zeros((pad_len, *seg_states.shape[1:]), dtype=seg_states.dtype)
-            ])
-            seg_actions = np.concatenate([
-                seg_actions,
-                np.zeros((pad_len, *seg_actions.shape[1:]), dtype=seg_actions.dtype)
-            ])
-            seg_rtg = np.concatenate([
-                seg_rtg,
-                np.zeros(pad_len, dtype=seg_rtg.dtype)
-            ])
-            timesteps = np.concatenate([
-                timesteps,
-                np.zeros(pad_len, dtype=timesteps.dtype)
-            ])
+            seg_states = np.concatenate(
+                [
+                    seg_states,
+                    np.zeros((pad_len, *seg_states.shape[1:]), dtype=seg_states.dtype),
+                ]
+            )
+            seg_actions = np.concatenate(
+                [
+                    seg_actions,
+                    np.zeros(
+                        (pad_len, *seg_actions.shape[1:]), dtype=seg_actions.dtype
+                    ),
+                ]
+            )
+            seg_rtg = np.concatenate([seg_rtg, np.zeros(pad_len, dtype=seg_rtg.dtype)])
+            timesteps = np.concatenate(
+                [timesteps, np.zeros(pad_len, dtype=timesteps.dtype)]
+            )
 
         return {
-            'states': seg_states.astype(np.float32),
-            'actions': seg_actions.astype(np.float32),
-            'returns_to_go': seg_rtg.astype(np.float32),
-            'timesteps': timesteps.astype(np.int64),
-            'attention_mask': np.ones(self.max_len if seg_len == self.max_len else seg_len, dtype=np.bool_)
+            "states": seg_states.astype(np.float32),
+            "actions": seg_actions.astype(np.float32),
+            "returns_to_go": seg_rtg.astype(np.float32),
+            "timesteps": timesteps.astype(np.int64),
+            "attention_mask": np.ones(
+                self.max_len if seg_len == self.max_len else seg_len, dtype=np.bool_
+            ),
         }
 
 
@@ -143,21 +147,27 @@ def collate_fn(batch: List[Dict[str, np.ndarray]]) -> Dict[str, torch.Tensor]:
     :param batch: List of trajectory segments
     :return: Batched tensors
     """
-    states = torch.tensor(np.stack([b['states'] for b in batch]), dtype=torch.float32)
-    actions = torch.tensor(np.stack([b['actions'] for b in batch]), dtype=torch.float32)
-    returns_to_go = torch.tensor(np.stack([b['returns_to_go'] for b in batch]), dtype=torch.float32)
-    timesteps = torch.tensor(np.stack([b['timesteps'] for b in batch]), dtype=torch.long)
-    attention_mask = torch.tensor(np.stack([b['attention_mask'] for b in batch]), dtype=torch.bool)
+    states = torch.tensor(np.stack([b["states"] for b in batch]), dtype=torch.float32)
+    actions = torch.tensor(np.stack([b["actions"] for b in batch]), dtype=torch.float32)
+    returns_to_go = torch.tensor(
+        np.stack([b["returns_to_go"] for b in batch]), dtype=torch.float32
+    )
+    timesteps = torch.tensor(
+        np.stack([b["timesteps"] for b in batch]), dtype=torch.long
+    )
+    attention_mask = torch.tensor(
+        np.stack([b["attention_mask"] for b in batch]), dtype=torch.bool
+    )
 
     # Add dimension for returns_to_go (needs to be seq_len, 1)
     returns_to_go = returns_to_go.unsqueeze(-1)
 
     return {
-        'states': states,
-        'actions': actions,
-        'returns_to_go': returns_to_go,
-        'timesteps': timesteps,
-        'attention_mask': attention_mask
+        "states": states,
+        "actions": actions,
+        "returns_to_go": returns_to_go,
+        "timesteps": timesteps,
+        "attention_mask": attention_mask,
     }
 
 
@@ -174,53 +184,58 @@ def load_trajectories_from_demonstrations(demo_file: str) -> TrajectoryDataset:
     behavior_spec, info_action_pair, _ = load_demonstration(demo_file)
 
     # Extract trajectories (group by episode)
-    trajectories = {
-        'states': [],
-        'actions': [],
-        'rewards': [],
-        'terminals': []
-    }
+    trajectories = {"states": [], "actions": [], "rewards": [], "terminals": []}
 
-    current_traj = {
-        'states': [],
-        'actions': [],
-        'rewards': [],
-        'terminals': []
-    }
+    current_traj = {"states": [], "actions": [], "rewards": [], "terminals": []}
 
     for brain_info, action_info in info_action_pair:
         # Assuming single agent for simplicity
         if len(brain_info.agents) > 0:
-            obs = brain_info.visual_observations[0] if brain_info.visual_observations else brain_info.vector_observations[0]
-            action = action_info.continuous_actions[0] if len(action_info.continuous_actions) > 0 else action_info.discrete_actions[0]
+            obs = (
+                brain_info.visual_observations[0]
+                if brain_info.visual_observations
+                else brain_info.vector_observations[0]
+            )
+            action = (
+                action_info.continuous_actions[0]
+                if len(action_info.continuous_actions) > 0
+                else action_info.discrete_actions[0]
+            )
 
-            current_traj['states'].append(obs)
-            current_traj['actions'].append(action)
-            current_traj['rewards'].append(brain_info.rewards[0] if len(brain_info.rewards) > 0 else 0.0)
+            current_traj["states"].append(obs)
+            current_traj["actions"].append(action)
+            current_traj["rewards"].append(
+                brain_info.rewards[0] if len(brain_info.rewards) > 0 else 0.0
+            )
 
             # Check if episode ended
             if len(brain_info.local_done) > 0 and brain_info.local_done[0]:
                 # Episode complete
-                current_traj['terminals'].append(True)
+                current_traj["terminals"].append(True)
 
                 # Save trajectory
-                trajectories['states'].append(np.array(current_traj['states']))
-                trajectories['actions'].append(np.array(current_traj['actions']))
-                trajectories['rewards'].append(np.array(current_traj['rewards']))
-                trajectories['terminals'].append(np.array(current_traj['terminals']))
+                trajectories["states"].append(np.array(current_traj["states"]))
+                trajectories["actions"].append(np.array(current_traj["actions"]))
+                trajectories["rewards"].append(np.array(current_traj["rewards"]))
+                trajectories["terminals"].append(np.array(current_traj["terminals"]))
 
                 # Reset for next episode
-                current_traj = {'states': [], 'actions': [], 'rewards': [], 'terminals': []}
+                current_traj = {
+                    "states": [],
+                    "actions": [],
+                    "rewards": [],
+                    "terminals": [],
+                }
             else:
-                current_traj['terminals'].append(False)
+                current_traj["terminals"].append(False)
 
     logger.info(f"Loaded {len(trajectories['states'])} trajectories from {demo_file}")
 
     return TrajectoryDataset(
-        trajectories['states'],
-        trajectories['actions'],
-        trajectories['rewards'],
-        trajectories['terminals']
+        trajectories["states"],
+        trajectories["actions"],
+        trajectories["rewards"],
+        trajectories["terminals"],
     )
 
 
@@ -234,7 +249,7 @@ def load_trajectories_from_buffer(buffer_file: str) -> TrajectoryDataset:
     import pickle
     from mlagents.trainers.buffer import BufferKey, ObservationKeyPrefix
 
-    with open(buffer_file, 'rb') as f:
+    with open(buffer_file, "rb") as f:
         buffer = pickle.load(f)
 
     # Extract observations (use first observation index)
@@ -279,11 +294,13 @@ def load_trajectories_from_buffer(buffer_file: str) -> TrajectoryDataset:
         trajectories_rewards.append(rewards[start:end])
         trajectories_terminals.append(dones[start:end])
 
-    logger.info(f"Loaded {len(trajectories_states)} trajectories from buffer: {buffer_file}")
+    logger.info(
+        f"Loaded {len(trajectories_states)} trajectories from buffer: {buffer_file}"
+    )
 
     return TrajectoryDataset(
         trajectories_states,
         trajectories_actions,
         trajectories_rewards,
-        trajectories_terminals
+        trajectories_terminals,
     )

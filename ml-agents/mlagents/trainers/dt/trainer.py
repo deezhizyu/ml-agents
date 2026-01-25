@@ -6,7 +6,7 @@ Trains Decision Transformer on offline trajectory data
 
 from __future__ import annotations
 
-from typing import Dict, Optional, List, List
+from typing import Any, Dict, Optional, List
 import numpy as np
 from mlagents.torch_utils import torch, default_device
 import torch.nn.functional as F
@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from mlagents.trainers.trainer.rl_trainer import RLTrainer
 from mlagents.trainers.dt.decision_transformer import DecisionTransformer
 from mlagents.trainers.dt.trajectory_dataset import TrajectoryDataset, collate_fn
-from mlagents.trainers.buffer import AgentBuffer
+
 from mlagents_envs.logging_util import get_logger
 from mlagents_envs.base_env import BehaviorSpec
 from mlagents.trainers.settings import TrainerSettings
@@ -60,26 +60,26 @@ class DecisionTransformerTrainer(RLTrainer):
             training,
             load,
             seed,
-            artifact_path
+            artifact_path,
         )
 
         # Decision Transformer specific parameters
         dt_params = trainer_settings.hyperparameters
 
-        self.hidden_dim = dt_params.get('hidden_dim', 128)
-        self.num_layers = dt_params.get('num_layers', 3)
-        self.num_heads = dt_params.get('num_heads', 1)
-        self.max_len = dt_params.get('max_len', 20)
-        self.batch_size = dt_params.get('batch_size', 64)
-        self.learning_rate = dt_params.get('learning_rate', 1e-4)
+        self.hidden_dim = getattr(dt_params, "hidden_dim", 128)
+        self.num_layers = getattr(dt_params, "num_layers", 3)
+        self.num_heads = getattr(dt_params, "num_heads", 1)
+        self.max_len = getattr(dt_params, "max_len", 20)
+        self.batch_size = getattr(dt_params, "batch_size", 64)
+        self.learning_rate = getattr(dt_params, "learning_rate", 1e-4)
 
         # Dataset
-        self.dataset: Optional[TrajectoryDataset] = None
-        self.dataloader: Optional[DataLoader] = None
+        self.dataset: TrajectoryDataset | None = None
+        self.dataloader: DataLoader | None = None
 
         logger.info(f"DecisionTransformerTrainer initialized for {behavior_name}")
 
-    def _create_model(self, behavior_spec: BehaviorSpec):
+    def _create_model(self, behavior_spec: BehaviorSpec) -> None:
         """Create Decision Transformer model"""
         # Get dimensions from behavior spec
         state_dim = behavior_spec.observation_specs[0].shape[0]  # Vector obs
@@ -92,30 +92,27 @@ class DecisionTransformerTrainer(RLTrainer):
             hidden_dim=self.hidden_dim,
             num_layers=self.num_layers,
             num_heads=self.num_heads,
-            action_tanh=True
+            action_tanh=True,
         ).to(default_device())
 
         # Optimizer
         self.optimizer = torch.optim.AdamW(
-            self.model.parameters(),
-            lr=self.learning_rate,
-            weight_decay=1e-4
+            self.model.parameters(), lr=self.learning_rate, weight_decay=1e-4
         )
 
         # Learning rate scheduler
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            self.optimizer,
-            T_max=100000  # Total training steps
+            self.optimizer, T_max=100000  # Total training steps
         )
 
         logger.info("Decision Transformer model created")
 
     def load_dataset(
         self,
-        states: List[np.ndarray],
-        actions: List[np.ndarray],
-        rewards: List[np.ndarray],
-        terminals: List[np.ndarray]
+        states: list[np.ndarray],
+        actions: list[np.ndarray],
+        rewards: list[np.ndarray],
+        terminals: list[np.ndarray],
     ):
         """
         Load offline dataset for training
@@ -130,7 +127,7 @@ class DecisionTransformerTrainer(RLTrainer):
             actions=actions,
             rewards=rewards,
             terminals=terminals,
-            max_len=self.max_len
+            max_len=self.max_len,
         )
 
         self.dataloader = DataLoader(
@@ -138,12 +135,12 @@ class DecisionTransformerTrainer(RLTrainer):
             batch_size=self.batch_size,
             shuffle=True,
             collate_fn=collate_fn,
-            num_workers=0  # Avoid multiprocessing issues
+            num_workers=0,  # Avoid multiprocessing issues
         )
 
         logger.info(f"Dataset loaded: {len(self.dataset)} trajectories")
 
-    def _update_policy(self) -> Dict[str, float]:
+    def _update_policy(self) -> bool:  # type: ignore[override]
         """
         Update Decision Transformer on offline data
 
@@ -160,17 +157,17 @@ class DecisionTransformerTrainer(RLTrainer):
 
         for batch in self.dataloader:
             # Move batch to device
-            states = batch['states'].to(default_device())
-            actions = batch['actions'].to(default_device())
-            returns_to_go = batch['returns_to_go'].to(default_device())
-            timesteps = batch['timesteps'].to(default_device())
+            states = batch["states"].to(default_device())
+            actions = batch["actions"].to(default_device())
+            returns_to_go = batch["returns_to_go"].to(default_device())
+            timesteps = batch["timesteps"].to(default_device())
 
             # Forward pass
             action_preds = self.model(
                 states=states,
                 actions=actions,
                 returns_to_go=returns_to_go,
-                timesteps=timesteps
+                timesteps=timesteps,
             )
 
             # Loss: MSE between predicted and actual actions
@@ -193,44 +190,41 @@ class DecisionTransformerTrainer(RLTrainer):
 
         avg_loss = total_loss / num_batches if num_batches > 0 else 0.0
 
-        return {
-            'Losses/Decision Transformer Loss': avg_loss,
-            'Policy/Learning Rate': self.scheduler.get_last_lr()[0]
-        }
+        # Log metrics
+        self.stats_reporter.add_stat("Losses/Decision Transformer Loss", avg_loss)
+        self.stats_reporter.add_stat(
+            "Policy/Learning Rate", self.scheduler.get_last_lr()[0]
+        )
+        return True
 
-    def advance(self) -> Dict[str, float]:
+    def advance(self) -> None:  # type: ignore[override]
         """
         Advance the trainer by one step
 
         :return: Training metrics
         """
         if not self.should_still_train:
-            return {}
+            return
 
         # Update policy
-        metrics = self._update_policy()
+        self._update_policy()
 
-        # Update step count
-        self.step += 1
-
-        return metrics
+        # Update step count is handled by parent class
 
     def create_policy(
         self,
-        parsed_behavior_id: str,
-        behavior_spec: BehaviorSpec,
-        create_graph: bool = False
+        parsed_behavior_id: Any,
+        behavior_spec: Any,
     ) -> TorchPolicy:
         """
         Create policy for Decision Transformer
 
         :param parsed_behavior_id: Parsed behavior ID
         :param behavior_spec: Behavior specification
-        :param create_graph: Whether to create TensorBoard graph
         :return: TorchPolicy instance
         """
         # Create model if not exists
-        if not hasattr(self, 'model'):
+        if not hasattr(self, "model"):
             self._create_model(behavior_spec)
 
         # Create policy wrapper
@@ -242,7 +236,7 @@ class DecisionTransformerTrainer(RLTrainer):
 
         # Return standard TorchPolicy for compatibility
         # Actual implementation would need custom policy class
-        return super().create_policy(parsed_behavior_id, behavior_spec, create_graph)
+        return super().create_policy(parsed_behavior_id, behavior_spec)
 
     def _is_ready_update(self) -> bool:
         """
@@ -260,7 +254,7 @@ class DecisionTransformerTrainer(RLTrainer):
         """
         pass
 
-    def add_policy(self, parsed_behavior_id: str, policy: TorchPolicy) -> None:
+    def add_policy(self, parsed_behavior_id: Any, policy: Any) -> None:  # type: ignore[override]
         """Add policy to trainer"""
         self.policies[parsed_behavior_id] = policy
         logger.info(f"Policy added for {parsed_behavior_id}")

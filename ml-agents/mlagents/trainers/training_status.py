@@ -59,7 +59,7 @@ class GlobalTrainingStatus:
     cannot/should not be captured in a model checkpoint, such as curriclum lesson.
     """
 
-    saved_state: Dict[str, Dict[str, Any]] = defaultdict(lambda: {})
+    saved_state: Dict[str, Dict[str, Any]] = defaultdict(dict)
 
     @staticmethod
     def load_state(path: str) -> None:

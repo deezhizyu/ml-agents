@@ -20,6 +20,9 @@
     * [action\_spaces](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.action_spaces)
     * [action\_space](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.action_space)
     * [side\_channel](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.side_channel)
+    * [terminations](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.terminations)
+    * [truncations](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.truncations)
+    * [dones](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.dones)
     * [reset](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.reset)
     * [seed](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.seed)
     * [render](#mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.render)
@@ -105,7 +108,7 @@ Returns the observation an agent currently can make. `last()` calls this functio
  | last(observe=True)
 ```
 
-returns observation, cumulative reward, done, info for the current agent (specified by self.agent_selection)
+returns observation, cumulative reward, terminated, truncated, info for the current agent (PettingZoo 1.24+ API)
 
 <a name="mlagents_envs.envs.unity_parallel_env"></a>
 # mlagents\_envs.envs.unity\_parallel\_env
@@ -137,10 +140,19 @@ Initializes a Unity Parallel environment wrapper.
 #### reset
 
 ```python
- | reset() -> Dict[str, Any]
+ | reset(seed=None, options=None) -> Tuple[Dict[str, Any], Dict[str, Any]]
 ```
 
 Resets the environment.
+
+**Arguments**:
+
+- `seed`: Optional random seed (PettingZoo 1.24+ API)
+- `options`: Optional reset options (PettingZoo 1.24+ API)
+
+**Returns**:
+
+Tuple of (observations, infos) per PettingZoo 1.24+ API
 
 <a name="mlagents_envs.envs.unity_pettingzoo_base_env"></a>
 # mlagents\_envs.envs.unity\_pettingzoo\_base\_env
@@ -203,14 +215,52 @@ The action space of the current agent.
 The side channels of the environment. You can access the side channels
 of an environment with `env.side_channel[<name-of-channel>]`.
 
+<a name="mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.terminations"></a>
+#### terminations
+
+```python
+ | @property
+ | terminations()
+```
+
+Returns a dict with termination status for each agent (PettingZoo 1.24+ API)
+For Unity ML-Agents, all dones are treated as terminations (not truncations)
+
+<a name="mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.truncations"></a>
+#### truncations
+
+```python
+ | @property
+ | truncations()
+```
+
+Returns a dict with truncation status for each agent (PettingZoo 1.24+ API)
+Unity ML-Agents doesn't distinguish between termination and truncation,
+so this always returns False for all agents
+
+<a name="mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.dones"></a>
+#### dones
+
+```python
+ | @property
+ | dones()
+```
+
+Returns a dict with done status for each agent (backward compatibility)
+
 <a name="mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.reset"></a>
 #### reset
 
 ```python
- | reset()
+ | reset(seed=None, options=None)
 ```
 
 Resets the environment.
+
+**Arguments**:
+
+- `seed` - Random seed (unused, for Petting Zoo API compatibility)
+- `options` - Reset options (unused, for Petting Zoo API compatibility)
 
 <a name="mlagents_envs.envs.unity_pettingzoo_base_env.UnityPettingzooBaseEnv.seed"></a>
 #### seed

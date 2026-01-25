@@ -6,8 +6,7 @@ https://arxiv.org/abs/2106.01345
 """
 
 from typing import Optional
-from mlagents.torch_utils import torch, default_device
-import torch.nn as nn
+from mlagents.torch_utils import torch, nn, default_device
 import torch.nn.functional as F
 from mlagents_envs import logging_util
 
@@ -31,7 +30,7 @@ class DecisionTransformer(nn.Module):
         num_heads: int = 1,
         dropout: float = 0.1,
         max_timestep: int = 4096,
-        action_tanh: bool = True
+        action_tanh: bool = True,
     ):
         """
         Initialize Decision Transformer
@@ -69,18 +68,15 @@ class DecisionTransformer(nn.Module):
             nhead=num_heads,
             dim_feedforward=4 * hidden_dim,
             dropout=dropout,
-            activation='gelu',
-            batch_first=True
+            activation="gelu",
+            batch_first=True,
         )
-        self.transformer = nn.TransformerEncoder(
-            encoder_layer,
-            num_layers=num_layers
-        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
         # Action prediction head
         self.action_head = nn.Sequential(
             nn.Linear(hidden_dim, action_dim),
-            nn.Tanh() if action_tanh else nn.Identity()
+            nn.Tanh() if action_tanh else nn.Identity(),
         )
 
         # Initialize weights
@@ -108,7 +104,7 @@ class DecisionTransformer(nn.Module):
         actions: torch.Tensor,
         returns_to_go: torch.Tensor,
         timesteps: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None
+        attention_mask: Optional[torch.Tensor] = None,
     ):
         """
         Forward pass of Decision Transformer
@@ -148,16 +144,12 @@ class DecisionTransformer(nn.Module):
         if attention_mask is None:
             # Causal mask: can only attend to past and current tokens
             attention_mask = torch.triu(
-                torch.ones(3 * seq_len, 3 * seq_len),
-                diagonal=1
+                torch.ones(3 * seq_len, 3 * seq_len), diagonal=1
             ).bool()
             attention_mask = attention_mask.to(stacked.device)
 
         # Transformer forward
-        transformer_output = self.transformer(
-            stacked,
-            mask=attention_mask
-        )
+        transformer_output = self.transformer(stacked, mask=attention_mask)
 
         # Extract state positions (we predict action from state)
         # Positions: 1, 4, 7, ... (every third position starting from 1)
@@ -174,7 +166,7 @@ class DecisionTransformer(nn.Module):
         states: torch.Tensor,
         actions: torch.Tensor,
         returns_to_go: torch.Tensor,
-        timesteps: torch.Tensor
+        timesteps: torch.Tensor,
     ):
         """
         Get action for current state (inference mode)

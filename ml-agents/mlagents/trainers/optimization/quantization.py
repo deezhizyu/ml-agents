@@ -5,6 +5,7 @@ Provides INT8 and FP16 quantization for faster inference and smaller model sizes
 """
 
 import argparse
+import time
 from pathlib import Path
 from typing import Optional, Dict, Tuple
 import numpy as np
@@ -16,9 +17,8 @@ logger = logging_util.get_logger(__name__)
 
 
 def quantize_model_int8(
-    model: torch.nn.Module,
-    validation_data: Optional[torch.Tensor] = None
-) -> torch.nn.Module:
+    model: "torch.nn.Module", validation_data: Optional["torch.Tensor"] = None
+) -> "torch.nn.Module":
     """
     Quantize model to INT8 using dynamic quantization
 
@@ -37,9 +37,7 @@ def quantize_model_int8(
 
     # Dynamic quantization (Linear layers)
     quantized_model = torch.quantization.quantize_dynamic(
-        model,
-        {torch.nn.Linear},
-        dtype=torch.qint8
+        model, {torch.nn.Linear}, dtype=torch.qint8
     )
 
     # Validate quantization quality
@@ -57,13 +55,15 @@ def quantize_model_int8(
         logger.info(f"  Max difference: {max_diff:.6f}")
 
         if mse > 0.01:
-            logger.warning(f"High quantization error (MSE={mse:.6f}) - may affect performance")
+            logger.warning(
+                f"High quantization error (MSE={mse:.6f}) - may affect performance"
+            )
 
     logger.info("INT8 quantization complete")
     return quantized_model
 
 
-def quantize_model_fp16(model: torch.nn.Module) -> torch.nn.Module:
+def quantize_model_fp16(model: "torch.nn.Module") -> "torch.nn.Module":
     """
     Quantize model to FP16 (half precision)
 
@@ -82,8 +82,8 @@ def quantize_model_fp16(model: torch.nn.Module) -> torch.nn.Module:
 def quantize_and_save(
     model_path: str,
     output_path: str,
-    quantization_type: str = 'int8',
-    validation_data_path: Optional[str] = None
+    quantization_type: str = "int8",
+    validation_data_path: Optional[str] = None,
 ):
     """
     Quantize a saved model and save the result
@@ -116,9 +116,9 @@ def quantize_and_save(
         validation_data = torch.tensor(val_np, dtype=torch.float32)
 
     # Quantize
-    if quantization_type == 'int8':
+    if quantization_type == "int8":
         quantized_model = quantize_model_int8(model, validation_data)
-    elif quantization_type == 'fp16':
+    elif quantization_type == "fp16":
         quantized_model = quantize_model_fp16(model)
     else:
         raise ValueError(f"Unknown quantization type: {quantization_type}")
@@ -150,7 +150,7 @@ def compare_inference_speed(
     original_model: torch.nn.Module,
     quantized_model: torch.nn.Module,
     input_shape: Tuple[int, ...],
-    num_iterations: int = 1000
+    num_iterations: int = 1000,
 ) -> Dict[str, float]:
     """
     Compare inference speed between original and quantized models
@@ -190,16 +190,20 @@ def compare_inference_speed(
     speedup = original_time / quantized_time
 
     results = {
-        'original_time_sec': original_time,
-        'quantized_time_sec': quantized_time,
-        'original_time_per_inference_ms': (original_time / num_iterations) * 1000,
-        'quantized_time_per_inference_ms': (quantized_time / num_iterations) * 1000,
-        'speedup': speedup
+        "original_time_sec": original_time,
+        "quantized_time_sec": quantized_time,
+        "original_time_per_inference_ms": (original_time / num_iterations) * 1000,
+        "quantized_time_per_inference_ms": (quantized_time / num_iterations) * 1000,
+        "speedup": speedup,
     }
 
     logger.info("Inference speed comparison:")
-    logger.info(f"  Original: {results['original_time_per_inference_ms']:.3f} ms/inference")
-    logger.info(f"  Quantized: {results['quantized_time_per_inference_ms']:.3f} ms/inference")
+    logger.info(
+        f"  Original: {results['original_time_per_inference_ms']:.3f} ms/inference"
+    )
+    logger.info(
+        f"  Quantized: {results['quantized_time_per_inference_ms']:.3f} ms/inference"
+    )
     logger.info(f"  Speedup: {speedup:.2f}x")
 
     return results
@@ -212,28 +216,26 @@ def main():
         description="Quantize ML-Agents models for faster inference"
     )
     parser.add_argument(
-        "model_path",
-        type=str,
-        help="Path to model to quantize (.pt file)"
+        "model_path", type=str, help="Path to model to quantize (.pt file)"
     )
     parser.add_argument(
         "--output",
         type=str,
         default=None,
-        help="Output path for quantized model (default: <model>_quantized.pt)"
+        help="Output path for quantized model (default: <model>_quantized.pt)",
     )
     parser.add_argument(
         "--type",
         type=str,
-        choices=['int8', 'fp16'],
-        default='int8',
-        help="Quantization type (default: int8)"
+        choices=["int8", "fp16"],
+        default="int8",
+        help="Quantization type (default: int8)",
     )
     parser.add_argument(
         "--validation-data",
         type=str,
         default=None,
-        help="Path to validation data (.npy file) for quality check"
+        help="Path to validation data (.npy file) for quality check",
     )
 
     args = parser.parse_args()
@@ -241,14 +243,16 @@ def main():
     # Default output path
     if args.output is None:
         model_path = Path(args.model_path)
-        args.output = str(model_path.parent / f"{model_path.stem}_quantized{model_path.suffix}")
+        args.output = str(
+            model_path.parent / f"{model_path.stem}_quantized{model_path.suffix}"
+        )
 
     # Quantize
     quantize_and_save(
         model_path=args.model_path,
         output_path=args.output,
         quantization_type=args.type,
-        validation_data_path=args.validation_data
+        validation_data_path=args.validation_data,
     )
 
     logger.info(f"Quantization complete! Quantized model saved to: {args.output}")

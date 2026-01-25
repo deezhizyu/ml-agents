@@ -1,6 +1,6 @@
 # Performance Optimization Guide
 
-**ML-Agents Toolkit - Performance Optimization Guide**  
+**ML-Agents Toolkit - Performance Optimization Guide**
 **Version:** Phase 2+ Features
 
 ---
@@ -71,14 +71,14 @@ behaviors:
 behaviors:
   3DBall:
     trainer_type: ppo
-    
+
     network_settings:
       normalize: false
       hidden_units: 128
       num_layers: 2
       enable_torchscript: true              # Enable TorchScript
       torchscript_optimize_for_inference: true  # Optimize for inference
-    
+
     hyperparameters:
       batch_size: 1024
       buffer_size: 10240
@@ -87,7 +87,7 @@ behaviors:
       epsilon: 0.2
       lambd: 0.95
       num_epoch: 3
-    
+
     max_steps: 500000
     time_horizon: 1000
     summary_freq: 10000
@@ -248,14 +248,14 @@ environment_parameters:
           threshold: 5.0
           min_lesson_length: 10000
         value: 1.0
-      
+
       - name: Medium
         completion_criteria:
           measure: reward
           threshold: 10.0
           min_lesson_length: 20000
         value: 5.0
-      
+
       - name: Hard
         value: 10.0
 ```
@@ -435,5 +435,5 @@ Before deploying to production:
 
 ---
 
-**Last Updated:** 2026-01-23  
+**Last Updated:** 2026-01-23
 **Phase:** 3 (Test Coverage & Polish)

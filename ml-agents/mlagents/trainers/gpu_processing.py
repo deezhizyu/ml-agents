@@ -5,6 +5,7 @@ Provides GPU-optimized preprocessing for observations to reduce CPU overhead
 and enable faster training with large batch sizes.
 """
 
+import time
 import numpy as np
 from typing import Union, Optional, Dict, Tuple
 from mlagents.torch_utils import torch
@@ -28,7 +29,7 @@ class GPUObservationProcessor:
         :param device: Device to use ('cuda', 'cpu', or None for auto-detect)
         """
         if device is None:
-            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = torch.device(device)
 
@@ -43,7 +44,7 @@ class GPUObservationProcessor:
 
         logger.info(f"GPUObservationProcessor initialized on device: {self.device}")
 
-    def update_statistics(self, observations: torch.Tensor):
+    def update_statistics(self, observations: "torch.Tensor") -> None:
         """
         Update running mean and std for normalization
 
@@ -67,7 +68,9 @@ class GPUObservationProcessor:
 
         self.count += observations.shape[0]
 
-    def normalize(self, observations: torch.Tensor, update_stats: bool = True) -> torch.Tensor:
+    def normalize(
+        self, observations: "torch.Tensor", update_stats: bool = True
+    ) -> "torch.Tensor":
         """
         Normalize observations using running statistics
 
@@ -83,16 +86,18 @@ class GPUObservationProcessor:
             return observations
 
         # Normalize: (obs - mean) / (std + epsilon)
-        normalized = (observations - self.running_mean) / (self.running_std + self.epsilon)
+        normalized = (observations - self.running_mean) / (
+            self.running_std + self.epsilon
+        )
 
         return normalized
 
     def process_batch(
         self,
-        obs_batch: Union[np.ndarray, torch.Tensor],
+        obs_batch: Union[np.ndarray, "torch.Tensor"],
         normalize: bool = True,
-        update_stats: bool = True
-    ) -> torch.Tensor:
+        update_stats: bool = True,
+    ) -> "torch.Tensor":
         """
         Process a batch of observations on GPU
 
@@ -118,10 +123,8 @@ class GPUObservationProcessor:
         return gpu_obs
 
     def process_single(
-        self,
-        observation: Union[np.ndarray, torch.Tensor],
-        normalize: bool = True
-    ) -> torch.Tensor:
+        self, observation: Union[np.ndarray, "torch.Tensor"], normalize: bool = True
+    ) -> "torch.Tensor":
         """
         Process a single observation on GPU
 
@@ -132,15 +135,21 @@ class GPUObservationProcessor:
         :return: Processed observation on GPU
         """
         # Add batch dimension
-        obs_batch = observation[np.newaxis, :] if isinstance(observation, np.ndarray) else observation.unsqueeze(0)
+        obs_batch = (
+            observation[np.newaxis, :]
+            if isinstance(observation, np.ndarray)
+            else observation.unsqueeze(0)
+        )
 
         # Process as batch
-        processed = self.process_batch(obs_batch, normalize=normalize, update_stats=False)
+        processed = self.process_batch(
+            obs_batch, normalize=normalize, update_stats=False
+        )
 
         # Remove batch dimension
         return processed.squeeze(0)
 
-    def save_statistics(self, path: str):
+    def save_statistics(self, path: str) -> None:
         """
         Save running statistics to file
 
@@ -150,16 +159,19 @@ class GPUObservationProcessor:
             logger.warning("No statistics to save (processor not used yet)")
             return
 
-        torch.save({
-            'running_mean': self.running_mean.cpu(),
-            'running_std': self.running_std.cpu(),
-            'count': self.count,
-            'device': str(self.device)
-        }, path)
+        torch.save(
+            {
+                "running_mean": self.running_mean.cpu(),
+                "running_std": self.running_std.cpu(),
+                "count": self.count,
+                "device": str(self.device),
+            },
+            path,
+        )
 
         logger.info(f"Saved GPU processor statistics to {path}")
 
-    def load_statistics(self, path: str):
+    def load_statistics(self, path: str) -> None:
         """
         Load running statistics from file
 
@@ -167,13 +179,13 @@ class GPUObservationProcessor:
         """
         checkpoint = torch.load(path, weights_only=True)
 
-        self.running_mean = checkpoint['running_mean'].to(self.device)
-        self.running_std = checkpoint['running_std'].to(self.device)
-        self.count = checkpoint['count']
+        self.running_mean = checkpoint["running_mean"].to(self.device)
+        self.running_std = checkpoint["running_std"].to(self.device)
+        self.count = checkpoint["count"]
 
         logger.info(f"Loaded GPU processor statistics from {path} (count={self.count})")
 
-    def reset_statistics(self):
+    def reset_statistics(self) -> None:
         """Reset running statistics"""
         self.running_mean = None
         self.running_std = None
@@ -196,7 +208,7 @@ class BatchedGPUInference:
         :param device: Device to run inference on
         """
         if device is None:
-            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = torch.device(device)
 
@@ -207,7 +219,7 @@ class BatchedGPUInference:
         logger.info(f"BatchedGPUInference initialized on {self.device}")
 
     @torch.no_grad()
-    def infer_actions(self, observations: torch.Tensor) -> torch.Tensor:
+    def infer_actions(self, observations: "torch.Tensor") -> "torch.Tensor":
         """
         Infer actions for batch of observations
 
@@ -231,19 +243,19 @@ class BatchedGPUInference:
 
         :return: Dictionary with memory statistics in GB
         """
-        if self.device.type == 'cuda':
+        if self.device.type == "cuda":
             allocated = torch.cuda.memory_allocated(self.device) / 1e9
             reserved = torch.cuda.memory_reserved(self.device) / 1e9
             return {
-                'allocated_gb': allocated,
-                'reserved_gb': reserved,
-                'device': str(self.device)
+                "allocated_gb": allocated,
+                "reserved_gb": reserved,
+                "device": str(self.device),  # type: ignore[dict-item]
             }
-        return {'allocated_gb': 0, 'reserved_gb': 0, 'device': 'cpu'}
+        return {"allocated_gb": 0.0, "reserved_gb": 0.0, "device": "cpu"}  # type: ignore[dict-item]
 
 
 # Utility functions
-def move_to_gpu(data: Union[np.ndarray, torch.Tensor], device='cuda') -> torch.Tensor:
+def move_to_gpu(data: Union[np.ndarray, "torch.Tensor"], device: str = "cuda") -> "torch.Tensor":
     """
     Move data to GPU efficiently
 
@@ -260,7 +272,7 @@ def benchmark_gpu_processing(
     processor: GPUObservationProcessor,
     obs_shape: Tuple[int, ...],
     batch_size: int = 32,
-    num_iterations: int = 1000
+    num_iterations: int = 1000,
 ) -> Dict[str, float]:
     """
     Benchmark GPU observation processing performance
@@ -289,9 +301,9 @@ def benchmark_gpu_processing(
     obs_per_sec = (batch_size * num_iterations) / elapsed
 
     return {
-        'total_time_sec': elapsed,
-        'time_per_batch_ms': (elapsed / num_iterations) * 1000,
-        'observations_per_sec': obs_per_sec,
-        'batch_size': batch_size,
-        'num_iterations': num_iterations
+        "total_time_sec": elapsed,
+        "time_per_batch_ms": (elapsed / num_iterations) * 1000,
+        "observations_per_sec": obs_per_sec,
+        "batch_size": batch_size,
+        "num_iterations": num_iterations,
     }

@@ -174,7 +174,7 @@ class TestTorchScriptOptimizer:
     def test_save_and_load_scripted_model(self, tmp_path):
         """Test saving and loading TorchScript model"""
         # Force all operations to CPU to avoid CUDA device mixing
-        device = torch.device('cpu')
+        device = torch.device("cpu")
 
         model = SimpleModel()
         model.to(device)

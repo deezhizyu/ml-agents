@@ -57,5 +57,7 @@ class UnityParallelEnv(UnityPettingzooBaseEnv, ParallelEnv):
 
         # PettingZoo 1.24+ API: return terminations and truncations separately
         terminations = self._dones
-        truncations = {agent: False for agent in self._dones}  # Unity doesn't track truncation
+        truncations = {
+            agent: False for agent in self._dones
+        }  # Unity doesn't track truncation
         return self._observations, self._rewards, terminations, truncations, self._infos

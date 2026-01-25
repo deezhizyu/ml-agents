@@ -15,6 +15,7 @@ Security Note - Cloudpickle Usage:
     factories, shared memory via env_manager_shared_memory.py), but cloudpickle
     provides the best balance of flexibility and performance for this use case.
 """
+
 import datetime
 from typing import Dict, NamedTuple, List, Any, Optional, Callable, Set
 import cloudpickle
@@ -30,6 +31,10 @@ from mlagents_envs.exception import (
 )
 from multiprocessing import Process, Pipe, Queue
 from multiprocessing.connection import Connection
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from multiprocessing.connection import Connection as ConnectionType
 from queue import Empty as EmptyQueueException
 from mlagents_envs.base_env import BaseEnv, BehaviorName, BehaviorSpec
 from mlagents_envs import logging_util
@@ -93,7 +98,7 @@ class StepResponse(NamedTuple):
 
 
 class UnityEnvWorker:
-    def __init__(self, process: Process, worker_id: int, conn: Connection):
+    def __init__(self, process: Process, worker_id: int, conn: "Connection"):  # type: ignore[type-arg]
         self.process = process
         self.worker_id = worker_id
         self.conn = conn
@@ -172,7 +177,9 @@ def _handle_step_command(
     env_stats = stats_channel.get_and_reset_stats()
     step_response = StepResponse(all_step_result, get_timer_root(), env_stats)
 
-    step_queue.put(EnvironmentResponse(EnvironmentCommand.STEP, worker_id, step_response))
+    step_queue.put(
+        EnvironmentResponse(EnvironmentCommand.STEP, worker_id, step_response)
+    )
     reset_timers()
 
 
@@ -200,7 +207,9 @@ def _handle_reset_command(
     all_step_result: AllStepResult = {}
     for brain_name in env.behavior_specs:
         all_step_result[brain_name] = env.get_steps(brain_name)
-    parent_conn.send(EnvironmentResponse(EnvironmentCommand.RESET, worker_id, all_step_result))
+    parent_conn.send(
+        EnvironmentResponse(EnvironmentCommand.RESET, worker_id, all_step_result)
+    )
 
 
 def _handle_environment_parameters(
@@ -302,10 +311,7 @@ def _initialize_worker_environment(
     env = env_factory(worker_id, side_channels)
 
     # Disable training analytics if environment doesn't support it
-    if (
-        not env.academy_capabilities
-        or not env.academy_capabilities.trainingAnalytics
-    ):
+    if not env.academy_capabilities or not env.academy_capabilities.trainingAnalytics:
         training_analytics_channel = None
 
     if training_analytics_channel:
@@ -356,7 +362,9 @@ def worker(
 
             elif req.cmd == EnvironmentCommand.BEHAVIOR_SPECS:
                 parent_conn.send(
-                    EnvironmentResponse(EnvironmentCommand.BEHAVIOR_SPECS, worker_id, env.behavior_specs)
+                    EnvironmentResponse(
+                        EnvironmentCommand.BEHAVIOR_SPECS, worker_id, env.behavior_specs
+                    )
                 )
 
             elif req.cmd == EnvironmentCommand.ENVIRONMENT_PARAMETERS:
@@ -379,15 +387,23 @@ def worker(
         UnityCommunicatorStoppedException,
     ) as ex:
         logger.debug(f"UnityEnvironment worker {worker_id}: environment stopping.")
-        step_queue.put(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
-        parent_conn.send(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
+        step_queue.put(
+            EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex)
+        )
+        parent_conn.send(
+            EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex)
+        )
 
     except Exception as ex:
         logger.exception(
             f"UnityEnvironment worker {worker_id}: environment raised an unexpected exception."
         )
-        step_queue.put(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
-        parent_conn.send(EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex))
+        step_queue.put(
+            EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex)
+        )
+        parent_conn.send(
+            EnvironmentResponse(EnvironmentCommand.ENV_EXITED, worker_id, ex)
+        )
 
     finally:
         logger.debug(f"UnityEnvironment worker {worker_id} closing.")
@@ -578,7 +594,10 @@ class SubprocessEnvManager(EnvManager):
                     worker_steps.clear()
                     step_workers.clear()
                     self._queue_steps()
-                elif step.cmd == EnvironmentCommand.STEP and step.worker_id not in step_workers:
+                elif (
+                    step.cmd == EnvironmentCommand.STEP
+                    and step.worker_id not in step_workers
+                ):
                     self.env_workers[step.worker_id].waiting = False
                     worker_steps.append(step)
                     step_workers.add(step.worker_id)
@@ -588,10 +607,10 @@ class SubprocessEnvManager(EnvManager):
         # After getting at least one step, drain any other available steps from the queue
         while True:
             try:
-                step: EnvironmentResponse = self.step_queue.get_nowait()
-                if step.cmd == EnvironmentCommand.ENV_EXITED:
+                drain_step: EnvironmentResponse = self.step_queue.get_nowait()
+                if drain_step.cmd == EnvironmentCommand.ENV_EXITED:
                     # If even one env exits try to restart all envs that failed.
-                    self._restart_failed_workers(step)
+                    self._restart_failed_workers(drain_step)
                     # Clear state and restart this function.
                     worker_steps.clear()
                     step_workers.clear()
@@ -599,17 +618,23 @@ class SubprocessEnvManager(EnvManager):
                     # Need to get at least one step again
                     while len(worker_steps) < 1:
                         try:
-                            step = self.step_queue.get(timeout=0.001)
-                            if step.cmd == EnvironmentCommand.STEP and step.worker_id not in step_workers:
-                                self.env_workers[step.worker_id].waiting = False
-                                worker_steps.append(step)
-                                step_workers.add(step.worker_id)
+                            retry_step = self.step_queue.get(timeout=0.001)
+                            if (
+                                retry_step.cmd == EnvironmentCommand.STEP
+                                and retry_step.worker_id not in step_workers
+                            ):
+                                self.env_workers[retry_step.worker_id].waiting = False
+                                worker_steps.append(retry_step)
+                                step_workers.add(retry_step.worker_id)
                         except EmptyQueueException:
                             continue
-                elif step.cmd == EnvironmentCommand.STEP and step.worker_id not in step_workers:
-                    self.env_workers[step.worker_id].waiting = False
-                    worker_steps.append(step)
-                    step_workers.add(step.worker_id)
+                elif (
+                    drain_step.cmd == EnvironmentCommand.STEP
+                    and drain_step.worker_id not in step_workers
+                ):
+                    self.env_workers[drain_step.worker_id].waiting = False
+                    worker_steps.append(drain_step)
+                    step_workers.add(drain_step.worker_id)
             except EmptyQueueException:
                 break
 

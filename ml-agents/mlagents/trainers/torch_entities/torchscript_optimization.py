@@ -10,16 +10,14 @@ Usage:
     optimized_model = optimize_model(model, example_inputs)
 """
 
-import torch
-import torch.nn as nn
 from typing import Dict, Any, Tuple, Optional, List
 from mlagents_envs import logging_util
-from mlagents.torch_utils import torch as mlagents_torch
+from mlagents.torch_utils import torch, nn
 
 logger = logging_util.get_logger(__name__)
 
 # Track compilation statistics
-_compilation_stats = {
+_compilation_stats: Dict[str, int] = {
     "attempts": 0,
     "successes": 0,
     "failures": 0,
@@ -31,11 +29,11 @@ class TorchScriptOptimizer:
 
     @staticmethod
     def compile_model(
-        model: nn.Module,
-        example_inputs: Tuple[torch.Tensor, ...],
+        model: "nn.Module",
+        example_inputs: Tuple["torch.Tensor", ...],
         use_jit_script: bool = True,
         optimize_for_inference: bool = True,
-    ) -> nn.Module:
+    ) -> "nn.Module":
         """
         Compile model with TorchScript
 
@@ -94,9 +92,9 @@ class TorchScriptOptimizer:
 
     @staticmethod
     def benchmark_model(
-        original_model: nn.Module,
-        optimized_model: nn.Module,
-        example_inputs: Tuple[torch.Tensor, ...],
+        original_model: "nn.Module",
+        optimized_model: "nn.Module",
+        example_inputs: Tuple["torch.Tensor", ...],
         num_iterations: int = 1000,
     ) -> Dict[str, float]:
         """
@@ -157,7 +155,7 @@ class TorchScriptOptimizer:
         return results
 
     @staticmethod
-    def save_scripted_model(model: nn.Module, path: str):
+    def save_scripted_model(model: "nn.Module", path: str) -> None:
         """
         Save TorchScript model
 
@@ -168,7 +166,7 @@ class TorchScriptOptimizer:
         logger.info(f"TorchScript model saved to: {path}")
 
     @staticmethod
-    def load_scripted_model(path: str, device: Optional[str] = None) -> nn.Module:
+    def load_scripted_model(path: str, device: Optional[str] = None) -> "nn.Module":
         """
         Load TorchScript model
 
@@ -189,13 +187,13 @@ class ONNXExporter:
 
     @staticmethod
     def export_to_onnx(
-        model: nn.Module,
-        example_inputs: Tuple[torch.Tensor, ...],
+        model: "nn.Module",
+        example_inputs: Tuple["torch.Tensor", ...],
         output_path: str,
         input_names: Optional[List[str]] = None,
         output_names: Optional[List[str]] = None,
         opset_version: int = 11,
-    ):
+    ) -> None:
         """
         Export model to ONNX format
 
@@ -232,7 +230,9 @@ class ONNXExporter:
             raise
 
     @staticmethod
-    def verify_onnx_model(onnx_path: str, example_inputs: Tuple[torch.Tensor, ...]):
+    def verify_onnx_model(
+        onnx_path: str, example_inputs: Tuple["torch.Tensor", ...]
+    ) -> None:
         """
         Verify ONNX model can be loaded and runs correctly
 
@@ -270,11 +270,11 @@ class ONNXExporter:
 
 
 def optimize_model(
-    model: nn.Module,
-    example_inputs: Tuple[torch.Tensor, ...],
+    model: "nn.Module",
+    example_inputs: Tuple["torch.Tensor", ...],
     method: str = "torchscript",
-    **kwargs,
-) -> nn.Module:
+    **kwargs: Any,
+) -> "nn.Module":
     """
     Optimize model for faster inference
 
@@ -307,7 +307,9 @@ class OptimizedInferenceMixin:
             ...
     """
 
-    def enable_torchscript_optimization(self, example_inputs: Tuple[torch.Tensor, ...]):
+    def enable_torchscript_optimization(
+        self, example_inputs: Tuple["torch.Tensor", ...]
+    ) -> None:
         """
         Enable TorchScript optimization for this policy
 
@@ -326,7 +328,9 @@ class OptimizedInferenceMixin:
         )
         logger.info("Policy optimization complete")
 
-    def benchmark_inference(self, example_inputs: Tuple[torch.Tensor, ...]):
+    def benchmark_inference(
+        self, example_inputs: Tuple["torch.Tensor", ...]
+    ) -> Optional[Dict[str, float]]:
         """
         Benchmark inference performance
 
@@ -334,12 +338,12 @@ class OptimizedInferenceMixin:
         """
         if not hasattr(self, "actor"):
             logger.warning("Policy has no actor, skipping benchmark")
-            return
+            return None
 
         # Create unoptimized copy for comparison
         import copy
 
-        original_actor = copy.deepcopy(self.actor)
+        original_actor = copy.deepcopy(self.actor)  # type: ignore[attr-defined]
 
         # Optimize current actor
         self.enable_torchscript_optimization(example_inputs)
@@ -347,7 +351,7 @@ class OptimizedInferenceMixin:
         # Benchmark
         results = TorchScriptOptimizer.benchmark_model(
             original_actor,
-            self.actor,
+            self.actor,  # type: ignore[attr-defined]
             example_inputs,
         )
 

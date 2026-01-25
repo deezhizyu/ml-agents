@@ -10,12 +10,12 @@ Expected performance improvement: 20-40% for environments with large observation
 from __future__ import annotations
 
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 from multiprocessing import shared_memory, Process, Queue
 import queue
 import cloudpickle
-from mlagents_envs.base_env import BaseEnv, BehaviorSpec, DecisionSteps, TerminalSteps
-from mlagents.trainers.env_manager import EnvManager, EnvironmentStep, AllStepResult
+from mlagents_envs.base_env import BehaviorSpec
+from mlagents.trainers.env_manager import EnvManager, EnvironmentStep
 from mlagents.trainers.action_info import ActionInfo
 from mlagents_envs import logging_util
 from mlagents_envs.timers import timed
@@ -32,10 +32,12 @@ class SharedMemoryPool:
     """
 
     def __init__(self):
-        self.available_buffers: Dict[Tuple[Tuple[int, ...], np.dtype], List[SharedMemoryBuffer]] = {}
+        self.available_buffers: dict[
+            tuple[tuple[int, ...], np.dtype], list[SharedMemoryBuffer]
+        ] = {}
         self.buffer_counter = 0
 
-    def acquire(self, shape: Tuple[int, ...], dtype: np.dtype) -> SharedMemoryBuffer:
+    def acquire(self, shape: tuple[int, ...], dtype: np.dtype) -> SharedMemoryBuffer:
         """
         Acquire a buffer from the pool or create new one
 
@@ -91,7 +93,7 @@ class SharedMemoryPool:
 class SharedMemoryBuffer:
     """Manages shared memory buffers for observations"""
 
-    def __init__(self, name: str, shape: Tuple[int, ...], dtype: np.dtype):
+    def __init__(self, name: str, shape: tuple[int, ...], dtype: np.dtype):
         """
         Create or attach to shared memory buffer
 
@@ -163,7 +165,7 @@ class SharedMemoryEnvManager(EnvManager):
 
     def __init__(
         self,
-        env_factory,
+        env_factory: Callable[..., Any],
         num_envs: int = 1,
         timeout_wait: int = 60,
     ):
@@ -182,14 +184,14 @@ class SharedMemoryEnvManager(EnvManager):
         self.timeout = timeout_wait
 
         # Shared memory buffers (created after first step)
-        self.buffers: Dict[str, SharedMemoryBuffer] = {}
+        self.buffers: dict[str, SharedMemoryBuffer] = {}
 
         # Communication queues
-        self.command_queues: List[Queue] = []
-        self.result_queues: List[Queue] = []
+        self.command_queues: list[Queue] = []
+        self.result_queues: list[Queue] = []
 
         # Worker processes
-        self.workers: List[Process] = []
+        self.workers: list[Process] = []
 
         # Track worker status
         self._worker_alive = [True] * num_envs
@@ -231,7 +233,9 @@ class SharedMemoryEnvManager(EnvManager):
             except queue.Empty:
                 self._worker_alive[i] = False
                 logger.error(f"Worker {i} initialization timeout")
-                raise TimeoutError(f"Worker {i} did not initialize within {self.timeout}s")
+                raise TimeoutError(
+                    f"Worker {i} did not initialize within {self.timeout}s"
+                )
 
     @staticmethod
     def _worker_process(
@@ -241,7 +245,9 @@ class SharedMemoryEnvManager(EnvManager):
         pickled_env_factory: bytes,
     ):
         """Worker process that runs environment"""
-        from mlagents_envs.side_channel.environment_parameters_channel import EnvironmentParametersChannel
+        from mlagents_envs.side_channel.environment_parameters_channel import (
+            EnvironmentParametersChannel,
+        )
         from mlagents_envs.side_channel.stats_side_channel import StatsSideChannel
 
         env = None
@@ -278,8 +284,13 @@ class SharedMemoryEnvManager(EnvManager):
                         # Get step results for all behaviors
                         all_step_result = {}
                         for behavior_name in env.behavior_specs:
-                            decision_steps, terminal_steps = env.get_steps(behavior_name)
-                            all_step_result[behavior_name] = (decision_steps, terminal_steps)
+                            decision_steps, terminal_steps = env.get_steps(
+                                behavior_name
+                            )
+                            all_step_result[behavior_name] = (
+                                decision_steps,
+                                terminal_steps,
+                            )
 
                         res_queue.put(("step_result", all_step_result))
 
@@ -289,8 +300,13 @@ class SharedMemoryEnvManager(EnvManager):
                         # Get initial observations
                         all_step_result = {}
                         for behavior_name in env.behavior_specs:
-                            decision_steps, terminal_steps = env.get_steps(behavior_name)
-                            all_step_result[behavior_name] = (decision_steps, terminal_steps)
+                            decision_steps, terminal_steps = env.get_steps(
+                                behavior_name
+                            )
+                            all_step_result[behavior_name] = (
+                                decision_steps,
+                                terminal_steps,
+                            )
 
                         res_queue.put(("reset_done", all_step_result))
 
@@ -311,11 +327,16 @@ class SharedMemoryEnvManager(EnvManager):
                 except queue.Empty:
                     continue
                 except Exception as e:
-                    logger.error(f"Worker {worker_id} error processing command: {e}", exc_info=True)
+                    logger.error(
+                        f"Worker {worker_id} error processing command: {e}",
+                        exc_info=True,
+                    )
                     res_queue.put(("error", str(e)))
 
         except Exception as e:
-            logger.error(f"Worker {worker_id} initialization failed: {e}", exc_info=True)
+            logger.error(
+                f"Worker {worker_id} initialization failed: {e}", exc_info=True
+            )
             res_queue.put(("error", str(e)))
         finally:
             if env is not None:
@@ -326,7 +347,7 @@ class SharedMemoryEnvManager(EnvManager):
                     logger.warning(f"Worker {worker_id} error closing environment: {e}")
 
     def _create_shared_buffer(
-        self, name: str, shape: Tuple[int, ...], dtype: np.dtype
+        self, name: str, shape: tuple[int, ...], dtype: np.dtype
     ) -> SharedMemoryBuffer:
         """Create shared memory buffer for observations"""
         buffer = SharedMemoryBuffer(name, shape, dtype)
@@ -334,14 +355,14 @@ class SharedMemoryEnvManager(EnvManager):
         return buffer
 
     @timed
-    def _step(self) -> List[EnvironmentStep]:
+    def _step(self) -> list[EnvironmentStep]:
         """
         Step all environments
 
         Returns observations via shared memory (zero-copy)
         """
         # Get pending actions (if set via set_actions)
-        all_action_info = getattr(self, '_pending_actions', {})
+        all_action_info = getattr(self, "_pending_actions", {})
 
         # Send step commands to all workers
         for i, cmd_queue in enumerate(self.command_queues):
@@ -349,7 +370,9 @@ class SharedMemoryEnvManager(EnvManager):
                 try:
                     cmd_queue.put(("step", all_action_info), timeout=1.0)
                 except queue.Full:
-                    logger.error(f"Command queue full for worker {i} - worker not responding")
+                    logger.error(
+                        f"Command queue full for worker {i} - worker not responding"
+                    )
                     self._worker_alive[i] = False
 
         # Clear pending actions
@@ -371,7 +394,7 @@ class SharedMemoryEnvManager(EnvManager):
                         current_all_step_result=data,
                         worker_id=i,
                         brain_name_to_action_info={},
-                        environment_stats={}
+                        environment_stats={},
                     )
                     env_steps.append(env_step)
 
@@ -393,7 +416,7 @@ class SharedMemoryEnvManager(EnvManager):
 
         return env_steps
 
-    def _reset_env(self, config: Optional[Dict] = None) -> List[EnvironmentStep]:
+    def _reset_env(self, config: dict | None = None) -> list[EnvironmentStep]:
         """Reset all environments"""
         # Send reset commands to all workers
         for i, cmd_queue in enumerate(self.command_queues):
@@ -401,7 +424,9 @@ class SharedMemoryEnvManager(EnvManager):
                 try:
                     cmd_queue.put(("reset", config), timeout=1.0)
                 except queue.Full:
-                    logger.error(f"Command queue full for worker {i} - worker not responding")
+                    logger.error(
+                        f"Command queue full for worker {i} - worker not responding"
+                    )
                     self._worker_alive[i] = False
 
         # Collect reset results
@@ -419,7 +444,7 @@ class SharedMemoryEnvManager(EnvManager):
                         current_all_step_result=data,
                         worker_id=i,
                         brain_name_to_action_info={},
-                        environment_stats={}
+                        environment_stats={},
                     )
                     env_steps.append(env_step)
 
@@ -456,7 +481,9 @@ class SharedMemoryEnvManager(EnvManager):
                 try:
                     worker.join(timeout=2.0)
                     if worker.is_alive():
-                        logger.warning(f"Worker {i} did not shut down cleanly, terminating...")
+                        logger.warning(
+                            f"Worker {i} did not shut down cleanly, terminating..."
+                        )
                         worker.terminate()
                         worker.join(timeout=1.0)
                 except Exception as e:
@@ -475,12 +502,14 @@ class SharedMemoryEnvManager(EnvManager):
             logger.info("SharedMemoryEnvManager closed")
 
     @property
-    def training_behaviors(self) -> Dict[str, BehaviorSpec]:
+    def training_behaviors(self) -> dict[str, BehaviorSpec]:
         """Get training behaviors by querying workers (like SubprocessEnvManager)"""
-        result: Dict[str, BehaviorSpec] = {}
+        result: dict[str, BehaviorSpec] = {}
 
         # Query first alive worker for behavior specs
-        for i, (cmd_queue, res_queue) in enumerate(zip(self.command_queues, self.result_queues)):
+        for i, (cmd_queue, res_queue) in enumerate(
+            zip(self.command_queues, self.result_queues)
+        ):
             if self._worker_alive[i]:
                 try:
                     cmd_queue.put(("behavior_specs", None), timeout=1.0)
@@ -502,11 +531,11 @@ class SharedMemoryEnvManager(EnvManager):
         This method stores them for the next step() call
         """
         # Store actions for next step
-        if not hasattr(self, '_pending_actions'):
+        if not hasattr(self, "_pending_actions"):
             self._pending_actions = {}
         self._pending_actions[behavior_name] = action_info
 
-    def set_env_parameters(self, config: Dict = None) -> None:
+    def set_env_parameters(self, config: dict = None) -> None:
         """
         Set environment parameters (curriculum, randomization)
 
@@ -522,7 +551,7 @@ class SharedMemoryEnvManager(EnvManager):
 
 
 # Performance comparison utilities
-def benchmark_env_manager(env_manager, num_steps: int = 1000) -> Dict[str, float]:
+def benchmark_env_manager(env_manager, num_steps: int = 1000) -> dict[str, float]:
     """
     Benchmark environment manager performance
 

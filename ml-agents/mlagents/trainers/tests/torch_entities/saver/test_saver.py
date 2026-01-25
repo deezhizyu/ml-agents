@@ -243,4 +243,6 @@ def test_checkpoint_conversion(tmpdir, rnn, visual, discrete):
     if not os.path.isfile(onnx_path):
         # ONNX export failed (expected for RNN models in PyTorch 2.10+)
         # This is acceptable - just log it
-        assert rnn and discrete, "ONNX export should only fail for RNN + discrete models"
+        assert (
+            rnn and discrete
+        ), "ONNX export should only fail for RNN + discrete models"

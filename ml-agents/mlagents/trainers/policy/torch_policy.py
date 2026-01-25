@@ -67,10 +67,12 @@ class TorchPolicy(Policy):
         self.gpu_processor = None
         # Only enable during actual training to avoid CUDA test errors
         import os
-        if torch.cuda.is_available() and os.environ.get('PYTEST_CURRENT_TEST') is None:
+
+        if torch.cuda.is_available() and os.environ.get("PYTEST_CURRENT_TEST") is None:
             try:
                 from mlagents.trainers.gpu_processing import GPUObservationProcessor
-                self.gpu_processor = GPUObservationProcessor(device='cuda')
+
+                self.gpu_processor = GPUObservationProcessor(device="cuda")
                 logger.info("GPU observation processing enabled for faster training")
             except ImportError:
                 pass
@@ -98,17 +100,21 @@ class TorchPolicy(Policy):
                 )
         return mask
 
-    def _get_cached_tensor(self, shape: tuple, dtype, device, cache_key: str) -> torch.Tensor:
+    def _get_cached_tensor(
+        self, shape: tuple, dtype: "torch.dtype", device: "torch.device", cache_key: str
+    ) -> "torch.Tensor":
         """
         Get a pre-allocated tensor from cache or create a new one.
         Reduces allocation overhead for repeated inference calls.
         """
-        if not hasattr(self, '_tensor_cache'):
-            self._tensor_cache = {}
-        
+        if not hasattr(self, "_tensor_cache"):
+            self._tensor_cache: Dict[tuple, torch.Tensor] = {}
+
         full_key = (cache_key, shape, dtype, str(device))
         if full_key not in self._tensor_cache:
-            self._tensor_cache[full_key] = torch.empty(shape, dtype=dtype, device=device)
+            self._tensor_cache[full_key] = torch.empty(
+                shape, dtype=dtype, device=device
+            )
         return self._tensor_cache[full_key]
 
     @timed
@@ -130,7 +136,9 @@ class TorchPolicy(Policy):
             tensor_obs = []
             for np_ob in obs:
                 # GPU processor handles normalization on GPU
-                processed = self.gpu_processor.process_batch(np_ob, normalize=True, update_stats=True)
+                processed = self.gpu_processor.process_batch(
+                    np_ob, normalize=True, update_stats=True
+                )
                 tensor_obs.append(processed)
         else:
             # Optimized CPU path with tensor caching for reduced allocation overhead
@@ -138,14 +146,16 @@ class TorchPolicy(Policy):
             for i, np_ob in enumerate(obs):
                 # Try to reuse cached tensor if shape matches
                 cache_key = f"obs_{i}"
-                if np_ob.shape == getattr(self, f'_last_obs_shape_{i}', None):
-                    cached = self._get_cached_tensor(np_ob.shape, torch.float32, device, cache_key)
+                if np_ob.shape == getattr(self, f"_last_obs_shape_{i}", None):
+                    cached = self._get_cached_tensor(
+                        np_ob.shape, torch.float32, device, cache_key
+                    )
                     # Direct copy from numpy to avoid intermediate tensor allocation
                     cached.copy_(torch.from_numpy(np_ob))
                     tensor_obs.append(cached)
                 else:
                     # Shape changed, create new tensor and update cache
-                    setattr(self, f'_last_obs_shape_{i}', np_ob.shape)
+                    setattr(self, f"_last_obs_shape_{i}", np_ob.shape)
                     tensor_obs.append(torch.as_tensor(np_ob, device=device))
 
         memories = torch.as_tensor(

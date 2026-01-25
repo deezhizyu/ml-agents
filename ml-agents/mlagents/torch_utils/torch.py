@@ -1,15 +1,15 @@
 import os
-from typing import Optional, TypeVar
+from typing import Any, Optional, TypeVar
 
 # Configure CUDA memory allocator BEFORE importing torch
 # This must be set before PyTorch initializes CUDA
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
-from packaging.version import Version
-import importlib.metadata
-from mlagents.torch_utils import cpu_utils
-from mlagents.trainers.settings import TorchSettings
-from mlagents_envs.logging_util import get_logger
+from packaging.version import Version  # noqa: E402
+import importlib.metadata  # noqa: E402
+from mlagents.torch_utils import cpu_utils  # noqa: E402
+from mlagents.trainers.settings import TorchSettings  # noqa: E402
+from mlagents_envs.logging_util import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -159,7 +159,7 @@ def maybe_compile(model: T, mode: str = "reduce-overhead") -> T:
     return model
 
 
-def create_optimizer(params, lr: float, **kwargs) -> torch.optim.Adam:
+def create_optimizer(params: Any, lr: float, **kwargs: Any) -> "torch.optim.Adam":
     """
     Create an Adam optimizer with optional fused optimization.
 

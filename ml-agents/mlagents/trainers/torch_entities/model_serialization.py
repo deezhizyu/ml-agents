@@ -175,5 +175,9 @@ class ModelSerializer:
             # ONNX export can fail for complex models (RNNs) in PyTorch 2.10+
             # Log warning but don't fail - PyTorch checkpoint is still saved
             logger.warning(f"Failed to export ONNX model: {e}")
-            logger.warning("PyTorch checkpoint saved successfully, but ONNX export failed")
-            logger.warning("This is a known limitation with PyTorch 2.10+ for RNN models")
+            logger.warning(
+                "PyTorch checkpoint saved successfully, but ONNX export failed"
+            )
+            logger.warning(
+                "This is a known limitation with PyTorch 2.10+ for RNN models"
+            )

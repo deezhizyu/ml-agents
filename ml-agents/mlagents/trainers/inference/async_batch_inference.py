@@ -8,8 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Optional, List, Tuple, Any, Dict, Dict
-from collections import deque
+from typing import Optional, List, Dict
 import numpy as np
 
 from mlagents.torch_utils import torch
@@ -31,7 +30,7 @@ class AsyncBatchInference:
         model: torch.nn.Module,
         max_batch_size: int = 32,
         max_latency_ms: float = 10.0,
-        device: Optional[str] = None
+        device: str | None = None,
     ):
         """
         Initialize async batch inference server
@@ -42,7 +41,7 @@ class AsyncBatchInference:
         :param device: Device to run inference on
         """
         if device is None:
-            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = torch.device(device)
 
@@ -53,7 +52,7 @@ class AsyncBatchInference:
         self.max_latency_sec = max_latency_ms / 1000.0
 
         # Request queue: (observation, future)
-        self.request_queue: asyncio.Queue = asyncio.Queue()
+        self.request_queue: asyncio.Queue[tuple] = asyncio.Queue()
 
         # Statistics
         self.total_requests = 0
@@ -61,7 +60,7 @@ class AsyncBatchInference:
         self.total_latency = 0.0
 
         # Start batch processing loop
-        self._batch_task = None
+        self._batch_task: asyncio.Task[None] | None = None
         self._running = False
 
         logger.info(
@@ -140,8 +139,7 @@ class AsyncBatchInference:
 
                     try:
                         obs, future, start_time = await asyncio.wait_for(
-                            self.request_queue.get(),
-                            timeout=timeout
+                            self.request_queue.get(), timeout=timeout
                         )
                         batch_obs.append(obs)
                         batch_futures.append(future)
@@ -152,7 +150,9 @@ class AsyncBatchInference:
 
                 # Process batch if not empty
                 if batch_obs:
-                    await self._process_batch(batch_obs, batch_futures, batch_start_times)
+                    await self._process_batch(
+                        batch_obs, batch_futures, batch_start_times
+                    )
 
                 # Small sleep to avoid busy waiting when queue is empty
                 if not batch_obs:
@@ -165,10 +165,10 @@ class AsyncBatchInference:
 
     async def _process_batch(
         self,
-        observations: List[np.ndarray],
-        futures: List[asyncio.Future],
-        start_times: List[float]
-    ):
+        observations: list[np.ndarray],
+        futures: list[asyncio.Future[np.ndarray]],
+        start_times: list[float],
+    ) -> None:
         """
         Process a batch of inference requests
 
@@ -181,7 +181,9 @@ class AsyncBatchInference:
             obs_batch = np.stack(observations)
 
             # Convert to tensor and move to device
-            obs_tensor = torch.tensor(obs_batch, dtype=torch.float32, device=self.device)
+            obs_tensor = torch.tensor(
+                obs_batch, dtype=torch.float32, device=self.device
+            )
 
             # Inference
             with torch.no_grad():
@@ -208,7 +210,7 @@ class AsyncBatchInference:
                 if not future.done():
                     future.set_exception(e)
 
-    def get_statistics(self) -> Dict[str, float]:
+    def get_statistics(self) -> dict[str, float]:
         """
         Get inference statistics
 
@@ -218,17 +220,23 @@ class AsyncBatchInference:
             return {}
 
         avg_latency_ms = (self.total_latency / self.total_requests) * 1000
-        avg_batch_size = self.total_requests / self.total_batches if self.total_batches > 0 else 0
+        avg_batch_size = (
+            self.total_requests / self.total_batches if self.total_batches > 0 else 0
+        )
 
         return {
-            'total_requests': self.total_requests,
-            'total_batches': self.total_batches,
-            'avg_latency_ms': avg_latency_ms,
-            'avg_batch_size': avg_batch_size,
-            'requests_per_second': self.total_requests / self.total_latency if self.total_latency > 0 else 0
+            "total_requests": self.total_requests,
+            "total_batches": self.total_batches,
+            "avg_latency_ms": avg_latency_ms,
+            "avg_batch_size": avg_batch_size,
+            "requests_per_second": (
+                self.total_requests / self.total_latency
+                if self.total_latency > 0
+                else 0
+            ),
         }
 
-    def reset_statistics(self):
+    def reset_statistics(self) -> None:
         """Reset inference statistics"""
         self.total_requests = 0
         self.total_batches = 0
@@ -244,7 +252,7 @@ class MultiModelAsyncInference:
 
     def __init__(self):
         """Initialize multi-model inference manager"""
-        self.models: Dict[str, AsyncBatchInference] = {}
+        self.models: dict[str, AsyncBatchInference] = {}
         logger.info("MultiModelAsyncInference initialized")
 
     async def register_model(
@@ -252,7 +260,7 @@ class MultiModelAsyncInference:
         name: str,
         model: torch.nn.Module,
         max_batch_size: int = 32,
-        max_latency_ms: float = 10.0
+        max_latency_ms: float = 10.0,
     ):
         """
         Register a model for inference
@@ -263,9 +271,7 @@ class MultiModelAsyncInference:
         :param max_latency_ms: Max latency for this model
         """
         inference_server = AsyncBatchInference(
-            model=model,
-            max_batch_size=max_batch_size,
-            max_latency_ms=max_latency_ms
+            model=model, max_batch_size=max_batch_size, max_latency_ms=max_latency_ms
         )
 
         await inference_server.start()
@@ -300,7 +306,7 @@ class MultiModelAsyncInference:
         new_server = AsyncBatchInference(
             model=new_model,
             max_batch_size=self.models[name].max_batch_size,
-            max_latency_ms=self.models[name].max_latency_sec * 1000
+            max_latency_ms=self.models[name].max_latency_sec * 1000,
         )
 
         await new_server.start()
@@ -314,18 +320,15 @@ class MultiModelAsyncInference:
 
         logger.info(f"Model {name} hot-swapped successfully")
 
-    def get_all_statistics(self) -> Dict[str, Dict[str, float]]:
+    def get_all_statistics(self) -> dict[str, dict[str, float]]:
         """Get statistics for all models"""
-        return {
-            name: server.get_statistics()
-            for name, server in self.models.items()
-        }
+        return {name: server.get_statistics() for name, server in self.models.items()}
 
     async def shutdown(self):
         """Shutdown all models"""
         logger.info("Shutting down all inference servers...")
 
-        for name, server in self.models.items():
+        for _name, server in self.models.items():
             await server.stop()
 
         self.models.clear()
@@ -339,33 +342,29 @@ async def example_usage():
 
     # Create model (example)
     model = torch.nn.Sequential(
-        torch.nn.Linear(10, 64),
-        torch.nn.ReLU(),
-        torch.nn.Linear(64, 3)
+        torch.nn.Linear(10, 64), torch.nn.ReLU(), torch.nn.Linear(64, 3)
     )
 
     # Create inference server
-    server = AsyncBatchInference(
-        model=model,
-        max_batch_size=16,
-        max_latency_ms=5.0
-    )
+    server = AsyncBatchInference(model=model, max_batch_size=16, max_latency_ms=5.0)
 
     await server.start()
 
     # Make concurrent requests
     tasks = []
-    for i in range(100):
+    for _ in range(100):
         obs = np.random.randn(10).astype(np.float32)
         task = server.infer(obs)
         tasks.append(task)
 
     # Wait for all results
-    results = await asyncio.gather(*tasks)
+    _results = await asyncio.gather(*tasks)
 
     # Get statistics
     stats = server.get_statistics()
-    print(f"Processed {stats['total_requests']} requests in {stats['total_batches']} batches")
+    print(
+        f"Processed {stats['total_requests']} requests in {stats['total_batches']} batches"
+    )
     print(f"Average latency: {stats['avg_latency_ms']:.2f} ms")
     print(f"Average batch size: {stats['avg_batch_size']:.1f}")
 

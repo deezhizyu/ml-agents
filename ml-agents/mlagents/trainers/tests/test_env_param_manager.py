@@ -191,6 +191,7 @@ environment_parameters:
 def test_curriculum_raises_no_completion_criteria_conversion():
     # TrainerConfigError is wrapped in cattrs.errors.ClassValidationError when raised during structure
     import cattrs.errors
+
     with pytest.raises((TrainerConfigError, cattrs.errors.ClassValidationError)):
         RunOptions.from_dict(
             yaml.safe_load(test_bad_curriculum_no_competion_criteria_config_yaml)
@@ -338,6 +339,7 @@ environment_parameters:
 def test_curriculum_no_behavior():
     # Missing 'behavior' field causes TypeError or KeyError wrapped in ClassValidationError
     import cattrs.errors
+
     with pytest.raises((TypeError, KeyError, cattrs.errors.ClassValidationError)):
         run_options = RunOptions.from_dict(
             yaml.safe_load(test_curriculum_no_behavior_yaml)

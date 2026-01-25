@@ -364,13 +364,21 @@ def test_env_parameter_structure():
     # Check multirange has valid intervals
     # cattrs validates tuple structure and wraps errors in IterableValidationError/ClassValidationError
     import cattrs.errors
+
     invalid_distribution_dict = {
         "mass": {
             "sampler_type": "multirangeuniform",
             "sampler_parameters": {"intervals": [[1.0, 2.0], [3.0]]},
         }
     }
-    with pytest.raises((TrainerConfigError, cattrs.errors.ClassValidationError, cattrs.errors.IterableValidationError, ValueError)):
+    with pytest.raises(
+        (
+            TrainerConfigError,
+            cattrs.errors.ClassValidationError,
+            cattrs.errors.IterableValidationError,
+            ValueError,
+        )
+    ):
         EnvironmentParameterSettings.structure(
             invalid_distribution_dict, Dict[str, EnvironmentParameterSettings]
         )
@@ -398,7 +406,13 @@ def test_env_parameter_structure():
             ]
         }
     }
-    with pytest.raises((TrainerConfigError, cattrs.errors.ClassValidationError, cattrs.errors.IterableValidationError)):
+    with pytest.raises(
+        (
+            TrainerConfigError,
+            cattrs.errors.ClassValidationError,
+            cattrs.errors.IterableValidationError,
+        )
+    ):
         EnvironmentParameterSettings.structure(
             invalid_curriculum_dict, Dict[str, EnvironmentParameterSettings]
         )

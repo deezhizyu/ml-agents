@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.8, pytest-8.3.4, pluggy-1.5.0
+rootdir: C:\Development\Projects\ml-agents
+configfile: pytest.ini
+plugins: anyio-4.8.0, langsmith-0.3.4, asyncio-0.25.3, cov-4.1.0, mock-3.12.0, xdist-3.8.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None
+collected 699 items / 592 deselected / 107 selected
+
+mlagents\trainers\tests\torch_entities\test_encoders.py .....            [  4%]
+mlagents\trainers\tests\torch_entities\test_hybrid.py ....FF....

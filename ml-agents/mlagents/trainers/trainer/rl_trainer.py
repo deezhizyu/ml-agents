@@ -43,7 +43,7 @@ class RLTrainer(Trainer):
         # of what reward signals are actually present.
         self.cumulative_returns_since_policy_update: List[float] = []
         self.collected_rewards: Dict[str, Dict[str, int]] = {
-            "environment": defaultdict(lambda: 0)
+            "environment": defaultdict(int)
         }
         self.update_buffer: AgentBuffer = AgentBuffer()
         self._stats_reporter.add_property(
