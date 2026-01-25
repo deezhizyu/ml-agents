@@ -577,12 +577,41 @@ class SubprocessEnvManager(EnvManager):
                     worker_steps.clear()
                     step_workers.clear()
                     self._queue_steps()
-                elif step.worker_id not in step_workers:
+                elif step.cmd == EnvironmentCommand.STEP and step.worker_id not in step_workers:
                     self.env_workers[step.worker_id].waiting = False
                     worker_steps.append(step)
                     step_workers.add(step.worker_id)
             except EmptyQueueException:
                 continue
+
+        # After getting at least one step, drain any other available steps from the queue
+        while True:
+            try:
+                step: EnvironmentResponse = self.step_queue.get_nowait()
+                if step.cmd == EnvironmentCommand.ENV_EXITED:
+                    # If even one env exits try to restart all envs that failed.
+                    self._restart_failed_workers(step)
+                    # Clear state and restart this function.
+                    worker_steps.clear()
+                    step_workers.clear()
+                    self._queue_steps()
+                    # Need to get at least one step again
+                    while len(worker_steps) < 1:
+                        try:
+                            step = self.step_queue.get(timeout=0.001)
+                            if step.cmd == EnvironmentCommand.STEP and step.worker_id not in step_workers:
+                                self.env_workers[step.worker_id].waiting = False
+                                worker_steps.append(step)
+                                step_workers.add(step.worker_id)
+                        except EmptyQueueException:
+                            continue
+                elif step.cmd == EnvironmentCommand.STEP and step.worker_id not in step_workers:
+                    self.env_workers[step.worker_id].waiting = False
+                    worker_steps.append(step)
+                    step_workers.add(step.worker_id)
+            except EmptyQueueException:
+                break
+
         step_infos = self._postprocess_steps(worker_steps)
         return step_infos
 

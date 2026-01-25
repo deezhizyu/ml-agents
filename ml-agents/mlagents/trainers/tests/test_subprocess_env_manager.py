@@ -130,11 +130,13 @@ class SubprocessEnvManagerTest(unittest.TestCase):
         mock_create_worker.side_effect = create_worker_mock
         manager = SubprocessEnvManager(mock_env_factory, RunOptions(), 3)
         manager.step_queue = Mock()
-        manager.step_queue.get_nowait.side_effect = [
+        step_responses = [
             EnvironmentResponse(EnvironmentCommand.STEP, 0, StepResponse(0, None, {})),
             EnvironmentResponse(EnvironmentCommand.STEP, 1, StepResponse(1, None, {})),
             EmptyQueue(),
         ]
+        manager.step_queue.get.side_effect = step_responses
+        manager.step_queue.get_nowait.side_effect = step_responses
         step_mock = Mock()
         last_steps = [Mock(), Mock(), Mock()]
         manager.env_workers[0].previous_step = last_steps[0]
@@ -146,7 +148,7 @@ class SubprocessEnvManagerTest(unittest.TestCase):
         for i, env in enumerate(manager.env_workers):
             if i < 2:
                 env.send.assert_called_with(EnvironmentCommand.STEP, step_mock)
-                manager.step_queue.get_nowait.assert_called()
+                manager.step_queue.get.assert_called()
                 # Check that the "last steps" are set to the value returned for each step
                 self.assertEqual(
                     manager.env_workers[i].previous_step.current_all_step_result, i
@@ -176,7 +178,8 @@ class SubprocessEnvManagerTest(unittest.TestCase):
         ]
         manager = SubprocessEnvManager(mock_env_factory, RunOptions(), 2)
         manager.step_queue = Mock()
-        manager.step_queue.get_nowait.side_effect = [
+        # Responses for get() - called in the first while loop
+        get_responses = [
             EnvironmentResponse(
                 EnvironmentCommand.ENV_EXITED,
                 0,
@@ -184,11 +187,15 @@ class SubprocessEnvManagerTest(unittest.TestCase):
             ),
             EnvironmentResponse(EnvironmentCommand.CLOSED, 0, None),
             EnvironmentResponse(EnvironmentCommand.STEP, 1, StepResponse(0, None, {})),
-            EmptyQueue(),
             EnvironmentResponse(EnvironmentCommand.STEP, 0, StepResponse(1, None, {})),
-            EnvironmentResponse(EnvironmentCommand.STEP, 1, StepResponse(2, None, {})),
+        ]
+        # Responses for get_nowait() - called in the drain loop
+        get_nowait_responses = [
+            EnvironmentResponse(EnvironmentCommand.STEP, 0, StepResponse(1, None, {})),
             EmptyQueue(),
         ]
+        manager.step_queue.get.side_effect = get_responses
+        manager.step_queue.get_nowait.side_effect = get_nowait_responses
         step_mock = Mock()
         last_steps = [Mock(), Mock(), Mock()]
         assert crashing_worker is manager.env_workers[0]
