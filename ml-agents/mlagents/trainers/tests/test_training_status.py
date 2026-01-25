@@ -16,7 +16,7 @@ from mlagents.trainers.policy.checkpoint_manager import (
 
 def test_globaltrainingstatus(tmpdir):
     # Reset global state to avoid pollution from other tests
-    GlobalTrainingStatus.clear()
+    GlobalTrainingStatus.saved_state.clear()
 
     path_dir = os.path.join(tmpdir, "test.json")
 
