@@ -56,22 +56,22 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     zip_safe=False,
     install_requires=[
-        # Test-only dependencies should go in test_requirements.txt, not here.
-        "grpcio>=1.11.0",  # Relaxed max version for compatibility
+        # Modern version constraints (protobuf files regenerated for protobuf 6.x)
+        "grpcio>=1.11.0",
         "h5py>=2.9.0",
         f"mlagents_envs=={VERSION}",
-        "numpy>=1.23.5",  # Relaxed to support numpy 2.x
+        "numpy>=1.23.5",  # Works with numpy 2.x
         "Pillow>=4.2.1",
-        "protobuf>=3.6",  # Relaxed for onnxscript compatibility
+        "protobuf>=4.25.1",  # Regenerated for protobuf 6.x
         "pyyaml>=3.1.0",
-        "torch>=2.1.1",  # Relaxed to support PyTorch 2.10+
+        "torch>=2.1.1",  # Works with PyTorch 2.10+
         "tensorboard>=2.14",
         "six>=1.16",
-        "cattrs>=1.1.0,<1.7; python_version>='3.8'",
+        "cattrs>=1.1.0",  # Removed upper bound for modern cattrs
         "attrs>=19.3.0",
         "huggingface_hub>=0.14",
         'pypiwin32==223;platform_system=="Windows"',
-        "onnx>=1.15.0",  # Relaxed to support onnxscript (requires >=1.16)
+        "onnx>=1.15.0",  # Works with onnxscript
         "onnxscript>=0.5.7",  # Required for PyTorch 2.10+ ONNX export
         "packaging",
     ],

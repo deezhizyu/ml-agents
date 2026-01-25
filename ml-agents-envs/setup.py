@@ -56,13 +56,13 @@ setup(
     zip_safe=False,
     install_requires=[
         "cloudpickle",
-        "grpcio>=1.11.0,<=1.76.0",
+        "grpcio>=1.11.0",  # Works with grpcio 1.76+
         "Pillow>=4.2.1",
-        "protobuf>=3.6,<6.34",
+        "protobuf>=4.25.1",  # Regenerated for modern protobuf
         "pyyaml>=3.1.0",
         "gym>=0.21.0",
         "pettingzoo>=1.23.0",
-        "numpy>=1.23.5",  # Relaxed to support newer numpy versions
+        "numpy>=1.23.5",  # Works with numpy 2.x
         "filelock>=3.4.0",
     ],
     python_requires=">=3.10.1",  # Relaxed to support Python 3.12+
