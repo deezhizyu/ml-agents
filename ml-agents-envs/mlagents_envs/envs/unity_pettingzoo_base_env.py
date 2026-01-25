@@ -283,6 +283,8 @@ class UnityPettingzooBaseEnv:
             _, _, _ = self._batch_update(behavior_name)
         self._live_agents.sort()  # unnecessary, only for passing API test
         self._dones = {agent: False for agent in self._agents}
+        self._terminations = {agent: False for agent in self._agents}
+        self._truncations = {agent: False for agent in self._agents}
         self._rewards = {agent: 0 for agent in self._agents}
         self._cumm_rewards = {agent: 0 for agent in self._agents}
 
