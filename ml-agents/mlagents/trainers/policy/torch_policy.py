@@ -98,6 +98,19 @@ class TorchPolicy(Policy):
                 )
         return mask
 
+    def _get_cached_tensor(self, shape: tuple, dtype, device, cache_key: str) -> torch.Tensor:
+        """
+        Get a pre-allocated tensor from cache or create a new one.
+        Reduces allocation overhead for repeated inference calls.
+        """
+        if not hasattr(self, '_tensor_cache'):
+            self._tensor_cache = {}
+        
+        full_key = (cache_key, shape, dtype, str(device))
+        if full_key not in self._tensor_cache:
+            self._tensor_cache[full_key] = torch.empty(shape, dtype=dtype, device=device)
+        return self._tensor_cache[full_key]
+
     @timed
     def evaluate(
         self, decision_requests: DecisionSteps, global_agent_ids: List[str]
@@ -120,8 +133,20 @@ class TorchPolicy(Policy):
                 processed = self.gpu_processor.process_batch(np_ob, normalize=True, update_stats=True)
                 tensor_obs.append(processed)
         else:
-            # Standard CPU path
-            tensor_obs = [torch.as_tensor(np_ob, device=device) for np_ob in obs]
+            # Optimized CPU path with tensor caching for reduced allocation overhead
+            tensor_obs = []
+            for i, np_ob in enumerate(obs):
+                # Try to reuse cached tensor if shape matches
+                cache_key = f"obs_{i}"
+                if np_ob.shape == getattr(self, f'_last_obs_shape_{i}', None):
+                    cached = self._get_cached_tensor(np_ob.shape, torch.float32, device, cache_key)
+                    # Direct copy from numpy to avoid intermediate tensor allocation
+                    cached.copy_(torch.from_numpy(np_ob))
+                    tensor_obs.append(cached)
+                else:
+                    # Shape changed, create new tensor and update cache
+                    setattr(self, f'_last_obs_shape_{i}', np_ob.shape)
+                    tensor_obs.append(torch.as_tensor(np_ob, device=device))
 
         memories = torch.as_tensor(
             self.retrieve_memories(global_agent_ids), device=device

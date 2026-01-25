@@ -1,6 +1,10 @@
 import os
 from typing import Optional, TypeVar
 
+# Configure CUDA memory allocator BEFORE importing torch
+# This must be set before PyTorch initializes CUDA
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 from packaging.version import Version
 import importlib.metadata
 from mlagents.torch_utils import cpu_utils

@@ -903,6 +903,20 @@ class RunOptions(ExportableSettings):
     )
     cattr.register_unstructure_hook(collections.defaultdict, defaultdict_to_dict)
 
+    # Register custom unstructure hook for HyperparamSettings and all subclasses to properly
+    # serialize inherited fields (e.g., SACSettings -> OffPolicyHyperparamSettings -> HyperparamSettings)
+    # Use value_serializer to convert Enum values to their string representation for YAML compatibility
+    @staticmethod
+    def _hyperparam_value_serializer(inst, field, value):
+        if isinstance(value, Enum):
+            return value.value
+        return value
+
+    cattr.register_unstructure_hook_func(
+        lambda t: isinstance(t, type) and issubclass(t, HyperparamSettings),
+        lambda obj: attr.asdict(obj, value_serializer=RunOptions._hyperparam_value_serializer)
+    )
+
     @staticmethod
     def from_argparse(args: argparse.Namespace) -> "RunOptions":
         """
