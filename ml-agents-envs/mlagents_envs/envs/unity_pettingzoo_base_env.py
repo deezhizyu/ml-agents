@@ -232,9 +232,13 @@ class UnityPettingzooBaseEnv:
         self._infos = {}
         self._agent_id_to_index = {}
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         """
         Resets the environment.
+
+        Args:
+            seed: Random seed (unused, for Petting Zoo API compatibility)
+            options: Reset options (unused, for Petting Zoo API compatibility)
         """
         self._assert_loaded()
         self._agent_index = 0
