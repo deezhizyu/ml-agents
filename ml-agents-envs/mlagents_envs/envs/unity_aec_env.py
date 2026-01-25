@@ -60,10 +60,13 @@ class UnityAECEnv(UnityPettingzooBaseEnv, AECEnv):
 
     def last(self, observe=True):
         """
-        returns observation, cumulative reward, done, info for the current agent (specified by self.agent_selection)
+        returns observation, cumulative reward, terminated, truncated, info for the current agent (PettingZoo 1.24+ API)
         """
         obs, reward, done, info = self.observe(self._agents[self._agent_index])
-        return obs if observe else None, reward, done, info
+        # PettingZoo 1.24+ expects terminated and truncated separately
+        terminated = done
+        truncated = False  # Unity doesn't distinguish truncation
+        return obs if observe else None, reward, terminated, truncated, info
 
     @property
     def agent_selection(self):
