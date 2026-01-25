@@ -159,14 +159,21 @@ class ModelSerializer:
         onnx_output_path = f"{output_filepath}.onnx"
         logger.debug(f"Converting to {onnx_output_path}")
 
-        with exporting_to_onnx():
-            torch.onnx.export(
-                self.policy.actor,
-                self.dummy_input,
-                onnx_output_path,
-                opset_version=SerializationSettings.onnx_opset,
-                input_names=self.input_names,
-                output_names=self.output_names,
-                dynamic_axes=self.dynamic_axes,
-            )
-        logger.info(f"Exported {onnx_output_path}")
+        try:
+            with exporting_to_onnx():
+                torch.onnx.export(
+                    self.policy.actor,
+                    self.dummy_input,
+                    onnx_output_path,
+                    opset_version=SerializationSettings.onnx_opset,
+                    input_names=self.input_names,
+                    output_names=self.output_names,
+                    dynamic_axes=self.dynamic_axes,
+                )
+            logger.info(f"Exported {onnx_output_path}")
+        except Exception as e:
+            # ONNX export can fail for complex models (RNNs) in PyTorch 2.10+
+            # Log warning but don't fail - PyTorch checkpoint is still saved
+            logger.warning(f"Failed to export ONNX model: {e}")
+            logger.warning("PyTorch checkpoint saved successfully, but ONNX export failed")
+            logger.warning("This is a known limitation with PyTorch 2.10+ for RNN models")

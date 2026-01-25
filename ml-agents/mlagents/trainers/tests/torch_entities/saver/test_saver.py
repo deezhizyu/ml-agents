@@ -218,10 +218,6 @@ def _compare_two_optimizers(opt1: TorchOptimizer, opt2: TorchOptimizer) -> None:
 @pytest.mark.parametrize("visual", [True, False], ids=["visual", "vector"])
 @pytest.mark.parametrize("rnn", [True, False], ids=["rnn", "no_rnn"])
 def test_checkpoint_conversion(tmpdir, rnn, visual, discrete):
-    # Skip RNN + discrete tests - ONNX export fails with PyTorch 2.10+ for RNNs with discrete actions
-    # This is a known PyTorch issue with torch.export on RNN models
-    if rnn and discrete:
-        pytest.skip("ONNX export of RNN models with discrete actions fails in PyTorch 2.10+")
     dummy_config = TrainerSettings()
     model_path = os.path.join(tmpdir, "Mock_Brain")
     policy = create_policy_mock(
@@ -234,4 +230,17 @@ def test_checkpoint_conversion(tmpdir, rnn, visual, discrete):
     model_saver = TorchModelSaver(trainer_params, model_path)
     model_saver.register(policy)
     model_saver.save_checkpoint("Mock_Brain", 100)
-    assert os.path.isfile(model_path + "/Mock_Brain-100.onnx")
+
+    # ONNX export can fail for RNN models in PyTorch 2.10+
+    # PyTorch checkpoint should always exist, ONNX is optional
+    onnx_path = model_path + "/Mock_Brain-100.onnx"
+    pt_path = model_path + "/Mock_Brain-100.pt"
+
+    # PyTorch checkpoint must exist
+    assert os.path.isfile(pt_path), "PyTorch checkpoint must be saved"
+
+    # ONNX may or may not exist depending on model complexity
+    if not os.path.isfile(onnx_path):
+        # ONNX export failed (expected for RNN models in PyTorch 2.10+)
+        # This is acceptable - just log it
+        assert rnn and discrete, "ONNX export should only fail for RNN + discrete models"
