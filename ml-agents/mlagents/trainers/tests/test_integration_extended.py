@@ -84,6 +84,8 @@ class TestConfigurationIntegration:
 
     def test_recurrent_network_configuration(self):
         """Test configuration with recurrent network"""
+        from mlagents.trainers.settings import NetworkSettings
+
         memory_settings = NetworkSettings.MemorySettings(
             sequence_length=64, memory_size=128
         )
@@ -107,8 +109,6 @@ class TestConfigurationIntegration:
         assert trainer_settings.network_settings.memory.sequence_length == 64
         assert trainer_settings.network_settings.memory.memory_size == 128
         # Verify memory is properly configured as MemorySettings instance
-        from mlagents.trainers.settings import NetworkSettings
-
         assert isinstance(trainer_settings.network_settings.memory, NetworkSettings.MemorySettings)
 
 
