@@ -21,6 +21,10 @@ from mlagents.trainers.settings import (
 from mlagents.trainers.tests import mock_brain as mb
 from mlagents.trainers.tests.torch_entities.test_policy import create_policy_mock
 from mlagents.trainers.torch_entities.utils import ModelUtils
+from mlagents.plugins.trainer_type import get_default_trainer_types
+
+# Initialize trainer types for tests
+get_default_trainer_types()
 
 
 def test_register(tmp_path):

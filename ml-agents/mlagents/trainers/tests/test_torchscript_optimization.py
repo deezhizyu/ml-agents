@@ -174,6 +174,7 @@ class TestTorchScriptOptimizer:
     def test_save_and_load_scripted_model(self, tmp_path):
         """Test saving and loading TorchScript model"""
         model = SimpleModel()
+        model.to('cpu')  # Force CPU to avoid CUDA device issues in tests
         example_input = torch.randn(1, 10)
 
         optimizer = TorchScriptOptimizer()
@@ -189,8 +190,8 @@ class TestTorchScriptOptimizer:
 
         assert save_path.exists()
 
-        # Load model
-        loaded_model = optimizer.load_scripted_model(str(save_path))
+        # Load model on CPU
+        loaded_model = optimizer.load_scripted_model(str(save_path), device='cpu')
 
         # Should be able to run inference
         with torch.no_grad():
