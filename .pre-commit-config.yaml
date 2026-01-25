@@ -75,12 +75,13 @@ repos:
     hooks:
     -   id: python-check-mock-methods
 
-- repo: https://github.com/mattlqx/pre-commit-search-and-replace
-  rev: v1.1.9
-  hooks:
-  - id: search-and-replace
-    types: [markdown]
-    exclude: ".*localized.*"
+# Replaced Ruby-based hook with Python equivalent (rbenv doesn't work on Windows)
+# - repo: https://github.com/mattlqx/pre-commit-search-and-replace
+#   rev: v1.1.9
+#   hooks:
+#   - id: search-and-replace
+#     types: [markdown]
+#     exclude: ".*localized.*"
 
 #- repo: https://github.com/dotnet/format
 #  rev: v5.1.225507
@@ -121,18 +122,18 @@ repos:
         args: [--check-remote]
     -   id: validate-versions
         name: validate library versions
-        language: script
-        entry: utils/validate_versions.py
+        language: system
+        entry: python utils/validate_versions.py
         files: ".*/__init__.py"
     -   id: validate-init-py
         name: validate __init__.py files
-        language: script
-        entry: utils/validate_inits.py
+        language: system
+        entry: python utils/validate_inits.py
         types: [python]
     -   id: validate-release-links-py
         name: validate release links
-        language: script
-        entry: utils/validate_release_links.py
+        language: system
+        entry: python utils/validate_release_links.py
         require_serial: true
     -   id: generate-markdown-docs
         name: generate markdown docs
@@ -153,3 +154,9 @@ repos:
         entry: bash -c 'cd ml-agents && deptry . || cd ../ml-agents-envs && deptry .'
         pass_filenames: false
         stages: [manual]
+    -   id: search-and-replace
+        name: search and replace in markdown
+        language: system
+        entry: python utils/search_and_replace.py
+        types: [markdown]
+        exclude: ".*localized.*"
