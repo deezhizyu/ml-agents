@@ -19,6 +19,9 @@ from mlagents.trainers.trajectory import ObsUtil
 
 logger = logging_util.get_logger(__name__)
 
+# Hidden layer size for curiosity inverse and forward models
+CURIOSITY_HIDDEN_SIZE = 128
+
 
 class ActionPredictionTuple(NamedTuple):
     continuous: torch.Tensor
