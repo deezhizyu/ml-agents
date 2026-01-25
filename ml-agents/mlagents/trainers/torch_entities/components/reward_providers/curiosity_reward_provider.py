@@ -90,7 +90,7 @@ class CuriosityNetwork(torch.nn.Module):
         self._action_flattener = ActionFlattener(self._action_spec)
 
         self.inverse_model_action_encoding = torch.nn.Sequential(
-            LinearEncoder(2 * state_encoder_settings.hidden_units, 1, 256)
+            LinearEncoder(2 * state_encoder_settings.hidden_units, 1, CURIOSITY_HIDDEN_SIZE)
         )
 
         if self._action_spec.continuous_size > 0:
