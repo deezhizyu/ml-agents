@@ -57,24 +57,22 @@ setup(
     zip_safe=False,
     install_requires=[
         # Test-only dependencies should go in test_requirements.txt, not here.
-        "grpcio>=1.11.0,<=1.53.2",
+        "grpcio>=1.11.0",  # Relaxed max version for compatibility
         "h5py>=2.9.0",
         f"mlagents_envs=={VERSION}",
-        "numpy>=1.23.5",  # Relaxed to support newer numpy versions
+        "numpy>=1.23.5",  # Relaxed to support numpy 2.x
         "Pillow>=4.2.1",
-        "protobuf>=3.6,<3.21",
+        "protobuf>=3.6",  # Relaxed for onnxscript compatibility
         "pyyaml>=3.1.0",
-        "torch>=2.1.1",  # Relaxed to support newer PyTorch versions with CUDA
+        "torch>=2.1.1",  # Relaxed to support PyTorch 2.10+
         "tensorboard>=2.14",
-        # adding six explicit dependency since tensorboard needs it but doesn't declare it as a dep
         "six>=1.16",
-        # cattrs 1.1.0 dropped support for python 3.6, but 1.0.0 doesn't work for python 3.9
-        # Since there's no version that supports both, we have to draw the line somewhere.
         "cattrs>=1.1.0,<1.7; python_version>='3.8'",
         "attrs>=19.3.0",
         "huggingface_hub>=0.14",
         'pypiwin32==223;platform_system=="Windows"',
-        "onnx==1.15.0",
+        "onnx>=1.15.0",  # Relaxed to support onnxscript (requires >=1.16)
+        "onnxscript>=0.5.7",  # Required for PyTorch 2.10+ ONNX export
         "packaging",
     ],
     python_requires=">=3.10.1",  # Relaxed to support Python 3.12+
