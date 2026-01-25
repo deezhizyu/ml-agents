@@ -18,15 +18,20 @@ class UnityParallelEnv(UnityPettingzooBaseEnv, ParallelEnv):
         :param env: The UnityEnvironment that is being wrapped.
         :param seed: The seed for the action spaces of the agents.
         """
-        super().__init__(env, seed)
+        metadata = {"name": "UnityParallelEnv"}
+        super().__init__(env, seed, metadata)
 
-    def reset(self) -> Dict[str, Any]:
+    def reset(self, seed=None, options=None) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Resets the environment.
-        """
-        super().reset()
 
-        return self._observations
+        :param seed: Optional random seed (PettingZoo 1.24+ API)
+        :param options: Optional reset options (PettingZoo 1.24+ API)
+        :return: Tuple of (observations, infos) per PettingZoo 1.24+ API
+        """
+        super().reset(seed=seed, options=options)
+
+        return self._observations, self._infos
 
     def step(self, actions: Dict[str, Any]) -> Tuple:
         self._assert_loaded()

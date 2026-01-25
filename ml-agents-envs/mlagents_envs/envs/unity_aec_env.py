@@ -18,7 +18,8 @@ class UnityAECEnv(UnityPettingzooBaseEnv, AECEnv):
         :param env: The UnityEnvironment that is being wrapped.
         :param seed: The seed for the action spaces of the agents.
         """
-        super().__init__(env, seed)
+        metadata = {"name": "UnityAECEnv"}
+        super().__init__(env, seed, metadata)
 
     def step(self, action: Any) -> None:
         """

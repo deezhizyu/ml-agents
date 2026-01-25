@@ -33,6 +33,8 @@ class UnityPettingzooBaseEnv:
         self._agent_id_to_index: Dict[str, int] = {}  # agent_id: index in decision step
         self._observations: Dict[str, np.ndarray] = {}  # agent_id: obs
         self._dones: Dict[str, bool] = {}  # agent_id: done
+        self._terminations: Dict[str, bool] = {}  # agent_id: terminated (PettingZoo 1.24+)
+        self._truncations: Dict[str, bool] = {}  # agent_id: truncated (PettingZoo 1.24+)
         self._rewards: Dict[str, float] = {}  # agent_id: reward
         self._cumm_rewards: Dict[str, float] = {}  # agent_id: reward
         self._infos: Dict[str, Dict] = {}  # agent_id: info
@@ -177,6 +179,8 @@ class UnityPettingzooBaseEnv:
             self._live_agents.remove(current_agent)
             del self._observations[current_agent]
             del self._dones[current_agent]
+            del self._terminations[current_agent]
+            del self._truncations[current_agent]
             del self._rewards[current_agent]
             del self._cumm_rewards[current_agent]
             del self._infos[current_agent]
@@ -189,6 +193,9 @@ class UnityPettingzooBaseEnv:
         for behavior_name in self._env.behavior_specs.keys():
             dones, rewards, cumulative_rewards = self._batch_update(behavior_name)
             self._dones.update(dones)
+            # In Unity ML-Agents, all dones are treated as terminations (not truncations)
+            self._terminations.update(dones)
+            self._truncations.update({agent_id: False for agent_id in dones.keys()})
             self._rewards.update(rewards)
             self._cumm_rewards.update(cumulative_rewards)
         self._agent_index = 0
@@ -222,11 +229,37 @@ class UnityPettingzooBaseEnv:
     def _cumulative_rewards(self):
         return self._cumm_rewards
 
+    @property
+    def terminations(self):
+        """
+        Returns a dict with termination status for each agent (PettingZoo 1.24+ API)
+        For Unity ML-Agents, all dones are treated as terminations (not truncations)
+        """
+        return self._terminations
+
+    @property
+    def truncations(self):
+        """
+        Returns a dict with truncation status for each agent (PettingZoo 1.24+ API)
+        Unity ML-Agents doesn't distinguish between termination and truncation,
+        so this always returns False for all agents
+        """
+        return self._truncations
+
+    @property
+    def dones(self):
+        """
+        Returns a dict with done status for each agent (backward compatibility)
+        """
+        return self._dones
+
     def _reset_states(self):
         self._live_agents = []
         self._agents = []
         self._observations = {}
         self._dones = {}
+        self._terminations = {}
+        self._truncations = {}
         self._rewards = {}
         self._cumm_rewards = {}
         self._infos = {}
