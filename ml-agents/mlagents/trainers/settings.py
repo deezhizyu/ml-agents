@@ -25,6 +25,7 @@ import copy
 from mlagents.trainers.cli_utils import StoreConfigFile, DetectDefault, parser
 from mlagents.trainers.cli_utils import load_config
 from mlagents.trainers.exception import TrainerConfigError, TrainerConfigWarning
+from mlagents.plugins import all_trainer_settings, all_trainer_types
 
 from mlagents_envs import logging_util
 from mlagents_envs.side_channel.environment_parameters_channel import (
