@@ -52,3 +52,12 @@ pytest-mock>=3.14.0
 
 # Coverage reporting
 coverage[toml]>=7.4.4
+
+# ONNX export (required for PyTorch 2.10+)
+onnxscript>=0.5.7
+
+# Additional runtime dependencies
+h5py>=2.9.0
+tensorboard>=2.14
+onnx>=1.15.0
+pypiwin32>=223; platform_system == "Windows"

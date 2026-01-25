@@ -52,11 +52,11 @@ echo "✓ ml-agents-envs installed"
 pip install -e ./ml-agents -q
 echo "✓ ml-agents installed"
 
-# Install test dependencies
+# Install development dependencies (includes test, onnx, etc.)
 echo ""
-echo "Installing test dependencies..."
-pip install -r test_requirements.txt -q
-echo "✓ Test dependencies installed"
+echo "Installing development dependencies..."
+pip install -r requirements-dev.txt -q
+echo "✓ Development dependencies installed"
 
 # Install pre-commit hooks
 echo ""

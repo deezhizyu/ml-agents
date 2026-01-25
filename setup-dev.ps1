@@ -49,11 +49,11 @@ Write-Host "✓ ml-agents-envs installed" -ForegroundColor Green
 pip install -e .\ml-agents --quiet
 Write-Host "✓ ml-agents installed" -ForegroundColor Green
 
-# Install test dependencies
+# Install development dependencies (includes test, onnx, etc.)
 Write-Host ""
-Write-Host "Installing test dependencies..."
-pip install -r test_requirements.txt --quiet
-Write-Host "✓ Test dependencies installed" -ForegroundColor Green
+Write-Host "Installing development dependencies..."
+pip install -r requirements-dev.txt --quiet
+Write-Host "✓ Development dependencies installed" -ForegroundColor Green
 
 # Install pre-commit hooks
 Write-Host ""
