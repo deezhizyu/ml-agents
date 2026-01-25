@@ -24,7 +24,7 @@ def create_registry(tmp_dir: str) -> UnityEnvRegistry:
     return reg
 
 
-@pytest.mark.parametrize("n_ports", [2])
+@pytest.mark.parametrize("base_port", [5004])
 def test_basic_in_registry(base_port: int, tmp_path: Path) -> None:
     assert BASIC_ID in default_registry
     os.environ["TERM"] = "xterm"

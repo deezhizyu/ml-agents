@@ -15,7 +15,7 @@ from mlagents_envs.exception import (
 from mlagents_envs.communicator_objects.unity_input_pb2 import UnityInputProto
 
 
-@pytest.mark.parametrize("n_ports", [1])
+@pytest.mark.parametrize("base_port", [5004])
 def test_rpc_communicator_checks_port_on_create(base_port: int) -> None:
     first_comm = RpcCommunicator(base_port=base_port)
     with pytest.raises(UnityWorkerInUseException):
@@ -24,7 +24,7 @@ def test_rpc_communicator_checks_port_on_create(base_port: int) -> None:
     first_comm.close()
 
 
-@pytest.mark.parametrize("n_ports", [2])
+@pytest.mark.parametrize("base_port", [5004])
 def test_rpc_communicator_close(base_port: int) -> None:
     # Ensures it is possible to open a new RPC Communicators
     # after closing one on the same worker_id
@@ -34,7 +34,7 @@ def test_rpc_communicator_close(base_port: int) -> None:
     second_comm.close()
 
 
-@pytest.mark.parametrize("n_ports", [2])
+@pytest.mark.parametrize("base_port", [5004])
 def test_rpc_communicator_create_multiple_workers(base_port: int) -> None:
     # Ensures multiple RPC communicators can be created with
     # different worker_ids without causing an error.
@@ -44,7 +44,7 @@ def test_rpc_communicator_create_multiple_workers(base_port: int) -> None:
     second_comm.close()
 
 
-@pytest.mark.parametrize("n_ports", [1])
+@pytest.mark.parametrize("base_port", [5004])
 @mock.patch.object(grpc, "server")
 @mock.patch.object(
     mlagents_envs.rpc_communicator, "UnityToExternalServicerImplementation"
@@ -59,7 +59,7 @@ def test_rpc_communicator_initialize_OK(
     comm.unity_to_external.parent_conn.poll.assert_called()
 
 
-@pytest.mark.parametrize("n_ports", [1])
+@pytest.mark.parametrize("base_port", [5004])
 @mock.patch.object(grpc, "server")
 @mock.patch.object(
     mlagents_envs.rpc_communicator, "UnityToExternalServicerImplementation"
@@ -76,7 +76,7 @@ def test_rpc_communicator_initialize_timeout(
     comm.unity_to_external.parent_conn.poll.assert_called()
 
 
-@pytest.mark.parametrize("n_ports", [1])
+@pytest.mark.parametrize("base_port", [5004])
 @mock.patch.object(grpc, "server")
 @mock.patch.object(
     mlagents_envs.rpc_communicator, "UnityToExternalServicerImplementation"

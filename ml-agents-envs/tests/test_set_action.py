@@ -10,7 +10,7 @@ import numpy as np
 BALL_ID = "3DBall"
 
 
-@pytest.mark.parametrize("n_ports", [1])
+@pytest.mark.parametrize("base_port", [5004])
 def test_set_action_single_agent(base_port: int) -> None:
     engine_config_channel = EngineConfigurationChannel()
     env = default_registry[BALL_ID].make(
@@ -35,7 +35,7 @@ def test_set_action_single_agent(base_port: int) -> None:
     env.close()
 
 
-@pytest.mark.parametrize("n_ports", [1])
+@pytest.mark.parametrize("base_port", [5004])
 def test_set_action_multi_agent(base_port: int) -> None:
     engine_config_channel = EngineConfigurationChannel()
     env = default_registry[BALL_ID].make(
