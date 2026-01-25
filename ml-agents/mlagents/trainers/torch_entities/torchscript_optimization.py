@@ -18,6 +18,13 @@ from mlagents.torch_utils import torch as mlagents_torch
 
 logger = logging_util.get_logger(__name__)
 
+# Track compilation statistics
+_compilation_stats = {
+    "attempts": 0,
+    "successes": 0,
+    "failures": 0,
+}
+
 
 class TorchScriptOptimizer:
     """Optimize models with TorchScript for faster inference"""
