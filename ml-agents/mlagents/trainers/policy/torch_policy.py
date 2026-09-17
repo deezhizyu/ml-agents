@@ -63,16 +63,19 @@ class TorchPolicy(Policy):
 
         self.actor.to(default_device())
 
-        # Initialize GPU observation processor if CUDA available (disabled during testing)
+        # Initialize GPU observation processor if the actor actually lives on a CUDA
+        # device (disabled during testing). Must match default_device(), not just
+        # torch.cuda.is_available(), or torch_settings.device: cpu is silently ignored
+        # and the processor ends up on a different device than the actor/critic.
         self.gpu_processor = None
         # Only enable during actual training to avoid CUDA test errors
         import os
 
-        if torch.cuda.is_available() and os.environ.get("PYTEST_CURRENT_TEST") is None:
+        if default_device().type == "cuda" and os.environ.get("PYTEST_CURRENT_TEST") is None:
             try:
                 from mlagents.trainers.gpu_processing import GPUObservationProcessor
 
-                self.gpu_processor = GPUObservationProcessor(device="cuda")
+                self.gpu_processor = GPUObservationProcessor(device=default_device())
                 logger.info("GPU observation processing enabled for faster training")
             except ImportError:
                 pass
@@ -135,9 +138,11 @@ class TorchPolicy(Policy):
         if self.gpu_processor is not None:
             tensor_obs = []
             for np_ob in obs:
-                # GPU processor handles normalization on GPU
+                # Actor's own NetworkBody normalizes internally (network_settings.normalize).
+                # Normalizing again here would desync rollout-time obs from update-time obs,
+                # since optimizer_torch.py's update() reads raw obs straight from the buffer.
                 processed = self.gpu_processor.process_batch(
-                    np_ob, normalize=True, update_stats=True
+                    np_ob, normalize=False, update_stats=False
                 )
                 tensor_obs.append(processed)
         else:
