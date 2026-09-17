@@ -190,7 +190,11 @@ class GaussianDistribution(nn.Module):
             # throws error on runtime broadcasting due to unknown reason. We
             # use this to replace torch.expand() because it is not supported in
             # the verified version of Sentis (1.2.0-exp.2).
-            log_sigma = mu * 0 + self.log_sigma
+            # Clamp like the conditional_sigma branch above: unbounded log_sigma
+            # can drift under training gradient noise until std**2 overflows fp32
+            # (at log_sigma ~44, half the threshold for exp() alone), poisoning
+            # entropy/log_prob with inf/NaN that then never recovers on its own.
+            log_sigma = torch.clamp(mu * 0 + self.log_sigma, min=-20, max=2)
         if self.tanh_squash:
             return TanhGaussianDistInstance(mu, torch.exp(log_sigma))
         else:

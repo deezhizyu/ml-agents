@@ -43,6 +43,26 @@ def test_gaussian_distribution(conditional_sigma, tanh_squash):
         assert prob == pytest.approx(-2, abs=0.1)
 
 
+def test_gaussian_distribution_log_sigma_is_clamped():
+    # Regression test: unconditional log_sigma is a raw nn.Parameter that gradient
+    # noise can drive arbitrarily high over training. Once std**2 overflows fp32
+    # (~log_sigma 44, well before exp() itself would at ~88), entropy/log_prob
+    # produce inf/NaN that never recovers. Must be clamped like conditional_sigma.
+    hidden_size = 16
+    act_size = 4
+    sample_embedding = torch.ones((1, hidden_size))
+    gauss_dist = GaussianDistribution(
+        hidden_size, act_size, conditional_sigma=False, tanh_squash=False
+    )
+    with torch.no_grad():
+        gauss_dist.log_sigma.fill_(1000.0)
+
+    dist_inst = gauss_dist(sample_embedding)
+    assert torch.isfinite(dist_inst.std).all()
+    assert torch.isfinite(dist_inst.entropy()).all()
+    assert torch.isfinite(dist_inst.log_prob(torch.zeros((1, act_size)))).all()
+
+
 def test_multi_categorical_distribution():
     torch.manual_seed(0)
     hidden_size = 16
