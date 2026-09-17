@@ -14,6 +14,7 @@ from mlagents.trainers.policy.policy import Policy
 from mlagents.trainers.trainer.trainer_utils import get_gae
 from mlagents.trainers.optimizer.torch_optimizer import TorchOptimizer
 from mlagents.trainers.policy.torch_policy import TorchPolicy
+from mlagents.trainers.policy.torch_policy_optimized import TorchPolicyOptimized
 from mlagents.trainers.ppo.optimizer_torch import TorchPPOOptimizer, PPOSettings
 from mlagents.trainers.trajectory import Trajectory
 from mlagents.trainers.behavior_id_utils import BehaviorIdentifiers
@@ -191,13 +192,31 @@ class PPOTrainer(OnPolicyTrainer):
             actor_cls = SharedActorCritic
             actor_kwargs.update({"stream_names": reward_signal_names})
 
-        policy = TorchPolicy(
-            self.seed,
-            behavior_spec,
-            self.trainer_settings.network_settings,
-            actor_cls,
-            actor_kwargs,
-        )
+        network_settings = self.trainer_settings.network_settings
+        # TorchScript compilation freezes the actor (torch.jit.trace +
+        # optimize_for_inference) and only exposes its traced forward() pass,
+        # so it can't be used while actively training: PPO's update step
+        # backprops through policy.actor.get_stats(), which a frozen/traced
+        # module doesn't support. Only apply it when nothing will train
+        # against this policy (e.g. --inference mode).
+        if network_settings.enable_torchscript and not self.is_training:
+            policy: TorchPolicy = TorchPolicyOptimized(
+                self.seed,
+                behavior_spec,
+                network_settings,
+                actor_cls,
+                actor_kwargs,
+                enable_torchscript=True,
+                torchscript_optimize_for_inference=network_settings.torchscript_optimize_for_inference,
+            )
+        else:
+            policy = TorchPolicy(
+                self.seed,
+                behavior_spec,
+                network_settings,
+                actor_cls,
+                actor_kwargs,
+            )
         return policy
 
     def get_policy(self, name_behavior_id: str) -> Policy:
