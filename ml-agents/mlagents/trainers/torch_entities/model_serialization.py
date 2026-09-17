@@ -169,6 +169,25 @@ class ModelSerializer:
                     input_names=self.input_names,
                     output_names=self.output_names,
                     dynamic_axes=self.dynamic_axes,
+                    # Use the legacy TorchScript-based exporter, not the
+                    # torch.export/dynamo one that's been the default since
+                    # torch 2.x. The dynamo exporter causes two problems for
+                    # Unity import: (1) it decomposes each Linear layer's
+                    # bias-add into a separate Add node instead of folding it
+                    # into Gemm's optional 3rd input, and Sentis's ONNX Gemm
+                    # parser requires that input to be present ("required
+                    # Input 2 was not found"); (2) it defaults to splitting
+                    # tensor data into a separate "<file>.onnx.data" sidecar
+                    # that nothing in the checkpoint-copy path (see
+                    # TorchModelSaver.copy_final_model) knows to copy
+                    # alongside the .onnx, so the "final" model silently
+                    # loses its weights ("Could not read tensor data for
+                    # constant tensor"). The legacy exporter also natively
+                    # supports the opset requested below, without the
+                    # dynamo exporter's forced-then-failed downgrade
+                    # (RuntimeError: No Adapter From Version ... for Identity).
+                    dynamo=False,
+                    external_data=False,
                 )
             logger.info(f"Exported {onnx_output_path}")
         except Exception as e:

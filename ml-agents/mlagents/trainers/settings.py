@@ -84,6 +84,10 @@ def deep_update_dict(d: Dict, update_d: Mapping) -> None:
 
 class SerializationSettings:
     convert_to_onnx = True
+    # model_serialization.py exports with dynamo=False (the legacy
+    # TorchScript-based exporter), which natively supports opset 9 - unlike
+    # torch's newer dynamo/torch.export-based exporter, which can't target
+    # opset 9 for this graph at all (see model_serialization.py for details).
     onnx_opset = 9
 
 
