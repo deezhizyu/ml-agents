@@ -135,9 +135,11 @@ class TorchPolicy(Policy):
         if self.gpu_processor is not None:
             tensor_obs = []
             for np_ob in obs:
-                # GPU processor handles normalization on GPU
+                # Actor's own NetworkBody normalizes internally (network_settings.normalize).
+                # Normalizing again here would desync rollout-time obs from update-time obs,
+                # since optimizer_torch.py's update() reads raw obs straight from the buffer.
                 processed = self.gpu_processor.process_batch(
-                    np_ob, normalize=True, update_stats=True
+                    np_ob, normalize=False, update_stats=False
                 )
                 tensor_obs.append(processed)
         else:

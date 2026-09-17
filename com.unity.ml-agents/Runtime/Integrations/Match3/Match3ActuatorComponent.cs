@@ -58,7 +58,7 @@ namespace Unity.MLAgents.Integrations.Match3
                 return Array.Empty<IActuator>();
             }
 
-            var seed = m_RandomSeed == -1 ? gameObject.GetInstanceID() : m_RandomSeed + 1;
+            var seed = m_RandomSeed == -1 ? gameObject.GetHashCode() : m_RandomSeed + 1;
             return new IActuator[] { new Match3Actuator(board, m_ForceHeuristic, seed, m_ActuatorName) };
         }
 

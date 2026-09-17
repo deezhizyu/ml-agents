@@ -179,7 +179,10 @@ namespace Unity.MLAgents.Inference
             var width = tensorProxy.data.Width();
             var channels = tensorProxy.data.Channels();
 
-            tensorProxy.data.CompleteAllPendingOperations();
+            // CompleteAllPendingOperations() only waits for async ops to finish; it doesn't
+            // make a GPU/compute-backed tensor CPU-writable. ReadbackAndClone() does both,
+            // and returns the tensor we must actually index into.
+            tensorProxy.data = tensorProxy.data.ReadbackAndClone();
 
             var floatTensor = (Tensor<float>)tensorProxy.data;
 
@@ -232,7 +235,7 @@ namespace Unity.MLAgents.Inference
                 throw new ArgumentNullException();
             }
 
-            tensorProxy.data.CompleteAllPendingOperations();
+            tensorProxy.data = tensorProxy.data.ReadbackAndClone();
 
             for (var i = 0; i < tensorProxy.data.Length(); i++)
             {
