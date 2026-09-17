@@ -51,7 +51,8 @@ class GPUObservationProcessor:
         :param observations: Batch of observations (batch_size, obs_dim)
         """
         batch_mean = observations.mean(dim=0)
-        batch_std = observations.std(dim=0)
+        # unbiased=False avoids NaN when a batch has exactly 1 sample (n-1 == 0)
+        batch_std = observations.std(dim=0, unbiased=False)
 
         if self.running_mean is None:
             # Initialize
