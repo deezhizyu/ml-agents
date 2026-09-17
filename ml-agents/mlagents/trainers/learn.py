@@ -3,6 +3,7 @@ from mlagents import torch_utils
 import yaml
 
 import os
+import sys
 import numpy as np
 import json
 
@@ -324,7 +325,19 @@ def run_cli(options: RunOptions) -> None:
 
 
 def main():
-    run_cli(parse_command_line())
+    exit_code = 0
+    try:
+        run_cli(parse_command_line())
+    except SystemExit as e:
+        exit_code = 0 if e.code is None else (e.code if isinstance(e.code, int) else 1)
+    finally:
+        # On some platforms (observed with ROCm on Windows), tearing down the
+        # GPU context during normal interpreter shutdown hangs indefinitely.
+        # All work is done by this point, so skip Python's graceful shutdown
+        # and exit immediately rather than leaving the process stuck.
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(exit_code)
 
 
 # For python debugger to directly run this script
