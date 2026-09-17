@@ -212,3 +212,29 @@ def test_soft_update():
 
     ModelUtils.soft_update(tm1, tm2, tau=1.0)
     assert torch.equal(tm2.parameter, tm1.parameter)
+
+
+def test_trust_region_policy_loss_amp_large_log_prob_delta():
+    # Regression test: the PPO ratio's exp(log_probs - old_log_probs) must not
+    # overflow to inf/NaN when computed under fp16 autocast, even for a log-prob
+    # delta large enough to overflow fp16 (fp16 saturates at exp(x) for x >~ 11).
+    device_type = "cuda" if torch.cuda.is_available() else "cpu"
+    advantages = torch.randn(8)
+    old_log_probs = torch.zeros(8, 1)
+    loss_masks = torch.ones(8, dtype=torch.bool)
+
+    with torch.amp.autocast(
+        device_type=device_type, dtype=torch.float16, enabled=True
+    ):
+        # Simulate a large, fp16-precision log-prob from the policy network.
+        log_probs = torch.full((8, 1), 50.0).half()
+        policy_loss = ModelUtils.trust_region_policy_loss(
+            advantages,
+            log_probs.flatten(),
+            old_log_probs.flatten(),
+            loss_masks,
+            epsilon=0.2,
+        )
+
+    assert not torch.isnan(policy_loss).any()
+    assert not torch.isinf(policy_loss).any()

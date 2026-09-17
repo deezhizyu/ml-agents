@@ -450,7 +450,11 @@ class ModelUtils:
         :param loss_masks: Mask for losses. Used with LSTM to ignore 0'ed out experiences.
         """
         advantage = advantages.unsqueeze(-1)
-        r_theta = torch.exp(log_probs - old_log_probs)
+        # Force fp32 explicitly rather than relying on autocast's op-level promotion
+        # of exp() (or on old_log_probs happening to already be fp32): both hold today,
+        # but either could silently stop holding under a future dtype/autocast change,
+        # and exp() of a ratio's log-delta saturates fp16 at inputs as small as ~11.
+        r_theta = torch.exp((log_probs - old_log_probs).float())
         p_opt_a = r_theta * advantage
         p_opt_b = torch.clamp(r_theta, 1.0 - epsilon, 1.0 + epsilon) * advantage
         policy_loss = -1 * ModelUtils.masked_mean(
