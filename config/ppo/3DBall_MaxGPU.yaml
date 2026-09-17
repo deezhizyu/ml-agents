@@ -54,5 +54,5 @@ torch_settings:
   device: cuda
   enable_cudnn_benchmark: true
   enable_tf32: true
-  enable_amp: true
+  enable_amp: false
   enable_fused_optimizer: true
