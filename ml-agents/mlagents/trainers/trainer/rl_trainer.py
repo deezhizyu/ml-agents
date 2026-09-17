@@ -128,7 +128,8 @@ class RLTrainer(Trainer):
         if len(rewards) == 0:
             return None
         else:
-            return sum(rewards) / len(rewards)
+            # Cast from numpy.float32 (non-JSON-serializable) to a native float
+            return float(sum(rewards) / len(rewards))
 
     @timed
     def _checkpoint(self) -> ModelCheckpoint:
