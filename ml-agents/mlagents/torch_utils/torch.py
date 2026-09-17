@@ -1,9 +1,14 @@
 import os
+import sys
 from typing import Any, Optional, TypeVar
 
 # Configure CUDA memory allocator BEFORE importing torch
 # This must be set before PyTorch initializes CUDA
-os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+# expandable_segments is unsupported on Windows (both CUDA and ROCm builds warn
+# "not supported on this platform"), and forcing it there can leave the caching
+# allocator in a bad state that hangs on interpreter shutdown.
+if sys.platform != "win32":
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 from packaging.version import Version  # noqa: E402
 import importlib.metadata  # noqa: E402
@@ -96,7 +101,17 @@ def set_torch_config(torch_settings: TorchSettings) -> None:
 
         # Check if fused optimizer is available (PyTorch 2.0+)
         _fused_optimizer_available = torch_settings.enable_fused_optimizer
-        if _fused_optimizer_available:
+        if _fused_optimizer_available and getattr(torch.version, "hip", None) is not None:
+            # Constructing a fused CUDA optimizer (even without calling .step())
+            # has been observed to leave the process unable to exit on some
+            # ROCm/GPU combinations (not even os._exit() escapes it), so skip
+            # the feature - and its self-test below - entirely on ROCm builds.
+            _fused_optimizer_available = False
+            logger.debug(
+                "Fused optimizer disabled on ROCm (known to hang on process exit "
+                "on some GPUs), falling back to standard optimizer"
+            )
+        elif _fused_optimizer_available:
             # Test if fused is actually supported
             try:
                 # Create a small test to verify fused optimizer works
