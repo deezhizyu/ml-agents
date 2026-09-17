@@ -1,5 +1,5 @@
 import atexit
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 
 import numpy as np
 import os
@@ -91,8 +91,16 @@ class UnityEnvironment(BaseEnv):
     def _check_communication_compatibility(
         unity_com_ver: str, python_api_version: str, unity_package_version: str
     ) -> bool:
-        unity_communicator_version = Version(unity_com_ver)
-        api_version = Version(python_api_version)
+        try:
+            unity_communicator_version = Version(unity_com_ver)
+            api_version = Version(python_api_version)
+        except InvalidVersion:
+            # Observed when reconnecting to the Unity Editor after a worker
+            # restart: the handshake can come back with an empty/malformed
+            # version string. Treat it the same as a genuine version
+            # mismatch (a recoverable UnityEnvironmentException) instead of
+            # letting the raw packaging exception crash the whole run.
+            UnityEnvironment._raise_version_exception(unity_com_ver)
         if unity_communicator_version.major == 0:
             if (
                 unity_communicator_version.major != api_version.major
