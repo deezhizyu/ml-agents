@@ -216,11 +216,12 @@ def _should_use_shared_memory(
     # Check if any behavior uses visual encoders (indicates large observations)
     for behavior_name, settings in behaviors.items():
         vis_encode_type = settings.network_settings.vis_encode_type
-        # Visual encoders suggest large observation data
+        # NATURE_CNN/RESNET are only ever set when a behavior has an actual
+        # visual/camera sensor configured. SIMPLE is the field's default and
+        # is present on every behavior, visual or not, so it is not signal.
         if vis_encode_type in (
             EncoderType.NATURE_CNN,
             EncoderType.RESNET,
-            EncoderType.SIMPLE,
         ):
             logger.debug(
                 f"Behavior '{behavior_name}' uses visual encoder - shared memory recommended"
