@@ -5,12 +5,13 @@ import os
 
 def get_num_threads_to_use() -> Optional[int]:
     """
-    Gets the number of threads to use. For most problems, 4 is all you
-    need, but for smaller machines, we'd like to scale to less than that.
-    By default, PyTorch uses 1/2 of the available cores.
+    Gets the number of threads to use for the PPO update pass. Leaves a
+    couple of cores free for Unity and the trainer's own IPC/env-stepping
+    threads, and uses the rest so the CPU-bound backward pass isn't
+    artificially capped on machines with many cores.
     """
     num_cpus = _get_num_available_cpus()
-    return max(min(num_cpus // 2, 4), 1) if num_cpus is not None else None
+    return max(min(num_cpus - 2, 12), 1) if num_cpus is not None else None
 
 
 def _get_num_available_cpus() -> Optional[int]:
