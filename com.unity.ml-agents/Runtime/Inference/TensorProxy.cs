@@ -47,6 +47,12 @@ namespace Unity.MLAgents.Inference
         public Tensor data;
         public BackendType Device => data.dataOnBackend.backendType;
 
+        // False for TensorProxyFromSentis-wrapped model outputs: that data is a reference into
+        // the Worker's own internal storage (see Worker.PeekOutput docs — "valid until you call
+        // Schedule/Dispose on the worker"), not something this proxy owns. Disposing it here
+        // would free memory the Worker still relies on for its next Schedule() call.
+        public bool OwnsData = true;
+
         public long Height
         {
             get { return shape.Length >= 4 ? shape[^2] : 1; }
@@ -89,7 +95,10 @@ namespace Unity.MLAgents.Inference
 
             if (data != null)
             {
-                data.Dispose();
+                if (OwnsData)
+                {
+                    data.Dispose();
+                }
                 data = null;
             }
 
@@ -163,7 +172,9 @@ namespace Unity.MLAgents.Inference
                     ? TensorProxy.TensorType.FloatingPoint
                     : TensorProxy.TensorType.Integer,
                 shape = shape,
-                data = src
+                data = src,
+                // src comes from Worker.PeekOutput — a borrowed reference, not ours to free.
+                OwnsData = false
             };
         }
 
@@ -182,7 +193,12 @@ namespace Unity.MLAgents.Inference
             // CompleteAllPendingOperations() only waits for async ops to finish; it doesn't
             // make a GPU/compute-backed tensor CPU-writable. ReadbackAndClone() does both,
             // and returns the tensor we must actually index into.
+            var previousData = tensorProxy.data;
             tensorProxy.data = tensorProxy.data.ReadbackAndClone();
+            if (previousData != null && !ReferenceEquals(previousData, tensorProxy.data))
+            {
+                previousData.Dispose();
+            }
 
             var floatTensor = (Tensor<float>)tensorProxy.data;
 
@@ -235,7 +251,12 @@ namespace Unity.MLAgents.Inference
                 throw new ArgumentNullException();
             }
 
+            var previousData = tensorProxy.data;
             tensorProxy.data = tensorProxy.data.ReadbackAndClone();
+            if (!ReferenceEquals(previousData, tensorProxy.data))
+            {
+                previousData.Dispose();
+            }
 
             for (var i = 0; i < tensorProxy.data.Length(); i++)
             {

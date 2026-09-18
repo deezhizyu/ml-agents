@@ -175,6 +175,15 @@ namespace Unity.MLAgents.Inference
 
         void FetchSentisOutputs(string[] names)
         {
+            // Dispose explicitly, on the main thread, right here — instead of leaving these
+            // TensorProxy wrappers to the GC finalizer, which runs on a background thread and
+            // isn't safe for these native-backed tensors (each disposal is a no-op on the
+            // underlying data since OwnsData is false for output wrappers, but the TensorProxy
+            // itself still needs Dispose() to run its cleanup and suppress its finalizer).
+            foreach (var proxy in m_InferenceOutputs)
+            {
+                proxy.Dispose();
+            }
             m_InferenceOutputs.Clear();
 
             foreach (var n in names)
