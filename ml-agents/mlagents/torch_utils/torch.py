@@ -124,6 +124,12 @@ def set_torch_config(torch_settings: TorchSettings) -> None:
                     "Fused optimizer not available, falling back to standard optimizer"
                 )
     else:
+        # Reset the global default device back to cpu - an earlier call to
+        # set_torch_config (e.g. the module-import-time default below, which
+        # runs before the user's configured device is known) may have left
+        # it set to cuda, which otherwise leaks into tensors created without
+        # an explicit device argument and causes cuda/cpu mismatches.
+        torch.set_default_device(_device.type)
         torch.set_default_dtype(torch.float32)
         _amp_enabled = False
         _compile_enabled = False
