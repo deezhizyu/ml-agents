@@ -220,3 +220,89 @@ class TorchOptimizer(Optimizer):
             if agent_id in self.critic_memory_dict:
                 self.critic_memory_dict.pop(agent_id)
         return value_estimates, next_value_estimate, all_next_memories
+
+    def get_batched_trajectory_value_estimates(
+        self,
+        batches: List[AgentBuffer],
+        next_obs_list: List[List[np.ndarray]],
+        dones: List[bool],
+        agent_ids: List[str],
+    ) -> List[Tuple[Dict[str, np.ndarray], Dict[str, float], Optional[AgentBufferField]]]:
+        """
+        Batched version of get_trajectory_value_estimates: runs one critic
+        forward pass covering every trajectory in `batches` concatenated
+        together (plus one more for all their bootstrap "next obs" values),
+        instead of one pair of forward passes per trajectory. Each
+        trajectory previously paid the same fixed per-call overhead
+        (tensor construction, no_grad context, dispatch) for a forward
+        pass over just its own few timesteps; batching amortizes that
+        overhead across every trajectory that finished around the same
+        time.
+
+        Recurrent policies carry a separate hidden state per agent across
+        calls, which this does not attempt to batch - falls back to the
+        per-trajectory path in that case, where it's handled already.
+        """
+        if self.policy.use_recurrent or not batches:
+            return [
+                self.get_trajectory_value_estimates(
+                    batch, next_obs, done, agent_id
+                )
+                for batch, next_obs, done, agent_id in zip(
+                    batches, next_obs_list, dones, agent_ids
+                )
+            ]
+
+        n_obs = len(self.policy.behavior_spec.observation_specs)
+        lengths = [batch.num_experiences for batch in batches]
+
+        per_traj_current_obs = [
+            [ModelUtils.list_to_tensor(obs) for obs in ObsUtil.from_buffer(batch, n_obs)]
+            for batch in batches
+        ]
+        current_obs = [
+            torch.cat([traj_obs[obs_idx] for traj_obs in per_traj_current_obs], dim=0)
+            for obs_idx in range(n_obs)
+        ]
+
+        per_traj_next_obs = [
+            [ModelUtils.list_to_tensor(obs) for obs in next_obs]
+            for next_obs in next_obs_list
+        ]
+        next_obs_batched = [
+            torch.stack([traj_obs[obs_idx] for traj_obs in per_traj_next_obs], dim=0)
+            for obs_idx in range(n_obs)
+        ]
+
+        with torch.no_grad():
+            value_estimates, _ = self.critic.critic_pass(
+                current_obs, None, sequence_length=sum(lengths)
+            )
+            next_value_estimates, _ = self.critic.critic_pass(
+                next_obs_batched, None, sequence_length=len(batches)
+            )
+
+        for name, estimate in value_estimates.items():
+            value_estimates[name] = ModelUtils.to_numpy(estimate)
+        for name, estimate in next_value_estimates.items():
+            next_value_estimates[name] = ModelUtils.to_numpy(estimate)
+
+        results: List[
+            Tuple[Dict[str, np.ndarray], Dict[str, float], Optional[AgentBufferField]]
+        ] = []
+        offset = 0
+        for i, length in enumerate(lengths):
+            traj_value_estimates = {
+                name: v[offset : offset + length] for name, v in value_estimates.items()
+            }
+            traj_next_value_estimate = {
+                name: v[i] for name, v in next_value_estimates.items()
+            }
+            if dones[i]:
+                for k in traj_next_value_estimate:
+                    if not self.reward_signals[k].ignore_done:
+                        traj_next_value_estimate[k] = 0.0
+            results.append((traj_value_estimates, traj_next_value_estimate, None))
+            offset += length
+
+        return results

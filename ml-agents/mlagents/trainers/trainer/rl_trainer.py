@@ -224,6 +224,16 @@ class RLTrainer(Trainer):
         self._maybe_save_model(self.get_step + len(trajectory.steps))
         self._increment_step(len(trajectory.steps), trajectory.behavior_id)
 
+    def _process_trajectories(self, trajectories: List[Trajectory]) -> None:
+        """
+        Processes every trajectory that became available in one queue drain.
+        The default implementation just processes them one at a time;
+        trainers that can batch their expensive per-trajectory work (e.g.
+        a critic forward pass) across trajectories should override this.
+        """
+        for trajectory in trajectories:
+            self._process_trajectory(trajectory)
+
     def _maybe_write_summary(self, step_after_process: int) -> None:
         """
         If processing the trajectory will make the step exceed the next summary write,
@@ -286,13 +296,15 @@ class RLTrainer(Trainer):
                 # This ensures that even if the queue is being filled faster than it is
                 # being emptied, the trajectories in the queue are on-policy.
                 _queried = False
+                trajectories: List[Trajectory] = []
                 for _ in range(traj_queue.qsize()):
                     _queried = True
                     try:
-                        t = traj_queue.get_nowait()
-                        self._process_trajectory(t)
+                        trajectories.append(traj_queue.get_nowait())
                     except AgentManagerQueue.Empty:
                         break
+                if trajectories:
+                    self._process_trajectories(trajectories)
                 if self.threaded and not _queried:
                     # Yield thread to avoid busy-waiting
                     time.sleep(0.0001)

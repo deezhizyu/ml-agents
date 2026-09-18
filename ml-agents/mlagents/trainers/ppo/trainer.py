@@ -2,13 +2,15 @@
 # ## ML-Agent Learning (PPO)
 # Contains an implementation of PPO as described in: https://arxiv.org/abs/1707.06347
 
-from typing import cast, Type, Union, Dict, Any
+from typing import cast, Type, Union, Dict, Any, List
 
 import numpy as np
 
 from mlagents_envs.base_env import BehaviorSpec
 from mlagents_envs.logging_util import get_logger
+from mlagents_envs.timers import hierarchical_timer
 from mlagents.trainers.buffer import BufferKey, RewardSignalUtil
+from mlagents.trainers.trainer.rl_trainer import RLTrainer
 from mlagents.trainers.trainer.on_policy_trainer import OnPolicyTrainer
 from mlagents.trainers.policy.policy import Policy
 from mlagents.trainers.trainer.trainer_utils import get_gae
@@ -72,98 +74,140 @@ class PPOTrainer(OnPolicyTrainer):
         Processing involves calculating value and advantage targets for model updating step.
         :param trajectory: The Trajectory tuple containing the steps to be processed.
         """
-        super()._process_trajectory(trajectory)
-        agent_id = trajectory.agent_id  # All the agents should have the same ID
+        self._process_trajectories([trajectory])
 
-        agent_buffer_trajectory = trajectory.to_agentbuffer()
-        # Check if we used group rewards, warn if so.
-        self._warn_if_group_reward(agent_buffer_trajectory)
+    def _process_trajectories(self, trajectories: List[Trajectory]) -> None:
+        """
+        Takes every trajectory that became available in one queue drain and
+        processes them together, putting each into the update buffer.
+        Processing involves calculating value and advantage targets for the
+        model updating step. The critic forward passes for value estimates
+        are batched across all of these trajectories at once (see
+        TorchOptimizer.get_batched_trajectory_value_estimates) instead of
+        paying a separate forward pass's fixed overhead per trajectory,
+        since many trajectories finishing in the same drain is the common
+        case once agents start falling/finishing episodes at similar times.
+        """
+        if not trajectories:
+            return
 
-        # Update the normalization
-        if self.is_training:
-            self.policy.actor.update_normalization(agent_buffer_trajectory)
-            self.optimizer.critic.update_normalization(agent_buffer_trajectory)
+        agent_buffers = []
+        with hierarchical_timer("ppo_prep_and_normalization"):
+            for trajectory in trajectories:
+                RLTrainer._process_trajectory(self, trajectory)
+                with hierarchical_timer("to_agentbuffer"):
+                    agent_buffer_trajectory = trajectory.to_agentbuffer()
+                # Check if we used group rewards, warn if so.
+                self._warn_if_group_reward(agent_buffer_trajectory)
+                agent_buffers.append(agent_buffer_trajectory)
 
-        # Get all value estimates
-        (
-            value_estimates,
-            value_next,
-            value_memories,
-        ) = self.optimizer.get_trajectory_value_estimates(
-            agent_buffer_trajectory,
-            trajectory.next_obs,
-            trajectory.done_reached and not trajectory.interrupted,
-        )
-        if value_memories is not None:
-            agent_buffer_trajectory[BufferKey.CRITIC_MEMORY].set(value_memories)
+            # Update the normalization once, batched across every
+            # trajectory in this drain, instead of once per trajectory.
+            # Normalizer.update merges batches with an exact parallel
+            # variance formula, so this is the same result, not an
+            # approximation - just without paying each call's fixed
+            # overhead (tensor construction, no_grad, dispatch) per
+            # trajectory.
+            if self.is_training:
+                with hierarchical_timer("update_normalization"):
+                    self.policy.actor.update_normalization_batched(agent_buffers)
+                    self.optimizer.critic.update_normalization_batched(agent_buffers)
 
-        for name, v in value_estimates.items():
-            agent_buffer_trajectory[RewardSignalUtil.value_estimates_key(name)].extend(
-                v
+        # Get all value estimates, batched across every trajectory at once.
+        with hierarchical_timer("ppo_batched_value_estimates"):
+            batched_estimates = self.optimizer.get_batched_trajectory_value_estimates(
+                agent_buffers,
+                [trajectory.next_obs for trajectory in trajectories],
+                [
+                    trajectory.done_reached and not trajectory.interrupted
+                    for trajectory in trajectories
+                ],
+                [trajectory.agent_id for trajectory in trajectories],
             )
-            self._stats_reporter.add_stat(
-                f"Policy/{self.optimizer.reward_signals[name].name.capitalize()} Value Estimate",
-                np.mean(v),
-            )
 
-        # Evaluate all reward functions
-        self.collected_rewards["environment"][agent_id] += np.sum(
-            agent_buffer_trajectory[BufferKey.ENVIRONMENT_REWARDS]
-        )
-        for name, reward_signal in self.optimizer.reward_signals.items():
-            evaluate_result = (
-                reward_signal.evaluate(agent_buffer_trajectory) * reward_signal.strength
-            )
-            agent_buffer_trajectory[RewardSignalUtil.rewards_key(name)].extend(
-                evaluate_result
-            )
-            # Report the reward signals
-            self.collected_rewards[name][agent_id] += np.sum(evaluate_result)
+        with hierarchical_timer("ppo_gae_and_buffer_append"):
+            for trajectory, agent_buffer_trajectory, (
+                value_estimates,
+                value_next,
+                value_memories,
+            ) in zip(trajectories, agent_buffers, batched_estimates):
+                agent_id = trajectory.agent_id  # All the agents should have the same ID
 
-        # Compute GAE and returns
-        tmp_advantages = []
-        tmp_returns = []
-        for name in self.optimizer.reward_signals:
-            bootstrap_value = value_next[name]
+                if value_memories is not None:
+                    agent_buffer_trajectory[BufferKey.CRITIC_MEMORY].set(value_memories)
 
-            local_rewards = agent_buffer_trajectory[
-                RewardSignalUtil.rewards_key(name)
-            ].get_batch()
-            local_value_estimates = agent_buffer_trajectory[
-                RewardSignalUtil.value_estimates_key(name)
-            ].get_batch()
+                for name, v in value_estimates.items():
+                    agent_buffer_trajectory[
+                        RewardSignalUtil.value_estimates_key(name)
+                    ].extend(v)
+                    self._stats_reporter.add_stat(
+                        f"Policy/{self.optimizer.reward_signals[name].name.capitalize()} Value Estimate",
+                        np.mean(v),
+                    )
 
-            local_advantage = get_gae(
-                rewards=local_rewards,
-                value_estimates=local_value_estimates,
-                value_next=bootstrap_value,
-                gamma=self.optimizer.reward_signals[name].gamma,
-                lambd=self.hyperparameters.lambd,
-            )
-            local_return = local_advantage + local_value_estimates
-            # This is later use as target for the different value estimates
-            agent_buffer_trajectory[RewardSignalUtil.returns_key(name)].set(
-                local_return
-            )
-            agent_buffer_trajectory[RewardSignalUtil.advantage_key(name)].set(
-                local_advantage
-            )
-            tmp_advantages.append(local_advantage)
-            tmp_returns.append(local_return)
+                # Evaluate all reward functions
+                self.collected_rewards["environment"][agent_id] += np.sum(
+                    agent_buffer_trajectory[BufferKey.ENVIRONMENT_REWARDS]
+                )
+                for name, reward_signal in self.optimizer.reward_signals.items():
+                    evaluate_result = (
+                        reward_signal.evaluate(agent_buffer_trajectory)
+                        * reward_signal.strength
+                    )
+                    agent_buffer_trajectory[RewardSignalUtil.rewards_key(name)].extend(
+                        evaluate_result
+                    )
+                    # Report the reward signals
+                    self.collected_rewards[name][agent_id] += np.sum(evaluate_result)
 
-        # Get global advantages
-        global_advantages = list(
-            np.mean(np.array(tmp_advantages, dtype=np.float32), axis=0)
-        )
-        global_returns = list(np.mean(np.array(tmp_returns, dtype=np.float32), axis=0))
-        agent_buffer_trajectory[BufferKey.ADVANTAGES].set(global_advantages)
-        agent_buffer_trajectory[BufferKey.DISCOUNTED_RETURNS].set(global_returns)
+                # Compute GAE and returns
+                tmp_advantages = []
+                tmp_returns = []
+                for name in self.optimizer.reward_signals:
+                    bootstrap_value = value_next[name]
 
-        self._append_to_update_buffer(agent_buffer_trajectory)
+                    local_rewards = agent_buffer_trajectory[
+                        RewardSignalUtil.rewards_key(name)
+                    ].get_batch()
+                    local_value_estimates = agent_buffer_trajectory[
+                        RewardSignalUtil.value_estimates_key(name)
+                    ].get_batch()
 
-        # If this was a terminal trajectory, append stats and reset reward collection
-        if trajectory.done_reached:
-            self._update_end_episode_stats(agent_id, self.optimizer)
+                    local_advantage = get_gae(
+                        rewards=local_rewards,
+                        value_estimates=local_value_estimates,
+                        value_next=bootstrap_value,
+                        gamma=self.optimizer.reward_signals[name].gamma,
+                        lambd=self.hyperparameters.lambd,
+                    )
+                    local_return = local_advantage + local_value_estimates
+                    # This is later use as target for the different value estimates
+                    agent_buffer_trajectory[RewardSignalUtil.returns_key(name)].set(
+                        local_return
+                    )
+                    agent_buffer_trajectory[RewardSignalUtil.advantage_key(name)].set(
+                        local_advantage
+                    )
+                    tmp_advantages.append(local_advantage)
+                    tmp_returns.append(local_return)
+
+                # Get global advantages
+                global_advantages = list(
+                    np.mean(np.array(tmp_advantages, dtype=np.float32), axis=0)
+                )
+                global_returns = list(
+                    np.mean(np.array(tmp_returns, dtype=np.float32), axis=0)
+                )
+                agent_buffer_trajectory[BufferKey.ADVANTAGES].set(global_advantages)
+                agent_buffer_trajectory[BufferKey.DISCOUNTED_RETURNS].set(
+                    global_returns
+                )
+
+                self._append_to_update_buffer(agent_buffer_trajectory)
+
+                # If this was a terminal trajectory, append stats and reset reward collection
+                if trajectory.done_reached:
+                    self._update_end_episode_stats(agent_id, self.optimizer)
 
     def create_optimizer(self) -> TorchOptimizer:
         return TorchPPOOptimizer(  # type: ignore

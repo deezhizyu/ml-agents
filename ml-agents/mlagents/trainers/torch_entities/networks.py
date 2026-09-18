@@ -90,6 +90,33 @@ class ObservationEncoder(nn.Module):
                     torch.as_tensor(vec_input.to_ndarray(), device=default_device())
                 )
 
+    def update_normalization_batched(self, buffers: List[AgentBuffer]) -> None:
+        """
+        Same running-stat update as update_normalization, but merges every
+        buffer in `buffers` into one update call per observation instead of
+        one call per buffer. The underlying Normalizer.update uses an exact
+        parallel/batch variance formula, so this produces the same result as
+        calling update_normalization once per buffer - just without paying
+        that call's fixed overhead (tensor construction, no_grad, dispatch)
+        once per buffer.
+        """
+        if not buffers:
+            return
+        num_obs = len(self.processors)
+        per_buffer_obs = [ObsUtil.from_buffer(buffer, num_obs) for buffer in buffers]
+        for obs_idx, enc in enumerate(self.processors):
+            if isinstance(enc, VectorInput):
+                merged = torch.cat(
+                    [
+                        torch.as_tensor(
+                            buf_obs[obs_idx].to_ndarray(), device=default_device()
+                        )
+                        for buf_obs in per_buffer_obs
+                    ],
+                    dim=0,
+                )
+                enc.update_normalization(merged)
+
     def copy_normalization(self, other_encoder: "ObservationEncoder") -> None:
         if self.normalize:
             for n1, n2 in zip(self.processors, other_encoder.processors):
@@ -221,6 +248,9 @@ class NetworkBody(nn.Module):
     def update_normalization(self, buffer: AgentBuffer) -> None:
         self.observation_encoder.update_normalization(buffer)
 
+    def update_normalization_batched(self, buffers: List[AgentBuffer]) -> None:
+        self.observation_encoder.update_normalization_batched(buffers)
+
     def copy_normalization(self, other_network: "NetworkBody") -> None:
         self.observation_encoder.copy_normalization(other_network.observation_encoder)
 
@@ -322,6 +352,9 @@ class MultiAgentNetworkBody(torch.nn.Module):
 
     def update_normalization(self, buffer: AgentBuffer) -> None:
         self.observation_encoder.update_normalization(buffer)
+
+    def update_normalization_batched(self, buffers: List[AgentBuffer]) -> None:
+        self.observation_encoder.update_normalization_batched(buffers)
 
     def copy_normalization(self, other_network: "MultiAgentNetworkBody") -> None:
         self.observation_encoder.copy_normalization(other_network.observation_encoder)
@@ -436,6 +469,15 @@ class Critic(abc.ABC):
         """
         pass
 
+    def update_normalization_batched(self, buffers: List[AgentBuffer]) -> None:
+        """
+        Default: update once per buffer. Concrete critics can override this
+        to batch the normalization-stat update across every buffer into one
+        call instead.
+        """
+        for buffer in buffers:
+            self.update_normalization(buffer)
+
     def critic_pass(
         self,
         inputs: List[torch.Tensor],
@@ -475,6 +517,9 @@ class ValueNetwork(nn.Module, Critic):
     def update_normalization(self, buffer: AgentBuffer) -> None:
         self.network_body.update_normalization(buffer)
 
+    def update_normalization_batched(self, buffers: List[AgentBuffer]) -> None:
+        self.network_body.update_normalization_batched(buffers)
+
     @property
     def memory_size(self) -> int:
         return self.network_body.memory_size
@@ -512,6 +557,15 @@ class Actor(abc.ABC):
         :param vector_obs: A List of vector obs as tensors.
         """
         pass
+
+    def update_normalization_batched(self, buffers: List[AgentBuffer]) -> None:
+        """
+        Default: update once per buffer. Concrete actors can override this
+        to batch the normalization-stat update across every buffer into one
+        call instead.
+        """
+        for buffer in buffers:
+            self.update_normalization(buffer)
 
     def get_action_and_stats(
         self,
@@ -626,6 +680,9 @@ class SimpleActor(nn.Module, Actor):
 
     def update_normalization(self, buffer: AgentBuffer) -> None:
         self.network_body.update_normalization(buffer)
+
+    def update_normalization_batched(self, buffers: List[AgentBuffer]) -> None:
+        self.network_body.update_normalization_batched(buffers)
 
     def get_action_and_stats(
         self,
