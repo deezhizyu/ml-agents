@@ -1,7 +1,8 @@
 import grpc
 from typing import Optional
 
-from multiprocessing import Pipe
+import threading
+from collections import deque
 from sys import platform
 import socket
 import time
@@ -18,9 +19,72 @@ from mlagents_envs.communicator_objects.unity_output_pb2 import UnityOutputProto
 from .exception import UnityTimeOutException, UnityWorkerInUseException
 
 
+class _ThreadHandoffChannel:
+    """
+    A single-direction, single-item-at-a-time handoff between two threads in
+    the same process, e.g. a single-slot queue with a non-destructive poll.
+    """
+
+    def __init__(self):
+        self._items: "deque" = deque()
+        self._cond = threading.Condition()
+
+    def put(self, item) -> None:
+        with self._cond:
+            self._items.append(item)
+            self._cond.notify()
+
+    def get(self):
+        with self._cond:
+            while not self._items:
+                self._cond.wait()
+            return self._items.popleft()
+
+    def poll(self, timeout: Optional[float] = None) -> bool:
+        """Non-destructive check for whether an item is waiting."""
+        with self._cond:
+            if self._items:
+                return True
+            self._cond.wait(timeout)
+            return bool(self._items)
+
+
+class _QueueConn:
+    """
+    One directional endpoint of a same-process, cross-thread handoff between
+    the gRPC worker thread and the main training thread. Stands in for one
+    end of a multiprocessing.Pipe, which pickles every message and makes a
+    real OS pipe syscall - overhead that only makes sense for actual
+    cross-process IPC. Both threads here share one interpreter, so an
+    in-memory, GIL-protected handoff does the same job without the pickling
+    or the syscalls.
+    """
+
+    def __init__(self, send_ch: _ThreadHandoffChannel, recv_ch: _ThreadHandoffChannel):
+        self._send_ch = send_ch
+        self._recv_ch = recv_ch
+
+    def send(self, obj) -> None:
+        self._send_ch.put(obj)
+
+    def recv(self):
+        return self._recv_ch.get()
+
+    def poll(self, timeout: Optional[float] = None) -> bool:
+        return self._recv_ch.poll(timeout)
+
+    def close(self) -> None:
+        # No OS resource to release - this is an in-memory, same-process
+        # handoff, unlike the multiprocessing.Pipe connection it replaces.
+        pass
+
+
 class UnityToExternalServicerImplementation(UnityToExternalProtoServicer):
     def __init__(self):
-        self.parent_conn, self.child_conn = Pipe()
+        to_parent = _ThreadHandoffChannel()
+        to_child = _ThreadHandoffChannel()
+        self.parent_conn = _QueueConn(send_ch=to_child, recv_ch=to_parent)
+        self.child_conn = _QueueConn(send_ch=to_parent, recv_ch=to_child)
 
     def Initialize(self, request, context):
         self.child_conn.send(request)
