@@ -500,12 +500,29 @@ class AgentBuffer(MutableMapping):
             )
         s = np.arange(len(self[key_list[0]]) // sequence_length)
         np.random.shuffle(s)
+        if sequence_length == 1:
+            element_order = s
+        else:
+            element_order = (
+                s[:, None] * sequence_length + np.arange(sequence_length)[None, :]
+            ).reshape(-1)
         for key in key_list:
             buffer_field = self[key]
-            tmp: List[np.ndarray] = []
-            for i in s:
-                tmp += buffer_field[i * sequence_length : (i + 1) * sequence_length]
-            buffer_field.set(tmp)
+            if buffer_field.contains_lists:
+                # Group entries are ragged (List[np.ndarray] per element), so
+                # they can't be stacked into a single ndarray below - fall
+                # back to the per-sequence Python reorder for correctness.
+                tmp: List[np.ndarray] = []
+                for i in s:
+                    tmp += buffer_field[i * sequence_length : (i + 1) * sequence_length]
+                buffer_field.set(tmp)
+            else:
+                # Entries are uniformly-shaped ndarrays: reorder with one
+                # vectorized numpy fancy-index instead of a Python-level loop
+                # per key, which otherwise dominates wall time on large
+                # buffers (this ran once per epoch, on every field).
+                stacked = np.asarray(buffer_field)
+                buffer_field.set(list(stacked[element_order]))
 
     def make_mini_batch(
         self, start: int, end: int, use_pool: bool = True
